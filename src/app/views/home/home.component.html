@@ -1,0 +1,32 @@
+<!-- home.component.html -->
+<div class="container mx-auto px-4 py-6">
+    <div>
+        <h1 class="text-2xl font-bold mb-6">Campeonatos</h1>
+        <!-- botao com fontawesome -->
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      @for (league of leagues; track league.name) {
+        <div class="flex flex-col p-4 border rounded shadow cursor-pointer hover:shadow-lg transition-shadow"
+             [routerLink]="['/leagueDetails', league.name]"
+             (click)="navigateToDetails(league.name)">
+          @if (league.img && league.img.trim() !== '') {
+            <img [src]="league.img" [alt]="league.name" class="w-full h-40 object-cover">
+          } @else {
+            <img [src]="imagemPadrao" [alt]="league.name" class="w-full h-40 object-cover">
+          }
+          <div class="mt-2">
+            <p class="text-center font-semibold">{{ league.name }}</p>
+            <p class="text-sm text-gray-600">
+              Privado: {{ league.private ? 'Sim' : 'Não' }}
+            </p>
+            @if (league.organizer && league.organizer.length > 0) {
+              <p class="text-sm">
+                Organizador: {{ league.organizer[0].name }}
+              </p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>

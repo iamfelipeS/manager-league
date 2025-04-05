@@ -1,0 +1,218 @@
+<div class="container mx-auto px-4 py-6">
+    <!-- Header com informações da liga e botão seguir -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center">
+            <img [src]="league?.img ? league?.img : imagemPadrao" [alt]="league?.name"
+                class="w-16 h-16 object-cover rounded-full mr-4">
+            <div>
+                <h1 class="text-2xl font-bold">{{ league?.name }}</h1>
+                <p class="text-sm text-gray-600">
+                    Organizador:
+                    <!-- {{ league?.organizer && league.organizer.length > 0 ? league.organizer[0].name : 'Não informado' }} -->
+                </p>
+                <span
+                    class="inline-block px-2 py-1 text-xs rounded-full {{ league?.private ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
+                    {{ league?.private ? 'Liga Privada' : 'Liga Pública' }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Botão seguir para usuários normais -->
+        @if (!isAdmin) {
+        <button (click)="followLeague()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            {{ isFollowing ? 'Seguindo' : 'Seguir' }}
+        </button>
+        }
+
+        <!-- Opções para admin -->
+        @if (isAdmin) {
+        <div class="space-x-2">
+            <button class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
+                Editar Liga
+            </button>
+            <button class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
+                Adicionar Participantes
+            </button>
+        </div>
+        }
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <!-- Menu de Navegação -->
+        <div class="mb-6 border-b">
+            <nav class="flex space-x-6">
+                <a (click)="activeTab = 'info'" [class.text-blue-600]="activeTab === 'info'"
+                    [class.border-b-2]="activeTab === 'info'" [class.border-blue-600]="activeTab === 'info'"
+                    class="py-2 cursor-pointer">
+                    Informações
+                </a>
+                <a (click)="activeTab = 'teams'" [class.text-blue-600]="activeTab === 'teams'"
+                    [class.border-b-2]="activeTab === 'teams'" [class.border-blue-600]="activeTab === 'teams'"
+                    class="py-2 cursor-pointer">
+                    Times
+                </a>
+                <a (click)="activeTab = 'matches'" [class.text-blue-600]="activeTab === 'matches'"
+                    [class.border-b-2]="activeTab === 'matches'" [class.border-blue-600]="activeTab === 'matches'"
+                    class="py-2 cursor-pointer">
+                    Partidas
+                </a>
+            </nav>
+        </div>
+
+        <!-- Conteúdo das abas -->
+        <div class="min-h-96">
+            <!-- Informações -->
+            @if (activeTab === 'info') {
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Sobre a Liga</h2>
+                <p class="mb-4">
+                    Esta é a descrição da liga {{ league?.name }}. Aqui você encontrará informações
+                    sobre as regras, formato da competição e outras informações relevantes.
+                </p>
+
+                <div class="mt-4">
+                    <h3 class="font-medium mb-2">Organizadores</h3>
+                    <ul class="list-disc pl-5">
+                        @for (organizer of league?.organizer; track organizer.name) {
+                        <li>{{ organizer.name }} - {{ organizer.phone }} - {{ organizer.email }}</li>
+                        }
+                    </ul>
+                </div>
+
+                @if (isAdmin) {
+                <button class="mt-4 px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition text-sm">
+                    Editar Informações
+                </button>
+                }
+            </div>
+            }
+
+            <!-- Times -->
+            @if (activeTab === 'teams') {
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Times Participantes</h2>
+                    @if (isAdmin) {
+                    <button class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition text-sm">
+                        Adicionar Time
+                    </button>
+                    }
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Exemplo de times, você deve adaptar para seus dados reais -->
+                    @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+                    <div class="border rounded-lg p-4 flex items-center">
+                        <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-sm">Logo</span>
+                        </div>
+                        <div>
+                            <h3 class="font-medium">Time {{ i }}</h3>
+                            <p class="text-sm text-gray-600">Jogadores: 18</p>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- Partidas -->
+            @if (activeTab === 'matches') {
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Partidas</h2>
+                    @if (isAdmin) {
+                    <button class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition text-sm">
+                        Agendar Partida
+                    </button>
+                    }
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Exemplo de partidas, você deve adaptar para seus dados reais -->
+                    @for (i of [1, 2, 3]; track i) {
+                    <div class="border rounded-lg p-4">
+                        <div class="text-sm text-gray-500 mb-2">
+                            {{ i === 1 ? 'Hoje' : i === 2 ? 'Amanhã' : 'PróximaSemana' }}
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">A</div>
+                                <span class="mx-2 font-medium">Time A</span>
+                            </div>
+
+                            <div class="text-center">
+                                <div class="font-bold">VS</div>
+                                <div class="text-sm text-gray-500">20:00</div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <span class="mx-2 font-medium">Time B</span>
+                                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">B</div>
+                            </div>
+                        </div>
+
+                        @if (isAdmin) {
+                        <div class="mt-3 flex justify-end space-x-2">
+                            <button class="px-2 py-1 bg-blue-500 text-white rounded text-xs">Editar</button>
+                            <button class="px-2 py-1 bg-gray-500 text-white rounded text-xs">Resultado</button>
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Rodapé com navegação -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-around py-3">
+                <a routerLink="/home" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span class="text-xs mt-1">Home</span>
+                </a>
+                <a (click)="activeTab = '/'" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-xs mt-1">Classificação</span>
+                </a>
+                <a (click)="activeTab = 'topscorers'"
+                    class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-xs mt-1">Artilharia</span>
+                </a>
+                <a (click)="activeTab = 'winners'" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                    <span class="text-xs mt-1">Vencedores</span>
+                </a>
+                <a (click)="activeTab = 'news'" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                    <span class="text-xs mt-1">Notícias</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
