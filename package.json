@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:verssat": "node dist/verssat/server/server.mjs",
-    "build:ssr": "ng build && ng run verssat:server"
+    "build:ssr": "ng build && ng run verssat:server:production"
   },
   "private": true,
   "dependencies": {
