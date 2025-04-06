@@ -5,6 +5,7 @@ import { Leagues } from '../../models/leagues.model';
 
 @Component({
   selector: 'app-league-details',
+  standalone: true,
   imports: [],
   templateUrl: './league-details.component.html',
   styleUrl: './league-details.component.scss'
