@@ -1,5 +1,5 @@
 [build]
-command = "ng build && ng run verssat:server"
+command = "npm run build:ssr"
 publish = "dist/verssat/browser"
 
 [functions]
