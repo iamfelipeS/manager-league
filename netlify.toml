@@ -1,5 +1,6 @@
 [build]
-command = "npm run build:ssr"
+command = "ng build"
+functions = "netlify/functions"
 publish = "dist/verssat/browser"
 
 [functions]
