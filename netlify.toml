@@ -1,0 +1,11 @@
+[build]
+command = "ng build && ng run verssat:server"
+publish = "dist/verssat/browser"
+
+[functions]
+directory = "netlify/functions"
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
