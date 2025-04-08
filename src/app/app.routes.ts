@@ -1,11 +1,13 @@
 import { Routes } from '@angular/router';
 import { LeagueDetailsComponent } from './views/league-details/league-details.component';
 import { HomeComponent } from './views/home/home.component';
+import { PlayerListComponent } from './views/player-list/player-list.component';
 
 export const routes: Routes = [
     {
         path: '',
-        redirectTo: 'home', pathMatch: 'full'
+        redirectTo: 'home', 
+        pathMatch: 'full'
     },
     {
         path: 'home',
@@ -13,7 +15,18 @@ export const routes: Routes = [
     },
     {
         path: 'leagueDetails/:name',
-        component: LeagueDetailsComponent
+        component: LeagueDetailsComponent,
+        children: [
+            {
+                path: '',
+                redirectTo: 'overview',
+                pathMatch: 'full'
+            },
+            {
+                path: 'players',
+                component: PlayerListComponent
+            },
+        ]
     },
-    { path: '**', redirectTo: 'home' }, // Rota para handling de páginas não encontradas
+    { path: '**', redirectTo: 'home' }
 ];

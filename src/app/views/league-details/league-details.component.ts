@@ -11,15 +11,16 @@ import { Leagues } from '../../models/leagues.model';
   styleUrl: './league-details.component.scss'
 })
 export class LeagueDetailsComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private leaguesService = inject(LeaguesService);
-  
   leagueName: string = '';
   league: Leagues | null = null;
-  imagemPadrao = 'caminho/para/imagem/padrao.jpg';
+  imagemPadrao = '';
   isAdmin = false; 
   isFollowing = false;
   activeTab: string = 'info';
+  
+  private route = inject(ActivatedRoute);
+  private leaguesService = inject(LeaguesService);
+  
 
   ngOnInit() {
     this.route.params.subscribe(params => {
