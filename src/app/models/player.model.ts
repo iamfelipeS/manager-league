@@ -1,10 +1,9 @@
 export interface Player {
   id: string;
   name: string;
-  position: string;
-  quality: number; 
-  speed: number; 
-  movement: number; 
-  phase: number; 
-  rating: number; 
+  qualidade: number;
+  velocidade: number;
+  fase: number;
+  movimentacao: 'Estático' | 'Normal' | 'Intenso';
+  rating: number;
 }

@@ -1,26 +1,54 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Player } from '../models/player.model';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { PLAYERS } from '../shared/data/mock-players';
+import { v4 as uuidv4 } from 'uuid'; // ajuste necessário!
 
 @Injectable({
   providedIn: 'root'
 })
-export class RatingService {
+export class PlayerService {
 
-  private weights = {
-    quality: { Baixa: 3, Normal: 5, Alta: 8 },
-    speed: { Lento: 3, Normal: 5, Rápido: 7 },
-    movement: { Estático: 3, Normal: 5, Intenso: 7 },
-    phase: { Ruim: 3, Normal: 5, Boa: 8 }
-  };
+  private playersSubject = new BehaviorSubject<Player[]>(PLAYERS);
+  players$ = this.playersSubject.asObservable();
 
-  // calculateRating(player: Player): number {
-  //   const qualityWeight = this.weights.quality[player.quality as keyof typeof this.weights.quality];
-  //   const speedWeight = this.weights.speed[player.speed as keyof typeof this.weights.speed];
-  //   const movementWeight = this.weights.movement[player.movement as keyof typeof this.weights.movement];
-  //   const phaseWeight = this.weights.phase[player.phase as keyof typeof this.weights.phase];
+  getPlayers(): Observable<Player[]> {
+    return of(PLAYERS);
+  }
+
+  addPlayer(playerData: Omit<Player, 'id' | 'rating'>): void {
+    const rating = this.calculateRating(playerData);
+    const newPlayer: Player = {
+      ...playerData,
+      id: uuidv4(),
+      rating,
+    };
   
-  //   const average = (qualityWeight + speedWeight + movementWeight + phaseWeight) / 4;
-  //   return Math.round(average * 11); // Normalizando para um valor entre 40-99
-  // }
-  
+    const updatedPlayers = [...this.playersSubject.value, newPlayer];
+    this.playersSubject.next(updatedPlayers);
+  }
+
+  private calculateRating(player: Omit<Player, 'id' | 'rating'>): number {
+    const base =
+      player.qualidade * 0.35 +
+      player.velocidade * 0.25 +
+      player.fase * 0.2;
+
+    // Peso extra para movimentação
+    let movimentacaoBonus = 0;
+    switch (player.movimentacao) {
+      case 'Intenso':
+        movimentacaoBonus = 0.2;
+        break;
+      case 'Normal':
+        movimentacaoBonus = 0.1;
+        break;
+      case 'Estático':
+        movimentacaoBonus = 0;
+        break;
+    }
+
+    const total = base + (10 * movimentacaoBonus);
+    return Math.round(total);
+  }
 }

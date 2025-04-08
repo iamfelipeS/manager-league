@@ -1,24 +1,54 @@
-<div class="p-6 max-w-3xl mx-auto">
-  <div class="flex justify-between items-center mb-4">
-    <h1 class="text-2xl font-bold">Jogadores</h1>
-    <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" (click)="openPlayerModal()">
-      + Criar Jogador
+<div class="p-4 max-w-4xl mx-auto">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-xl font-bold">Jogadores</h1>
+    <button
+      class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700"
+      (click)="openAddPlayerModal()">
+      + Adicionar Jogador
     </button>
   </div>
-
-  @if (players.length === 0) {
-  <div class="text-gray-500">Nenhum jogador cadastrado ainda.</div>
-  } @else {
-    @for (player of players; track $index) {
-    <ul class="space-y-4 mt-4">
-      <li class="flex justify-between items-center p-4 bg-white rounded shadow">
-        <div>
-          <p class="text-lg font-semibold">{{ player.name }}</p>
-          <p class="text-sm text-gray-500">Rating: {{ player.rating }}</p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
+    <div *ngFor="let player of players" class="relative bg-gradient-to-br from-[#0057ff] to-[#002e9b] text-white rounded-2xl p-6 shadow-xl">
+      <!-- Avatar central -->
+      <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-white rounded-full p-2">
+        <img src="assets/avatar.svg" alt="Player Avatar" class="h-12 w-12" />
+      </div>
+  
+      <!-- Nome -->
+      <div class="mt-8 text-center">
+        <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>
+      </div>
+  
+      <!-- Atributos -->
+      <div class="mt-4 space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span>Qualidade</span>
+          <span>{{ player.qualidade }}</span>
         </div>
-      </li>
-    </ul>
-    }
-  }
-
-</div>
+        <div class="flex justify-between">
+          <span>Velocidade</span>
+          <span>{{ player.velocidade }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Fase</span>
+          <span>{{ player.fase }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Movimentação</span>
+          <span>{{ player.movimentacao }}</span>
+        </div>
+      </div>
+  
+      <!-- Rating -->
+      <div class="mt-4 text-center">
+        <span class="text-sm uppercase text-blue-100">Rating</span>
+        <div class="text-3xl font-bold">{{ player.rating }}</div>
+      </div>
+  
+      <!-- Botão flutuante -->
+      <button class="absolute bottom-3 right-3 bg-white text-blue-600 p-2 rounded-full shadow-md hover:scale-105 transition">
+        +
+      </button>
+    </div>
+  </div>
+  

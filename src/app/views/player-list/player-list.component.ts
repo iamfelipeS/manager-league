@@ -1,25 +1,27 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Player } from '../../models/player.model';
 import { PlayerService } from '../../services/player.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-player-list',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './player-list.component.html',
   styleUrl: './player-list.component.scss'
 })
 export class PlayerListComponent {
   players: Player[] = [];
 
-    private playerService = inject(PlayerService);
-    // private modalService = inject(ModalService);
+  constructor(private playerService: PlayerService) {}
 
   ngOnInit(): void {
-    // this.players = this.playerService.getPlayers();
+    this.playerService.getPlayers().subscribe((players) => {
+      this.players = players;
+    });
   }
 
-  openPlayerModal(): void {
-    // this.modalService.open('create-player');
+  openAddPlayerModal(){
+    
   }
 }
