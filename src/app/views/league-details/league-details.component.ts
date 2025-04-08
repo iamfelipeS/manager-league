@@ -5,10 +5,10 @@ import { PlayerService } from '../../services/player.service';
 import { TeamService, Team } from '../../services/team.service';
 import { Player } from '../../models/player.model';
 import { CommonModule } from '@angular/common';
-import { FooterComponent } from '../../template/footer/footer.component';
-import { Leagues } from '../../models/leagues.model';
 import { FormsModule } from '@angular/forms';
+import { RatingService } from '../../services/rating.service';
 import { ToasterService } from '../../services/toaster.service';
+import { Leagues } from '../../models/leagues.model';
 
 @Component({
   selector: 'app-league-details',
@@ -26,14 +26,15 @@ export class LeagueDetailsComponent implements OnInit {
   activeTab: string = 'info';
   selectedTeamCount = 2;
 
-  // Lista de jogadores disponível (para teste, usamos todos os jogadores do mock)
+  sortBy: 'name' | 'rating' | 'qualidade' | 'velocidade' | 'fase' = 'name';
+
   playerList: Player[] = [];
-  // Times gerados, conforme o TeamService
   generatedTeams: Team[] = [];
 
   private route = inject(ActivatedRoute);
-  private teamService = inject(TeamService);
   private playerService = inject(PlayerService);
+  private teamService = inject(TeamService);
+  private ratingService = inject(RatingService);
   private leaguesService = inject(LeaguesService);
   private toasterService = inject(ToasterService);
 
@@ -45,12 +46,10 @@ export class LeagueDetailsComponent implements OnInit {
 
     this.checkIfUserIsAdmin();
 
-    // Para teste: carrega os jogadores do mock
     this.playerList = this.playerService.getPlayers();
 
-    //por liga
+    // Exemplo: filtrar por liga
     // this.playerList = this.playerService.getPlayers().filter(p => p.leagueId === this.leagueName);
-
   }
 
   loadLeagueDetails() {
@@ -63,7 +62,7 @@ export class LeagueDetailsComponent implements OnInit {
       }
     });
 
-    // Simulação para desenvolvimento
+    // Simulado
     this.league = {
       name: this.leagueName,
       img: '',
@@ -76,16 +75,31 @@ export class LeagueDetailsComponent implements OnInit {
 
   generateTeams() {
     const selectedPlayers = this.playerList.filter(p => p.selected);
-  
+
     if (selectedPlayers.length < 2) {
       this.toasterService.warning('Selecione pelo menos dois jogadores para gerar os times.');
       return;
     }
-  
+
     this.teamService.generateTeams(selectedPlayers, this.selectedTeamCount);
-    this.generatedTeams = this.teamService.teams(); // será novo a cada clique
+    this.generatedTeams = this.teamService.teams(); // sempre atualiza a exibição
   }
-  
+
+  get sortedPlayers(): Player[] {
+    return [...this.playerList].sort((a, b) => {
+      if (this.sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      }
+      if (this.sortBy === 'rating') {
+        return this.getRating(b) - this.getRating(a);
+      }
+      return (b[this.sortBy] ?? 0) - (a[this.sortBy] ?? 0);
+    });
+  }
+
+  getRating(player: Player): number {
+    return this.ratingService.calculate(player);
+  }
 
   togglePlayerSelection(player: Player) {
     player.selected = !player.selected;
@@ -94,20 +108,15 @@ export class LeagueDetailsComponent implements OnInit {
   setAutoTeamCount() {
     const selected = this.playerList.filter(p => p.selected);
     const totalPlayers = selected.length;
-
-    // Cada time precisa ter ao menos 5 jogadores de linha + 1 goleiro
     const possibleTeams = Math.floor(totalPlayers / 6);
-    this.selectedTeamCount = Math.max(possibleTeams, 2); // mínimo 2 times
+    this.selectedTeamCount = Math.max(possibleTeams, 2);
   }
-
 
   followLeague() {
     this.isFollowing = !this.isFollowing;
-    // Lógica de seguir/desseguir a liga
   }
 
   checkIfUserIsAdmin() {
-    // Simulação aleatória para teste
     this.isAdmin = Math.random() > 0.5;
   }
 }

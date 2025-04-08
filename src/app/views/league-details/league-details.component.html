@@ -174,28 +174,43 @@
             <!-- Gerar Times -->
             @if (activeTab === 'generate') {
             <div>
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
 
-                    <div class="flex items-center gap-4">
-                        <label class="text-sm">Qtd Times:</label>
-                        <input type="number" min="2" [(ngModel)]="selectedTeamCount"
-                            class="w-20 px-2 py-1 border rounded text-sm">
-                        <button (click)="setAutoTeamCount()" class="text-blue-600 text-sm hover:underline">
-                            Automático
-                        </button>
-
-                        <button (click)="generateTeams()"
-                            class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm">
-                            Gerar Times
-                        </button>
+                    <!-- Lado esquerdo: controles de geração -->
+                    <div class="flex flex-wrap items-center gap-4">
+                      <label class="text-sm">Qtd Times:</label>
+                  
+                      <input type="number" min="2" [(ngModel)]="selectedTeamCount"
+                        class="w-20 px-2 py-1 border rounded text-sm">
+                  
+                      <button (click)="setAutoTeamCount()" class="text-blue-600 text-sm hover:underline">
+                        Automático
+                      </button>
+                  
+                      <button (click)="generateTeams()"
+                        class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm">
+                        Gerar Times
+                      </button>
                     </div>
-                </div>
+                  
+                    <!-- Lado direito: ordenação -->
+                    <div class="flex items-center gap-2">
+                      <label class="text-sm text-gray-700">Ordenar por:</label>
+                      <select [(ngModel)]="sortBy" class="border px-2 py-1 rounded text-sm">
+                        <option value="name">Nome (A-Z)</option>
+                        <option value="rating">Rating</option>
+                        <option value="qualidade">Qualidade</option>
+                        <option value="velocidade">Velocidade</option>
+                        <option value="fase">Fase</option>
+                      </select>
+                    </div>
+                  </div>
+                  
 
                 <!-- Lista de jogadores disponíveis -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @for (player of playerList; track player.id) {
-                    <div (click)="togglePlayerSelection(player)"
-                        class="border rounded-lg p-4 flex items-center justify-between cursor-pointer transition-all duration-150 shadow-sm"
+                    @for (player of sortedPlayers; track player.id) {
+                    <div (click)="togglePlayerSelection(player)" class="border rounded-lg p-4 flex items-center justify-between cursor-pointer transition-all duration-150 shadow-sm"
                         [class.bg-green-100]="player.selected" [class.opacity-100]="player.selected"
                         [class.opacity-40]="!player.selected">
                         <div class="flex items-center gap-3">
@@ -205,8 +220,8 @@
                             <div>
                                 <h3 class="font-medium text-sm">{{ player.name }}</h3>
                                 <p class="text-xs text-gray-500">
-                                    Pos: {{ player.posicao }} • Rating: {{ player.rating }}
-                                </p>
+                                    Pos: {{ player.posicao }} • Rating: {{ getRating(player) }}
+                                </p>                                                                
                             </div>
                         </div>
 
