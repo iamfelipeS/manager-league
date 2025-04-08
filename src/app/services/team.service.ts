@@ -17,48 +17,52 @@ export class TeamService {
 
   generateTeams(players: Player[], totalTeams: number) {
     if (!players.length || totalTeams < 2) return;
-
-    // Limpa antes de gerar novos
+  
+    // Zera os times sempre
     this._teams.set([]);
-
-    // Score para balancear
-    const scoreMap = {
+  
+    const movimentacaoScore = {
       'Estático': 1,
       'Normal': 2,
       'Intenso': 3,
     };
-
-    const scoredPlayers = players.map(player => {
-      const score =
-        player.qualidade * 3 +
-        player.velocidade * 2 +
-        player.fase * 2 +
-        scoreMap[player.movimentacao];
-      return { ...player, score };
-    });
-
-    // Ordenar por score DESC
-    scoredPlayers.sort((a, b) => b.score - a.score);
-
-    // Inicializar times
+  
+    // Score auxiliar
+    const scored = players.map(p => ({
+      ...p,
+      _score:
+        p.qualidade * 3 +
+        p.velocidade * 2 +
+        p.fase * 2 +
+        movimentacaoScore[p.movimentacao],
+    }));
+  
+    // Ordena por score
+    scored.sort(() => Math.random() - 0.5); // embaralha pra gerar novo resultado a cada vez
+  
+    // Inicializa os times
     const teams: Team[] = Array.from({ length: totalTeams }, (_, i) => ({
       name: `Time ${i + 1}`,
       players: [],
-      overall: 0
+      overall: 0,
     }));
-
-    // Round-robin: distribuir de forma alternada entre os times
-    scoredPlayers.forEach((player, index) => {
-      const teamIndex = index % totalTeams;
-      teams[teamIndex].players.push(player);
+  
+    // Balanceia por quantidade, sempre colocando no time com MENOS jogadores
+    scored.forEach(player => {
+      const teamWithLeastPlayers = teams.reduce((prev, current) =>
+        prev.players.length <= current.players.length ? prev : current
+      );
+      teamWithLeastPlayers.players.push(player);
     });
-
-    // Calcular média de rating (overall)
+  
+    // Recalcula média de rating
     teams.forEach(team => {
-      const totalRating = team.players.reduce((acc, p) => acc + p.rating, 0);
-      team.overall = Math.round(totalRating / team.players.length);
+      const total = team.players.reduce((acc, p) => acc + p.rating, 0);
+      team.overall = Math.round(total / team.players.length);
     });
-
-    this._teams.set(teams);
+  
+    this._teams.set([...teams]); // força mudança e update
   }
+  
+  
 }

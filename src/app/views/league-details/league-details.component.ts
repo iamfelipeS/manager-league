@@ -83,7 +83,7 @@ export class LeagueDetailsComponent implements OnInit {
     }
   
     this.teamService.generateTeams(selectedPlayers, this.selectedTeamCount);
-    this.generatedTeams = this.teamService.teams();
+    this.generatedTeams = this.teamService.teams(); // será novo a cada clique
   }
   
 
