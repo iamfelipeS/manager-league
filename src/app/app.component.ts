@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { FooterComponent } from './template/footer/footer.component';
+import { ToasterComponent } from './shared/components/toaster/toaster.component';
+import { FooterComponent } from "./template/footer/footer.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FooterComponent],
+  imports: [RouterOutlet, ToasterComponent, FooterComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

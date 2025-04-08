@@ -1,31 +1,41 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { Router, RouterLink, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { ToasterService } from '../../services/toaster.service';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss'
 })
 export class FooterComponent implements OnInit {
   activeMenuItem: string | null = null;
+
   private router = inject(Router);
-  
+  private toasterService = inject(ToasterService);
+
+  // ✅ Objeto de rotas declarado como propriedade da classe
+  private readonly routesMap: { [key: string]: string } = {
+    home: '/home',
+    classificacao: '/classificacao',
+    jogadores: '/jogadores',
+    vencedores: '/vencedores',
+    noticias: '/noticias',
+  };
+
   ngOnInit(): void {
-    // Atualizar activeMenuItem quando a rota mudar
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.setActiveMenuItemFromUrl(this.router.url);
     });
-    
-    // Definir activeMenuItem inicial com base na URL atual
+
     this.setActiveMenuItemFromUrl(this.router.url);
   }
-  
+
   setActiveMenuItemFromUrl(url: string): void {
     if (url.includes('/home')) {
       this.activeMenuItem = 'home';
@@ -42,33 +52,20 @@ export class FooterComponent implements OnInit {
 
   navigateTo(menuItem: string): void {
     this.activeMenuItem = menuItem;
-    
-    // Verificar se o usuário está logado (opcional)
-    const role = localStorage.getItem('role');
-    if(!role && menuItem !== 'home') {
-      this.router.navigate(['/login']);
+
+    // Simula usuário logado
+    const role = localStorage.getItem('role') || 'guest';
+    localStorage.setItem('role', role);
+console.log(role)
+    // Verifica se está logado para navegar
+    if (!role && menuItem !== 'home') {
+      this.toasterService.warning('Você precisa estar logado para acessar esta página.');
+      this.router.navigate(['/home']);
       return;
     }
-    
-    // Navegar para a rota correspondente
-    switch (menuItem) {
-      case 'home':
-        this.router.navigate(['/home']);
-        break;
-      case 'classificacao':
-        this.router.navigate(['/classificacao']);
-        break;
-      case 'jogadores':
-        this.router.navigate(['/jogadores']);
-        break;
-      case 'vencedores':
-        this.router.navigate(['/vencedores']);
-        break;
-      case 'noticias':
-        this.router.navigate(['/noticias']);
-        break;
-      default:
-        this.router.navigate(['/home']);
-    }
+
+    // Navega para a rota correspondente
+    const route = this.routesMap[menuItem] || '/home';
+    this.router.navigate([route]);
   }
 }
