@@ -5,59 +5,75 @@ import { PlayerListComponent } from './views/player-list/player-list.component';
 
 export const routes: Routes = [
     {
-        path: '',
-        redirectTo: 'home', 
-        pathMatch: 'full'
-    },
-    {
         path: 'home',
-        component: HomeComponent
-    },
-    {
-        path: 'leagueDetails/:name',
-        component: LeagueDetailsComponent,
-        children: [
-            {
-                path: '',
-                redirectTo: 'overview',
-                pathMatch: 'full'
-            },
-            {
-                path: 'jogadores',
-                component: PlayerListComponent
-            },
-            // {
-            //     path: 'classificacao',
-            //     component: ClassificacaoComponent
-            // },
-            // {
-            //     path: 'vencedores',
-            //     component: VencedoresComponent
-            // },
-            // {
-            //     path: 'noticias',
-            //     component: NoticiasComponent
-            //}
-        ]
+        component: HomeComponent,
     },
     {
         path: 'jogadores',
-        component: PlayerListComponent
+        component: PlayerListComponent,
     },
+    {
+        path: 'league-details/:name',
+        component: LeagueDetailsComponent,
+    },
+    //   {
+    //     path: '**',
+    //     redirectTo: '',
+    //   },
     // {
-    //     path: 'classificacao',
-    //     component: ClassificacaoComponent
+    //     path: '',
+    //     redirectTo: 'home', 
+    //     pathMatch: 'full'
     // },
     // {
-    //     path: 'vencedores',
-    //     component: VencedoresComponent
+    //     path: 'home',
+    //     component: HomeComponent
     // },
     // {
-    //     path: 'noticias',
-    //     component: NoticiasComponent
+    //     path: 'league-details/:name',
+    //     component: LeagueDetailsComponent,
+    //     children: [
+    //         {
+    //             path: '',
+    //             redirectTo: 'overview',
+    //             pathMatch: 'full'
+    //         },
+    //         {
+    //             path: 'jogadores',
+    //             component: PlayerListComponent
+    //         },
+    //         // {
+    //         //     path: 'classificacao',
+    //         //     component: ClassificacaoComponent
+    //         // },
+    //         // {
+    //         //     path: 'vencedores',
+    //         //     component: VencedoresComponent
+    //         // },
+    //         // {
+    //         //     path: 'noticias',
+    //         //     component: NoticiasComponent
+    //}
+    //     ]
     // },
-    { 
-        path: '**', 
-        redirectTo: 'home' 
-    }
+    // {
+    //     path: 'jogadores',
+    //     component: PlayerListComponent
+    // },
+    // // {
+    // //     path: 'classificacao',
+    // //     component: ClassificacaoComponent
+    // // },
+    // // {
+    // //     path: 'vencedores',
+    // //     component: VencedoresComponent
+    // // },
+    // // {
+    // //     path: 'noticias',
+    // //     component: NoticiasComponent
+    // // },
+    // { 
+    //     path: '**', 
+    //     redirectTo: 'home' 
+    // }
 ];

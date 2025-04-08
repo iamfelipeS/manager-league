@@ -33,6 +33,6 @@ export class HomeComponent {
   imagemPadrao = 'liga_padrao.png';
 
   navigateToDetails(leagueName: string) {
-    this.router.navigate(['/leagueDetails', leagueName]);
+    this.router.navigate(['/league-details', leagueName]);
   }
 }
