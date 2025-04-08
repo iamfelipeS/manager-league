@@ -1,54 +1,90 @@
-<div class="w-full max-w-xl p-4 bg-white rounded-2xl shadow-md mx-auto">
-    <form (ngSubmit)="onSubmit()" class="space-y-6">
-      <!-- Nome do Jogador -->
-      <div>
-        <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">Nome</label>
-        <input
-          id="name"
-          type="text"
-          [(ngModel)]="player.name"
-          name="name"
-          class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-  
-      <!-- Atributos com botões +/- -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <ng-container *ngFor="let attr of attributes">
-          <div class="flex flex-col items-center bg-gray-100 p-2 rounded-xl">
-            <span class="text-sm font-medium text-gray-600">{{ attr.label }}</span>
-            <div class="flex items-center gap-2 mt-1">
-              <!-- <button type="button" (click)="decrement(attr.key)" class="px-2 py-1 bg-red-500 text-white rounded">-</button>
-              <span class="min-w-[24px] text-center font-semibold">{{ player[attr.key] }}</span>
-              <button type="button" (click)="increment(attr.key)" class="px-2 py-1 bg-green-500 text-white rounded">+</button> -->
-            </div>
-          </div>
-        </ng-container>
-      </div>
-  
-      <!-- Seleção de Movimentação -->
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Movimentação</label>
-        <select
-          [(ngModel)]="player.movimentacao"
-          name="movimentacao"
-          class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        >
-          <option value="" disabled selected>Selecione</option>
-          <option value="Estático">Estático</option>
-          <option value="Normal">Normal</option>
-          <option value="Intenso">Intenso</option>
-        </select>
-      </div>
-  
-      <!-- Botão de Salvar -->
-      <div class="flex justify-end">
-        <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition">
-          Salvar Jogador
-        </button>
-      </div>
-    </form>
+<div class="p-4 max-w-xl mx-auto space-y-6">
+  <!-- Nome -->
+  <div>
+    <label class="block mb-1 font-semibold">Nome</label>
+    <input type="text" class="w-full p-2 border rounded" formControlName="name" />
   </div>
-  
+
+  <!-- Posição -->
+  <div>
+    <label class="block mb-1 font-semibold">Posição</label>
+    <select class="w-full p-2 border rounded" formControlName="posicao">
+      <option value="" disabled selected>Selecione a posição</option>
+      @for (pos of ['Goleiro', 'Zagueiro', 'Meia', 'Atacante', 'Lateral']; track pos) {
+        <option [value]="pos">{{ pos }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Qualidade -->
+  <div>
+    <label class="block font-semibold mb-1">Qualidade: {{ getLabel('qualidade') }}</label>
+    <div class="flex gap-2">
+      @for (nivel of [1,2,3,4,5]; track nivel) {
+        <button
+          type="button"
+          (click)="set('qualidade', nivel)"
+          [class.bg-blue-600]="form.value.qualidade === nivel"
+          class="w-8 h-8 rounded-full border hover:bg-blue-400 transition"
+        ></button>
+      }
+    </div>
+  </div>
+
+  <!-- Velocidade -->
+  <div>
+    <label class="block font-semibold mb-1">Velocidade: {{ getLabel('velocidade') }}</label>
+    <div class="flex gap-2">
+      @for (nivel of [1,2,3]; track nivel) {
+        <button
+          type="button"
+          (click)="set('velocidade', nivel)"
+          [class.bg-green-600]="form.value.velocidade === nivel"
+          class="w-8 h-8 rounded-full border hover:bg-green-400 transition"
+        ></button>
+      }
+    </div>
+  </div>
+
+  <!-- Movimentação -->
+  <div>
+    <label class="block font-semibold mb-1">Movimentação</label>
+    <div class="flex gap-2">
+      @for (mov of movimentacaoOptions; track mov) {
+        <button
+          type="button"
+          (click)="set('movimentacao', mov)"
+          [class.bg-yellow-500]="form.value.movimentacao === mov"
+          class="px-3 py-1 border rounded hover:bg-yellow-300 transition"
+        >
+          {{ mov }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Fase -->
+  <div>
+    <label class="block font-semibold mb-1">Fase: {{ getLabel('fase') }}</label>
+    <div class="flex gap-2">
+      @for (nivel of [1,2,3]; track nivel) {
+        <button
+          type="button"
+          (click)="set('fase', nivel)"
+          [class.bg-purple-600]="form.value.fase === nivel"
+          class="w-8 h-8 rounded-full border hover:bg-purple-400 transition"
+        ></button>
+      }
+    </div>
+  </div>
+
+  <!-- Botões -->
+  <div class="pt-4 flex justify-between">
+    <button (click)="onCancel()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+      Cancelar
+    </button>
+    <button (click)="onSubmit()" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">
+      Salvar Jogador
+    </button>
+  </div>
+</div>

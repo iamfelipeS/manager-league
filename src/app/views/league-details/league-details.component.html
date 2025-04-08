@@ -1,4 +1,4 @@
-<div class="container mx-auto px-4 py-6">
+<div class="container mx-auto px-2 py-6">
     <!-- Header com informações da liga e botão seguir -->
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center">
@@ -57,6 +57,12 @@
                     class="py-2 cursor-pointer">
                     Partidas
                 </a>
+                <a (click)="activeTab = 'generate'" [class.text-blue-600]="activeTab === 'generate'"
+                    [class.border-b-2]="activeTab === 'generate'" [class.border-blue-600]="activeTab === 'generate'"
+                    class="py-2 cursor-pointer">
+                    Criar times
+                </a>
+
             </nav>
         </div>
 
@@ -164,6 +170,73 @@
                 </div>
             </div>
             }
+
+            <!-- Gerar Times -->
+            @if (activeTab === 'generate') {
+            <div>
+                <div class="flex justify-between items-center mb-4">
+
+                    <div class="flex items-center gap-4">
+                        <label class="text-sm">Qtd Times:</label>
+                        <input type="number" min="2" [(ngModel)]="selectedTeamCount"
+                            class="w-20 px-2 py-1 border rounded text-sm">
+                        <button (click)="setAutoTeamCount()" class="text-blue-600 text-sm hover:underline">
+                            Automático
+                        </button>
+
+                        <button (click)="generateTeams()"
+                            class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm">
+                            Gerar Novos Times
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de jogadores disponíveis -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @for (player of playerList; track player.id) {
+                    <div (click)="togglePlayerSelection(player)"
+                        class="border rounded-lg p-4 flex items-center justify-between cursor-pointer transition-all duration-150 shadow-sm"
+                        [class.bg-green-100]="player.selected" [class.opacity-100]="player.selected"
+                        [class.opacity-40]="!player.selected">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
+                                {{ player.name[0] }}
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-sm">{{ player.name }}</h3>
+                                <p class="text-xs text-gray-500">
+                                    Pos: {{ player.posicao }} • Rating: {{ player.rating }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div *ngIf="player.selected" class="text-green-600 text-lg">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    }
+                </div>
+
+                <!-- Times gerados -->
+                @if (generatedTeams?.length) {
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @for (team of generatedTeams; track team.name) {
+                    <div class="border rounded-lg p-4 bg-gray-50 shadow">
+                        <h4 class="font-semibold mb-2 text-lg">
+                            {{ team.name }} <span class="text-sm text-gray-500">(Média: {{ team.overall }})</span>
+                        </h4>
+                        <ul class="list-disc pl-5 text-sm space-y-1">
+                            @for (player of team.players; track player.id) {
+                            <li>{{ player.name }} – {{ player.posicao }} – {{ player.rating }}</li>
+                            }
+                        </ul>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+            }
+
         </div>
     </div>
 
