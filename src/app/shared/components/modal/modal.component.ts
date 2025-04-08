@@ -5,6 +5,7 @@ import { AnimationBuilder, animate, style } from '@angular/animations';
 
 @Component({
   selector: 'app-modal',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.scss' 

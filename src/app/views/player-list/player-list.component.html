@@ -1,4 +1,5 @@
 <div class="p-4 max-w-4xl mx-auto">
+  <!-- Cabeçalho -->
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-xl font-bold">Jogadores</h1>
     <button
@@ -7,18 +8,21 @@
       + Adicionar Jogador
     </button>
   </div>
+
+  <!-- Grid de jogadores -->
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
     <div *ngFor="let player of players()" class="relative bg-gradient-to-br from-[#0057ff] to-[#002e9b] text-white rounded-2xl p-6 shadow-xl">
-      <!-- Avatar central -->
+      
+      <!-- Avatar -->
       <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-white rounded-full p-2">
         <img src="assets/avatar.svg" alt="Player Avatar" class="h-12 w-12" />
       </div>
-  
+
       <!-- Nome -->
       <div class="mt-8 text-center">
         <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>
       </div>
-  
+
       <!-- Atributos -->
       <div class="mt-4 space-y-2 text-sm">
         <div class="flex justify-between">
@@ -38,17 +42,68 @@
           <span>{{ player.movimentacao }}</span>
         </div>
       </div>
-  
+
       <!-- Rating -->
       <div class="mt-4 text-center">
         <span class="text-sm uppercase text-blue-100">Rating</span>
-        <div class="text-3xl font-bold">{{ player.rating }}</div>
+        <div class="text-3xl font-bold">{{ getRating(player) }}</div>
       </div>
-  
-      <!-- Botão flutuante -->
-      <button class="absolute bottom-3 right-3 bg-white text-blue-600 p-2 rounded-full shadow-md hover:scale-105 transition">
-        +
-      </button>
+
+      <!-- Botões de ação -->
+      <div class="absolute bottom-3 right-3 flex gap-2">
+        <button
+          (click)="editPlayer(player)"
+          class="bg-white text-blue-600 hover:bg-blue-50 p-2 rounded-full shadow-md hover:scale-105 transition"
+          title="Editar jogador"
+        >
+          <i class="fas fa-pen text-sm"></i>
+        </button>
+
+        <button
+          (click)="deletePlayer(player.id)"
+          class="bg-white text-red-600 hover:bg-red-50 p-2 rounded-full shadow-md hover:scale-105 transition"
+          title="Remover jogador"
+        >
+          <i class="fas fa-trash text-sm"></i>
+        </button>
+      </div>
     </div>
   </div>
-  
+
+  <!-- Modal Genérico -->
+  <app-modal #modal></app-modal>
+
+  <!-- Template do formulário do jogador -->
+  <ng-template #playerFormTemplate let-player="player">
+    <form class="space-y-4" #form="ngForm">
+      <div>
+        <label class="text-sm font-medium">Nome</label>
+        <input [(ngModel)]="selectedPlayer!.name" name="name" required class="w-full p-2 border rounded text-sm" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm font-medium">Qualidade</label>
+          <input type="number" [(ngModel)]="selectedPlayer!.qualidade" name="qualidade" required min="0" max="10" class="w-full p-2 border rounded text-sm" />
+        </div>
+        <div>
+          <label class="text-sm font-medium">Velocidade</label>
+          <input type="number" [(ngModel)]="selectedPlayer!.velocidade" name="velocidade" required min="0" max="10" class="w-full p-2 border rounded text-sm" />
+        </div>
+        <div>
+          <label class="text-sm font-medium">Fase</label>
+          <input type="number" [(ngModel)]="selectedPlayer!.fase" name="fase" required min="0" max="10" class="w-full p-2 border rounded text-sm" />
+        </div>
+        <div>
+          <label class="text-sm font-medium">Movimentação</label>
+          <select [(ngModel)]="selectedPlayer!.movimentacao" name="movimentacao" required class="w-full p-2 border rounded text-sm">
+            <option value="Estático">Estático</option>
+            <option value="Normal">Normal</option>
+            <option value="Intenso">Intenso</option>
+          </select>
+        </div>
+      </div>
+
+    </form>
+  </ng-template>
+</div>
