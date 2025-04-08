@@ -23,10 +23,41 @@ export const routes: Routes = [
                 pathMatch: 'full'
             },
             {
-                path: 'players',
+                path: 'jogadores',
                 component: PlayerListComponent
             },
+            // {
+            //     path: 'classificacao',
+            //     component: ClassificacaoComponent
+            // },
+            // {
+            //     path: 'vencedores',
+            //     component: VencedoresComponent
+            // },
+            // {
+            //     path: 'noticias',
+            //     component: NoticiasComponent
+            //}
         ]
     },
-    { path: '**', redirectTo: 'home' }
+    {
+        path: 'jogadores',
+        component: PlayerListComponent
+    },
+    // {
+    //     path: 'classificacao',
+    //     component: ClassificacaoComponent
+    // },
+    // {
+    //     path: 'vencedores',
+    //     component: VencedoresComponent
+    // },
+    // {
+    //     path: 'noticias',
+    //     component: NoticiasComponent
+    // },
+    { 
+        path: '**', 
+        redirectTo: 'home' 
+    }
 ];

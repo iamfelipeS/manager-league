@@ -1,6 +1,33 @@
-
-<div class="bg-grays1">
-    <div class="flex flex-row">
-        <p>Desenvolvido por Felipe Silva - <a href="http://" target="_blank" rel="noopener noreferrer">Contato</a></p>
+<div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-around py-3">
+            <ul class="flex items-center justify-center space-x-14 md:space-x-28 w-full">
+                <li class="flex flex-col gap-1 items-center" (click)="navigateTo('home')">
+                    <i class="fa fa-home text-[1.7rem]" aria-hidden="true"
+                        [ngClass]="{'text-blue-500': activeMenuItem === 'home'}"></i>
+                    <span class="text-[9px] md:text-[16px]">Home</span>
+                </li>
+                <li class="flex flex-col gap-1 items-center" (click)="navigateTo('classificacao')">
+                    <i class="fa fa-trophy text-[1.7rem]" aria-hidden="true"
+                        [ngClass]="{'text-blue-500': activeMenuItem === 'classificacao'}"></i>
+                    <span class="text-[9px] md:text-[16px]">Classificação</span>
+                </li>
+                <li class="flex flex-col gap-1 items-center" (click)="navigateTo('jogadores')">
+                    <i class="fa fa-users text-[1.7rem]" aria-hidden="true"
+                        [ngClass]="{'text-blue-500': activeMenuItem === 'jogadores'}"></i>
+                    <span class="text-[9px] md:text-[16px]">Jogadores</span>
+                </li>
+                <li class="flex flex-col gap-1 items-center" (click)="navigateTo('vencedores')">
+                    <i class="fa fa-medal text-[1.7rem]" aria-hidden="true"
+                        [ngClass]="{'text-blue-500': activeMenuItem === 'vencedores'}"></i>
+                    <span class="text-[9px] md:text-[16px]">Vencedores</span>
+                </li>
+                <li class="flex flex-col gap-1 items-center" (click)="navigateTo('noticias')">
+                    <i class="fa fa-newspaper text-[1.7rem]" aria-hidden="true"
+                        [ngClass]="{'text-blue-500': activeMenuItem === 'noticias'}"></i>
+                    <span class="text-[9px] md:text-[16px]">Notícias</span>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>

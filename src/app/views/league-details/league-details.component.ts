@@ -2,11 +2,13 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { LeaguesService } from '../../services/leagues.service';
 import { Leagues } from '../../models/leagues.model';
+import { CommonModule } from '@angular/common';
+import { FooterComponent } from '../../template/footer/footer.component';
 
 @Component({
   selector: 'app-league-details',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, FooterComponent],
   templateUrl: './league-details.component.html',
   styleUrl: './league-details.component.scss'
 })
