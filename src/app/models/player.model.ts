@@ -4,6 +4,8 @@ export interface Player {
   qualidade: number;
   velocidade: number;
   fase: number;
-  movimentacao: 'Estático' | 'Normal' | 'Intenso';
   rating: number;
+  selected?: boolean;
+  movimentacao: 'Estático' | 'Normal' | 'Intenso';
+  posicao: 'A' | 'M' | 'D' | 'G'; // Atacante, Meio campo, Defensor, Goleiro
 }

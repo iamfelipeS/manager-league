@@ -1,5 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
-import { Player } from '../../models/player.model';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { PlayerService } from '../../services/player.service';
 import { CommonModule } from '@angular/common';
 
@@ -10,18 +9,16 @@ import { CommonModule } from '@angular/common';
   templateUrl: './player-list.component.html',
   styleUrl: './player-list.component.scss'
 })
-export class PlayerListComponent {
-  players: Player[] = [];
+export class PlayerListComponent implements OnInit {
+  private playerService = inject(PlayerService);
 
-  constructor(private playerService: PlayerService) {}
+  players = computed(() => this.playerService.getPlayers());
 
   ngOnInit(): void {
-    this.playerService.getPlayers().subscribe((players) => {
-      this.players = players;
-    });
+    // Nenhuma ação necessária aqui por enquanto
   }
 
   openAddPlayerModal(){
-    
+    // lógica para abrir o modal
   }
 }
