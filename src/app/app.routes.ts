@@ -5,8 +5,8 @@ import { PlayerListComponent } from './views/player-list/player-list.component';
 
 export const routes: Routes = [
     {
-        path: '**',
-        redirectTo: 'home',
+        path: '',
+        component: HomeComponent,
     },
     {
         path: 'home',
