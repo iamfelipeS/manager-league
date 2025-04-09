@@ -1,8 +1,9 @@
 [build]
-command = "ng build --configuration production"
+command = "npx ng build --configuration production"
 publish = "dist/verssat/browser"
 
 [[redirects]]
 from = "/*"
 to = "/index.html"
 status = 200
+
