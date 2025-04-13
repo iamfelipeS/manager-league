@@ -1,23 +1,37 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { LeaguesService } from '../../services/leagues.service';
 import { PlayerService } from '../../services/player.service';
 import { TeamService, Team } from '../../services/team.service';
 import { Player } from '../../models/player.model';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RatingService } from '../../services/rating.service';
+import { LeaguesService } from '../../services/leagues.service';
 import { ToasterService } from '../../services/toaster.service';
 import { Leagues } from '../../models/leagues.model';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { LoaderComponent } from '../../shared/components/loader/loader.component';
 
 @Component({
   selector: 'app-league-details',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoaderComponent],
   templateUrl: './league-details.component.html',
   styleUrl: './league-details.component.scss'
 })
 export class LeagueDetailsComponent implements OnInit {
+  private playerService = inject(PlayerService);
+  private ratingService = inject(RatingService);
+  private route = inject(ActivatedRoute);
+  private teamService = inject(TeamService);
+  private leaguesService = inject(LeaguesService);
+  private toasterService = inject(ToasterService);
+
   leagueName: string = '';
   league: Leagues | null = null;
   imagemPadrao = '';
@@ -25,44 +39,35 @@ export class LeagueDetailsComponent implements OnInit {
   isFollowing = false;
   activeTab: string = 'info';
   selectedTeamCount = 2;
-
   sortBy: 'name' | 'rating' | 'qualidade' | 'velocidade' | 'fase' = 'name';
 
-  playerList: Player[] = [];
+  players = signal<Player[]>([]);
+  isLoading = signal(true);
   generatedTeams: Team[] = [];
 
-  private route = inject(ActivatedRoute);
-  private playerService = inject(PlayerService);
-  private teamService = inject(TeamService);
-  private ratingService = inject(RatingService);
-  private leaguesService = inject(LeaguesService);
-  private toasterService = inject(ToasterService);
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.leagueName = params['name'];
       this.loadLeagueDetails();
     });
 
     this.checkIfUserIsAdmin();
+    this.loadPlayers();
+  }
 
-    this.playerList = this.playerService.getPlayers();
-
-    // Exemplo: filtrar por liga
-    // this.playerList = this.playerService.getPlayers().filter(p => p.leagueId === this.leagueName);
+  async loadPlayers() {
+    this.isLoading.set(true);
+    const result = await this.playerService.getPlayers();
+    this.players.set(result);
+    this.isLoading.set(false);
   }
 
   loadLeagueDetails() {
     this.leaguesService.getLeagueByName(this.leagueName).subscribe({
-      next: (league) => {
-        this.league = league;
-      },
-      error: (err) => {
-        console.error('Erro ao carregar detalhes da liga', err);
-      }
+      next: (league) => (this.league = league),
+      error: (err) => console.error('Erro ao carregar detalhes da liga', err)
     });
 
-    // Simulado
     this.league = {
       name: this.leagueName,
       img: '',
@@ -73,8 +78,22 @@ export class LeagueDetailsComponent implements OnInit {
     };
   }
 
+  get sortedPlayers(): Player[] {
+    this.isLoading.set(true);
+    return [...this.players()].sort((a, b) => {
+      if (this.sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      }
+      if (this.sortBy === 'rating') {
+        return this.getRating(b) - this.getRating(a);
+      }
+      this.isLoading.set(false);
+      return (b[this.sortBy] ?? 0) - (a[this.sortBy] ?? 0);
+    });
+  }
+
   generateTeams() {
-    const selectedPlayers = this.playerList.filter(p => p.selected);
+    const selectedPlayers = this.players().filter(p => p.selected);
 
     if (selectedPlayers.length < 2) {
       this.toasterService.warning('Selecione pelo menos dois jogadores para gerar os times.');
@@ -82,31 +101,19 @@ export class LeagueDetailsComponent implements OnInit {
     }
 
     this.teamService.generateTeams(selectedPlayers, this.selectedTeamCount);
-    this.generatedTeams = this.teamService.teams(); // sempre atualiza a exibição
-  }
-
-  get sortedPlayers(): Player[] {
-    return [...this.playerList].sort((a, b) => {
-      if (this.sortBy === 'name') {
-        return a.name.localeCompare(b.name);
-      }
-      if (this.sortBy === 'rating') {
-        return this.getRating(b) - this.getRating(a);
-      }
-      return (b[this.sortBy] ?? 0) - (a[this.sortBy] ?? 0);
-    });
-  }
-
-  getRating(player: Player): number {
-    return this.ratingService.calculate(player);
+    this.generatedTeams = this.teamService.teams();
   }
 
   togglePlayerSelection(player: Player) {
     player.selected = !player.selected;
   }
 
+  getRating(player: Player): number {
+    return this.ratingService.calculate(player);
+  }
+
   setAutoTeamCount() {
-    const selected = this.playerList.filter(p => p.selected);
+    const selected = this.players().filter(p => p.selected);
     const totalPlayers = selected.length;
     const possibleTeams = Math.floor(totalPlayers / 6);
     this.selectedTeamCount = Math.max(possibleTeams, 2);
