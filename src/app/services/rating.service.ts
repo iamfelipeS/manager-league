@@ -5,15 +5,15 @@ import { Player } from '../models/player.model';
 export class RatingService {
   private readonly movimentacaoScore = {
     'Estático': 1,
-    'Normal': 2,
-    'Intenso': 3
+    'Normal': 3,
+    'Intenso': 4
   } as const;
 
   calculate(player: Player): number {
     return (
-      player.qualidade * 4 +
-      player.velocidade * 2 +
-      player.fase * 3 +
+      player.qualidade * 6 +
+      player.velocidade * 3 +
+      player.fase * 4 +
       this.movimentacaoScore[player.movimentacao]
     );
   }

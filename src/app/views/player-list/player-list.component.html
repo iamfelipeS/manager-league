@@ -1,114 +1,271 @@
 <div class="p-4 max-w-4xl mx-auto">
   <!-- Cabeçalho -->
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-xl font-bold">Jogadores</h1>
-    <button class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700" (click)="openAddPlayerModal()">
-      + Adicionar Jogador
-    </button>
+  <div class="flex justify-end mb-6">
+    <div class="bg-primary flex justify-center w-12 h-12 rounded-full">
+      <div class="flex items-center gap-2 px-4 py-2">
+        <i class="fas fa-user-plus text-white text-14"></i>
+      </div>
+      <button
+        class=""
+        (click)="addPlayer()"
+      >
+      </button>
+
+    </div>
+  </div>
+  
+  <div class="flex justify-center mb-8">
+    <select
+      class="p-2 rounded border text-sm"
+      [ngModel]="orderBy()"
+      (ngModelChange)="orderBy.set($event)"
+    >
+      <option value="rating">Classificar por Rating</option>
+      <option value="name">Classificar por Nome</option>
+      <option value="posicao">Classificar por Posição</option>
+    </select>
   </div>
 
   <!-- Grid de jogadores -->
   @if (isLoading()) {
   <app-loader></app-loader>
   } @else {
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-    <div *ngFor="let player of players()" class="relative bg-gradient-to-br from-[#0057ff] to-[#002e9b] text-white rounded-2xl p-6 shadow-xl">
-
-      <!-- Avatar -->
-      <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 rounded-full p-2">
-        @if (player.avatarUrl) {
-          <img [src]="player.avatarUrl" alt="Player Avatar" class="h-24 w-2h-24" />
-        }@else{
-          <img src="icons/user.png" alt="Player Avatar" class="h-24 w-2h-24" />
-        }
-      </div>
-
-      <!-- Nome -->
-      <div class="mt-8 text-center">
-        <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>
-      </div>
-
-      <!-- Atributos -->
-      <div class="mt-4 space-y-2 text-sm">
-        <div class="flex justify-between">
-          <span>Qualidade</span>
-          <span>{{ player.qualidade }}</span>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div *ngFor="let player of orderedPlayers()" class="relative bg-white text-zinc-800 rounded-2xl p-6 border shadow-sm">
+    
+        <!-- Avatar -->
+        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 rounded-full p-2">
+          @if (player.avatarUrl) {
+            <img [src]="player.avatarUrl" alt="Player Avatar" class="h-24 w-2h-24" />
+          }@else{
+            <img src="icons/user.png" alt="Player Avatar" class="h-24 w-2h-24" />
+          }
         </div>
-        <div class="flex justify-between">
-          <span>Velocidade</span>
-          <span>{{ player.velocidade }}</span>
+    
+        <!-- Nome e posição -->
+        <div class="mt-8 text-center">
+          <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>
+          <span class="text-xs uppercase tracking-wide text-gray-500">
+            {{ getPosicaoLabel(player.posicao) }}
+          </span>
         </div>
-        <div class="flex justify-between">
-          <span>Fase</span>
-          <span>{{ player.fase }}</span>
+    
+        <!-- Atributos -->
+        <div class="mt-4 space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>Qualidade</span>
+            <span>{{ player.qualidade }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Velocidade</span>
+            <span>{{ player.velocidade }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Fase</span>
+            <span>{{ player.fase }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Movimentação</span>
+            <span>{{ player.movimentacao }}</span>
+          </div>
         </div>
-        <div class="flex justify-between">
-          <span>Movimentação</span>
-          <span>{{ player.movimentacao }}</span>
+    
+        <!-- Rating -->
+        <div class="mt-6 flex justify-center">
+          <div
+            class="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold"
+            [ngClass]="getRatingColor(getRating(player))"
+          >
+            {{ getRating(player) }}
+          </div>
         </div>
-      </div>
-
-      <!-- Rating -->
-      <div class="mt-4 text-center">
-        <span class="text-sm uppercase text-blue-100">Rating</span>
-        <div class="text-3xl font-bold">{{ getRating(player) }}</div>
-      </div>
-
-      <!-- Botões de ação -->
-      <div class="absolute bottom-3 right-3 flex gap-2">
-        <button (click)="editPlayer(player)"
-          class="bg-white text-blue-600 hover:bg-blue-50 p-2 rounded-full shadow-md hover:scale-105 transition"
-          title="Editar jogador">
-          <i class="fas fa-pen text-sm"></i>
-        </button>
-
-        <button (click)="deletePlayer(player.id)"
-          class="bg-white text-red-600 hover:bg-red-50 p-2 rounded-full shadow-md hover:scale-105 transition"
-          title="Remover jogador">
-          <i class="fas fa-trash text-sm"></i>
-        </button>
+    
+        <!-- Botões de ação -->
+        <div class="absolute bottom-3 right-3 flex gap-2">
+          <button (click)="editPlayer(player)"
+            class="bg-white text-blue-600 hover:bg-blue-50 p-2 rounded-full shadow-md hover:scale-105 transition"
+            title="Editar jogador">
+            <i class="fas fa-pen text-sm"></i>
+          </button>
+    
+          <button (click)="deletePlayer(player.id)"
+            class="bg-white text-red-600 hover:bg-red-50 p-2 rounded-full shadow-md hover:scale-105 transition"
+            title="Remover jogador">
+            <i class="fas fa-trash text-sm"></i>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+    
   }
   <!-- Modal Genérico -->
   <app-modal #modal></app-modal>
 
   <!-- Template do formulário do jogador -->
-  <ng-template #playerFormTemplate let-player="player">
-    <form class="space-y-4" #form="ngForm">
+  <ng-template #playerFormTemplate>
+    <form class="space-y-4 text-sm text-zinc-900">
+      <!-- Nome -->
       <div>
         <label class="text-sm font-medium">Nome</label>
-        <input [(ngModel)]="selectedPlayer!.name" name="name" required class="w-full p-2 border rounded text-sm" />
+        <input
+          [(ngModel)]="selectedPlayer!.name"
+          name="name"
+          required
+          class="w-full p-3 border rounded-xl bg-white"
+          placeholder="Nome do jogador"
+        />
       </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div>
+  
+      <!-- Posição -->
+      <div>
+        <label class="text-sm font-medium">Posição</label>
+        <select
+          [(ngModel)]="selectedPlayer!.posicao"
+          name="posicao"
+          required
+          class="w-full p-3 border rounded-xl bg-white"
+        >
+          <option disabled value="">Selecione a posição</option>
+          <option value="G">Goleiro</option>
+          <option value="D">Defensor</option>
+          <option value="M">Meio Campo</option>
+          <option value="A">Atacante</option>
+        </select>
+      </div>
+  
+      <!-- Qualidade -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
           <label class="text-sm font-medium">Qualidade</label>
-          <input type="number" [(ngModel)]="selectedPlayer!.qualidade" name="qualidade" required min="0" max="10"
-            class="w-full p-2 border rounded text-sm" />
+          <span class="text-xs font-semibold text-primary">
+            {{ getLabelFromQualidade(selectedPlayer?.qualidade || 0) }}
+          </span>
         </div>
-        <div>
-          <label class="text-sm font-medium">Velocidade</label>
-          <input type="number" [(ngModel)]="selectedPlayer!.velocidade" name="velocidade" required min="0" max="10"
-            class="w-full p-2 border rounded text-sm" />
-        </div>
-        <div>
-          <label class="text-sm font-medium">Fase</label>
-          <input type="number" [(ngModel)]="selectedPlayer!.fase" name="fase" required min="0" max="10"
-            class="w-full p-2 border rounded text-sm" />
-        </div>
-        <div>
-          <label class="text-sm font-medium">Movimentação</label>
-          <select [(ngModel)]="selectedPlayer!.movimentacao" name="movimentacao" required
-            class="w-full p-2 border rounded text-sm">
-            <option value="Estático">Estático</option>
-            <option value="Normal">Normal</option>
-            <option value="Intenso">Intenso</option>
-          </select>
+        <div class="flex justify-between gap-2">
+          @for (i of [1, 2, 3, 4, 5]; track i) {
+            <button
+              type="button"
+              class="w-full p-4 rounded-xl"
+              [class.bg-primary]="selectedPlayer?.qualidade === i"
+              [class.bg-gray-300]="selectedPlayer?.qualidade !== i"
+              [class.text-white]="selectedPlayer?.qualidade === i"
+              (click)="selectedPlayer!.qualidade = i"
+            ></button>
+          }
         </div>
       </div>
-
+  
+      <!-- Velocidade -->
+      <div>
+        <label class="text-sm font-medium">Velocidade</label>
+        <div class="flex justify-between gap-2 mt-1">
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.velocidade === 3"
+            [class.bg-gray-300]="selectedPlayer?.velocidade !== 3"
+            [class.text-white]="selectedPlayer?.velocidade === 3"
+            (click)="selectedPlayer!.velocidade = 3"
+          >
+            Lento
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.velocidade === 6"
+            [class.bg-gray-300]="selectedPlayer?.velocidade !== 6"
+            [class.text-white]="selectedPlayer?.velocidade === 6"
+            (click)="selectedPlayer!.velocidade = 6"
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.velocidade === 9"
+            [class.bg-gray-300]="selectedPlayer?.velocidade !== 9"
+            [class.text-white]="selectedPlayer?.velocidade === 9"
+            (click)="selectedPlayer!.velocidade = 9"
+          >
+            Rápido
+          </button>
+        </div>
+      </div>
+  
+      <!-- Movimentação -->
+      <div>
+        <label class="text-sm font-medium">Movimentação</label>
+        <div class="flex justify-between gap-2 mt-1">
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.movimentacao === 'Estático'"
+            [class.bg-gray-300]="selectedPlayer?.movimentacao !== 'Estático'"
+            [class.text-white]="selectedPlayer?.movimentacao === 'Estático'"
+            (click)="selectedPlayer!.movimentacao = 'Estático'"
+          >
+            Estático
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.movimentacao === 'Normal'"
+            [class.bg-gray-300]="selectedPlayer?.movimentacao !== 'Normal'"
+            [class.text-white]="selectedPlayer?.movimentacao === 'Normal'"
+            (click)="selectedPlayer!.movimentacao = 'Normal'"
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.movimentacao === 'Intenso'"
+            [class.bg-gray-300]="selectedPlayer?.movimentacao !== 'Intenso'"
+            [class.text-white]="selectedPlayer?.movimentacao === 'Intenso'"
+            (click)="selectedPlayer!.movimentacao = 'Intenso'"
+          >
+            Intenso
+          </button>
+        </div>
+      </div>
+  
+      <!-- Fase -->
+      <div>
+        <label class="text-sm font-medium">Fase</label>
+        <div class="flex justify-between gap-2 mt-1">
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.fase === 3"
+            [class.bg-gray-300]="selectedPlayer?.fase !== 3"
+            [class.text-white]="selectedPlayer?.fase === 3"
+            (click)="selectedPlayer!.fase = 3"
+          >
+            Ruim
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.fase === 6"
+            [class.bg-gray-300]="selectedPlayer?.fase !== 6"
+            [class.text-white]="selectedPlayer?.fase === 6"
+            (click)="selectedPlayer!.fase = 6"
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.fase === 9"
+            [class.bg-gray-300]="selectedPlayer?.fase !== 9"
+            [class.text-white]="selectedPlayer?.fase === 9"
+            (click)="selectedPlayer!.fase = 9"
+          >
+            Boa
+          </button>
+        </div>
+      </div>
     </form>
   </ng-template>
+  
 </div>

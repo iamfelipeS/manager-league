@@ -7,13 +7,15 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { v4 as uuidv4 } from 'uuid';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { PlayerService } from '../../services/player.service';
 import { RatingService } from '../../services/rating.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { Player } from '../../models/player.model';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { ToasterService } from '../../services/toaster.service';
 
 @Component({
   selector: 'app-player-list',
@@ -25,6 +27,7 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
 export class PlayerListComponent implements OnInit {
   private playerService = inject(PlayerService);
   private ratingService = inject(RatingService);
+  private toaster = inject(ToasterService);
 
   @ViewChild('modal') modal!: ModalComponent;
   @ViewChild('playerFormTemplate') formTemplateRef!: TemplateRef<any>;
@@ -33,6 +36,8 @@ export class PlayerListComponent implements OnInit {
 
   players = signal<Player[]>([]);
   isLoading = signal(true);
+
+  orderBy = signal<'rating' | 'name' | 'posicao'>('rating');
 
   ngOnInit(): void {
     this.loadPlayers();
@@ -43,72 +48,120 @@ export class PlayerListComponent implements OnInit {
   }
 
   async loadPlayers() {
-    this.isLoading.set(true); // Set loading state to true
-    const fetchedPlayers = await this.playerService.getPlayers(); // Fetch players from Supabase
-    this.players.set(fetchedPlayers); // Update the players signal
-    this.isLoading.set(false); // Set loading state to false
+    this.isLoading.set(true);
+    try {
+      const data = await this.playerService.getPlayers();
+      this.players.set(data);
+    } catch (err) {
+      this.toaster.error('Erro ao carregar jogadores');
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
-  openAddPlayerModal() {
+  addPlayer() {
     this.selectedPlayer = {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       name: '',
-      qualidade: 5,
-      velocidade: 5,
-      fase: 5,
+      qualidade: 3,
+      velocidade: 6,
+      fase: 6,
       movimentacao: 'Normal',
-      rating: 0,
       posicao: 'M',
+      rating: 0
     };
-
     this.modal.open({
       title: 'Adicionar Jogador',
       template: this.formTemplateRef,
-      context: { player: this.selectedPlayer },
-      confirmButtonText: 'Salvar',
-      showFooter: true,
-      showConfirmButton: true,
-      showCancelButton: true,
     });
   }
 
   editPlayer(player: Player) {
     this.selectedPlayer = { ...player };
     this.modal.open({
-      title: 'Editar Jogador',
+      title: 'Adicionar Jogador',
       template: this.formTemplateRef,
-      context: { player: this.selectedPlayer },
-      confirmButtonText: 'Salvar',
-      showFooter: true,
-      showConfirmButton: true,
-      showCancelButton: true,
     });
-  }
-
-  async deletePlayer(id: string) {
-    const confirmDelete = confirm('Tem certeza que deseja remover este jogador?');
-    if (!confirmDelete) return;
-
-    await this.playerService.delete(id);
-    await this.loadPlayers();
   }
 
   async savePlayer() {
     if (!this.selectedPlayer) return;
+    this.selectedPlayer.rating = this.getRating(this.selectedPlayer);
 
-    const exists = this.players().find(p => p.id === this.selectedPlayer!.id);
+    try {
+      const exists = this.players().some(p => p.id === this.selectedPlayer!.id);
 
-    if (exists) {
-      await this.playerService.update(this.selectedPlayer);
-    } else {
-      await this.playerService.add(this.selectedPlayer);
+      if (exists) {
+        await this.playerService.updatePlayer(this.selectedPlayer!);
+        this.toaster.success('Jogador atualizado!');
+      } else {
+        await this.playerService.addPlayer(this.selectedPlayer!);
+        this.toaster.success('Jogador adicionado!');
+      }
+
+      await this.loadPlayers();
+    } catch (err) {
+      this.toaster.error('Erro ao salvar jogador');
     }
-
-    await this.loadPlayers();
-    this.modal.close();
   }
+
+  async deletePlayer(id: string) {
+    if (!confirm('Deseja remover este jogador?')) return;
+
+    try {
+      await this.playerService.deletePlayer(id);
+      this.toaster.success('Jogador removido!');
+      this.players.update(p => p.filter(j => j.id !== id));
+    } catch {
+      this.toaster.error('Erro ao remover jogador');
+    }
+  }
+
+  orderedPlayers = computed(() => {
+    const players = [...this.players()];
+    const sortBy = this.orderBy();
+  
+    return players.sort((a, b) => {
+      if (sortBy === 'rating') return this.getRating(b) - this.getRating(a);
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      if (sortBy === 'posicao') return a.posicao.localeCompare(b.posicao);
+      return 0;
+    });
+  });
+  
 
   getRating(player: Player): number {
     return this.ratingService.calculate(player);
   }
+
+  getLabelFromQualidade(nivel: number): string {
+    switch (nivel) {
+      case 1: return 'Ruim';
+      case 2: return 'Regular';
+      case 3: return 'Normal';
+      case 4: return 'Bom';
+      case 5: return 'Excelente';
+      default: return '';
+    }
+  }
+
+  getPosicaoLabel(posicao: string): string {
+    switch (posicao) {
+      case 'G': return 'Goleiro';
+      case 'D': return 'Defensor';
+      case 'M': return 'Meio Campo';
+      case 'A': return 'Atacante';
+      default: return '';
+    }
+  }
+
+  getRatingColor(rating: number): string {
+    if (rating <= 55) return 'bg-yellow-900';
+    if (rating <= 69) return 'bg-yellow-500';
+    if (rating <= 80) return 'bg-green-400';
+    return 'bg-green-700';
+  }
+  
 }
+
+
