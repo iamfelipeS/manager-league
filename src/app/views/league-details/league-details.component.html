@@ -1,4 +1,4 @@
-<div class="container mx-auto px-2 py-6">
+<div class="container mx-auto py-6">
     <!-- Header com informações da liga e botão seguir -->
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center">
@@ -30,7 +30,7 @@
             <button class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
                 Editar Liga
             </button>
-            <button class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
+            <button class="px-4 py-2 bg-primary text-white rounded hover:bg-green-600 transition">
                 Adicionar Participantes
             </button>
         </div>
@@ -38,7 +38,7 @@
     </div>
 
     <!-- Conteúdo Principal -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
         <!-- Menu de Navegação -->
         <div class="mb-6 border-b">
             <nav class="flex space-x-6">
@@ -206,31 +206,52 @@
                     </div>
                   </div>
                   
-
-                <!-- Lista de jogadores disponíveis -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @for (player of sortedPlayers; track player.id) {
-                    <div (click)="togglePlayerSelection(player)" class="border rounded-lg p-4 flex items-center justify-between cursor-pointer transition-all duration-150 shadow-sm"
-                        [class.bg-green-100]="player.selected" [class.opacity-100]="player.selected"
-                        [class.opacity-40]="!player.selected">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold">
-                                {{ player.name[0] }}
+                  @if (isLoading()) {
+                    <app-loader />
+                  }@else {
+                      <!-- Lista de jogadores disponíveis -->
+                      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @for (player of sortedPlayers; track player.id) {
+                          <div
+                            (click)="togglePlayerSelection(player)"
+                            class="relative flex items-center justify-between border rounded-lg p-4 shadow-sm transition-all duration-150 cursor-pointer"
+                            [class.bg-green-100]="player.selected"
+                            [class.opacity-100]="player.selected"
+                            [class.opacity-40]="!player.selected"
+                          >
+                            <!-- Posição (esquerda) -->
+                            <div
+                              class="absolute left-0 top-0 h-full w-8 rounded-l-lg flex items-center justify-center text-white text-xs font-bold"
+                              [ngClass]="getPositionColor(player.posicao)"
+                            >
+                              {{ player.posicao }}
                             </div>
-                            <div>
-                                <h3 class="font-medium text-sm">{{ player.name }}</h3>
-                                <p class="text-xs text-gray-500">
-                                    Pos: {{ player.posicao }} • Rating: {{ getRating(player) }}
-                                </p>                                                                
+                      
+                            <!-- Avatar + Nome -->
+                            <div class="pl-12 pr-2 flex items-center justify-between w-full">
+                              <div class="flex items-center gap-3 overflow-hidden">
+                                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-zinc-800">
+                                  {{ player.name[0] }}
+                                </div>
+                                <div class="min-w-0">
+                                  <h3 class="font-medium text-sm truncate">{{ player.name }}</h3>
+                                </div>
+                              </div>
+                      
+                              <!-- Rating -->
+                              <div
+                                class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                                [ngClass]="getRatingColor(getRating(player))"
+                              >
+                                {{ getRating(player) }}
+                              </div>
                             </div>
-                        </div>
+                          </div>
+                        }
+                      </div>
+                      
+                  }
 
-                        <div *ngIf="player.selected" class="text-green-600 text-lg">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-                    }
-                </div>
 
                 <!-- Times gerados -->
                 @if (generatedTeams.length) {
@@ -254,5 +275,4 @@
 
         </div>
     </div>
-<app-loader />
 </div>

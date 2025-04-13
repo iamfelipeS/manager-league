@@ -79,7 +79,6 @@ export class LeagueDetailsComponent implements OnInit {
   }
 
   get sortedPlayers(): Player[] {
-    this.isLoading.set(true);
     return [...this.players()].sort((a, b) => {
       if (this.sortBy === 'name') {
         return a.name.localeCompare(b.name);
@@ -87,7 +86,6 @@ export class LeagueDetailsComponent implements OnInit {
       if (this.sortBy === 'rating') {
         return this.getRating(b) - this.getRating(a);
       }
-      this.isLoading.set(false);
       return (b[this.sortBy] ?? 0) - (a[this.sortBy] ?? 0);
     });
   }
@@ -126,4 +124,22 @@ export class LeagueDetailsComponent implements OnInit {
   checkIfUserIsAdmin() {
     this.isAdmin = Math.random() > 0.5;
   }
+
+  getPositionColor(posicao: string): string {
+    switch (posicao) {
+      case 'G': return 'bg-blue-700';    // Goleiro
+      case 'D': return 'bg-red-700';     // Defensor
+      case 'M': return 'bg-yellow-600';  // Meio Campo
+      case 'A': return 'bg-green-700';   // Atacante
+      default: return 'bg-gray-400';
+    }
+  }
+
+  getRatingColor(rating: number): string {
+    if (rating <= 55) return 'bg-yellow-900';
+    if (rating <= 69) return 'bg-yellow-400';
+    if (rating <= 85) return 'bg-lime-500';
+    return 'bg-green-700';
+  }
+  
 }
