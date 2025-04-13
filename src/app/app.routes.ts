@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { LeagueDetailsComponent } from './views/league-details/league-details.component';
 import { HomeComponent } from './views/home/home.component';
-import { PlayerListComponent } from './views/player-list/player-list.component';
 
 export const routes: Routes = [
     {
@@ -14,8 +13,12 @@ export const routes: Routes = [
     },
     {
         path: 'jogadores',
-        component: PlayerListComponent,
+        loadComponent: () => import('./views/player-list/player-list.component').then(m => m.PlayerListComponent),
+        data: {
+            ssr: false
+        }
     },
+
     {
         path: 'league-details/:name',
         component: LeagueDetailsComponent,

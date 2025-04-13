@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ToasterService } from '../../services/toaster.service';
@@ -16,8 +16,8 @@ export class FooterComponent implements OnInit {
 
   private router = inject(Router);
   private toasterService = inject(ToasterService);
+  private platformId = inject(PLATFORM_ID);
 
-  // ✅ Objeto de rotas declarado como propriedade da classe
   private readonly routesMap: { [key: string]: string } = {
     home: '/home',
     classificacao: '/classificacao',
@@ -37,34 +37,25 @@ export class FooterComponent implements OnInit {
   }
 
   setActiveMenuItemFromUrl(url: string): void {
-    if (url.includes('/home')) {
-      this.activeMenuItem = 'home';
-    } else if (url.includes('/classificacao')) {
-      this.activeMenuItem = 'classificacao';
-    } else if (url.includes('/jogadores')) {
-      this.activeMenuItem = 'jogadores';
-    } else if (url.includes('/vencedores')) {
-      this.activeMenuItem = 'vencedores';
-    } else if (url.includes('/noticias')) {
-      this.activeMenuItem = 'noticias';
-    }
+    const matchedItem = Object.entries(this.routesMap).find(([key, path]) => url.includes(path));
+    this.activeMenuItem = matchedItem?.[0] || null;
   }
 
   navigateTo(menuItem: string): void {
     this.activeMenuItem = menuItem;
 
-    // Simula usuário logado
-    const role = localStorage.getItem('role') || 'guest';
-    localStorage.setItem('role', role);
-console.log(role)
-    // Verifica se está logado para navegar
-    if (!role && menuItem !== 'home') {
-      this.toasterService.warning('Você precisa estar logado para acessar esta página.');
-      this.router.navigate(['/home']);
-      return;
+    if (isPlatformBrowser(this.platformId)) {
+      const role = localStorage.getItem('role') || 'guest';
+
+      if (!role && menuItem !== 'home') {
+        this.toasterService.warning('Você precisa estar logado para acessar esta página.');
+        this.router.navigate(['/home']);
+        return;
+      }
+
+      localStorage.setItem('role', role);
     }
 
-    // Navega para a rota correspondente
     const route = this.routesMap[menuItem] || '/home';
     this.router.navigate([route]);
   }
