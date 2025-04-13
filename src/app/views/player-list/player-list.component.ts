@@ -79,7 +79,7 @@ export class PlayerListComponent implements OnInit {
   editPlayer(player: Player) {
     this.selectedPlayer = { ...player };
     this.modal.open({
-      title: 'Adicionar Jogador',
+      title: 'Editar Jogador',
       template: this.formTemplateRef,
     });
   }

@@ -1,17 +1,13 @@
 <div class="p-4 max-w-4xl mx-auto">
   <!-- Cabeçalho -->
   <div class="flex justify-end mb-6">
-    <div class="bg-primary flex justify-center w-12 h-12 rounded-full">
-      <div class="flex items-center gap-2 px-4 py-2">
-        <i class="fas fa-user-plus text-white text-14"></i>
-      </div>
-      <button
-        class=""
-        (click)="addPlayer()"
-      >
-      </button>
-
-    </div>
+    <button
+    (click)="addPlayer()"
+    class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
+    title="Adicionar Jogador"
+    >
+    <i class="fas fa-user-plus text-white text-lg"></i>
+    </button>
   </div>
   
   <div class="flex justify-center mb-8">
@@ -98,8 +94,7 @@
     </div>
     
   }
-  <!-- Modal Genérico -->
-  <app-modal #modal></app-modal>
+
 
   <!-- Template do formulário do jogador -->
   <ng-template #playerFormTemplate>
@@ -268,4 +263,5 @@
     </form>
   </ng-template>
   
+  <app-modal #modal></app-modal>
 </div>
