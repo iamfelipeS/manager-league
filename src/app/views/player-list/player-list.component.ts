@@ -93,13 +93,13 @@ export class PlayerListComponent implements OnInit {
 
       if (exists) {
         await this.playerService.updatePlayer(this.selectedPlayer!);
-        this.toaster.success('Jogador atualizado!');
       } else {
         await this.playerService.addPlayer(this.selectedPlayer!);
-        this.toaster.success('Jogador adicionado!');
       }
 
       await this.loadPlayers();
+
+      this.toaster.success(exists ? 'Jogador atualizado!' : 'Jogador adicionado!');
     } catch (err) {
       this.toaster.error('Erro ao salvar jogador');
     }
@@ -120,7 +120,7 @@ export class PlayerListComponent implements OnInit {
   orderedPlayers = computed(() => {
     const players = [...this.players()];
     const sortBy = this.orderBy();
-  
+
     return players.sort((a, b) => {
       if (sortBy === 'rating') return this.getRating(b) - this.getRating(a);
       if (sortBy === 'name') return a.name.localeCompare(b.name);
@@ -128,7 +128,7 @@ export class PlayerListComponent implements OnInit {
       return 0;
     });
   });
-  
+
 
   getRating(player: Player): number {
     return this.ratingService.calculate(player);
@@ -160,6 +160,28 @@ export class PlayerListComponent implements OnInit {
     if (rating <= 69) return 'bg-yellow-500';
     if (rating <= 80) return 'bg-green-400';
     return 'bg-green-700';
+  }
+
+  getFaseIcon(player: Player): { icon: string; color: string; animation: string } {
+    if (player.fase <= 4) {
+      return {
+        icon: 'fa-caret-down',
+        color: 'text-red-500',
+        animation: 'animate-bounce-down' 
+      };
+    } else if (player.fase <= 7) {
+      return {
+        icon: 'fa-minus',
+        color: 'text-yellow-400',
+        animation: 'animate-pulse'
+      };
+    } else {
+      return {
+        icon: 'fa-caret-up',
+        color: 'text-green-500',
+        animation: 'animate-bounce-up' 
+      };
+    }
   }
   
 }

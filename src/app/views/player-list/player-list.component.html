@@ -27,23 +27,42 @@
   <app-loader></app-loader>
   } @else {
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      <div *ngFor="let player of orderedPlayers()" class="relative bg-white text-zinc-800 rounded-2xl p-6 border shadow-sm">
+      @for (player of orderedPlayers(); track $index) {
+      <div class="relative bg-white text-zinc-800 rounded-2xl p-6 border shadow-sm">
+     
+
+        <div class="flex flex-row gap-2 items-center justify-center">
+          <div class="ml-[22px]">
+
+            <!-- Avatar -->
+            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 rounded-full p-2">
+              @if (player.avatarUrl) {
+                <img [src]="player.avatarUrl" alt="Player Avatar" class="h-24 w-2h-24" />
+              }@else{
+                <img src="icons/user.png" alt="Player Avatar" class="h-24 w-2h-24" />
+              }
+            </div>
     
-        <!-- Avatar -->
-        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 rounded-full p-2">
-          @if (player.avatarUrl) {
-            <img [src]="player.avatarUrl" alt="Player Avatar" class="h-24 w-2h-24" />
-          }@else{
-            <img src="icons/user.png" alt="Player Avatar" class="h-24 w-2h-24" />
-          }
-        </div>
-    
-        <!-- Nome e posição -->
-        <div class="mt-8 text-center">
-          <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>
-          <span class="text-xs uppercase tracking-wide text-gray-500">
-            {{ getPosicaoLabel(player.posicao) }}
-          </span>
+            <!-- Nome e posição -->
+            <div class="mt-8 text-center">
+              <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>
+              <span class="text-xs uppercase tracking-wide text-gray-500">
+                {{ getPosicaoLabel(player.posicao) }}
+              </span>
+            </div>
+          </div>
+          
+          <!-- Ícone de Fase -->
+          <div class="mt-2">
+            <i class="fas"
+              [ngClass]="[
+                getFaseIcon(player).icon,
+                getFaseIcon(player).color,
+                getFaseIcon(player).animation,
+                'text-xl'
+              ]">
+            </i>
+          </div>
         </div>
     
         <!-- Atributos -->
@@ -91,8 +110,8 @@
           </button>
         </div>
       </div>
+      }
     </div>
-    
   }
 
 

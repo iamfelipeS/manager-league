@@ -14,7 +14,7 @@ module.exports = {
         'md': '768px',
         // => @media (min-width: 768px) { ... }
 
-        '1366': '1366px', 
+        '1366': '1366px',
         // => @media (min-width: 1366px) { ... }
 
         'lg': '1024px',
@@ -52,8 +52,22 @@ module.exports = {
         grays6: '#F3F5F7',
         grays7: '#FAFAFA',
         white: '#FFFFFF',
-      }
-    }
+      },
+      keyframes: {
+        'bounce-up': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-3px)' },
+        },
+        'bounce-down': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(3px)' },
+        },
+      },
+      animation: {
+        'bounce-up': 'bounce-up 1.2s ease-in-out infinite',
+        'bounce-down': 'bounce-down 1.2s ease-in-out infinite',
+      },
+    },
   },
   plugins: [],
 }
