@@ -11,13 +11,16 @@
   @if (isLoading()) {
   <app-loader></app-loader>
   } @else {
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
-    <div *ngFor="let player of players()"
-      class="relative bg-gradient-to-br from-[#0057ff] to-[#002e9b] text-white rounded-2xl p-6 shadow-xl">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    <div *ngFor="let player of players()" class="relative bg-gradient-to-br from-[#0057ff] to-[#002e9b] text-white rounded-2xl p-6 shadow-xl">
 
       <!-- Avatar -->
-      <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-white rounded-full p-2">
-        <img src="assets/avatar.svg" alt="Player Avatar" class="h-12 w-12" />
+      <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 rounded-full p-2">
+        @if (player.avatarUrl) {
+          <img [src]="player.avatarUrl" alt="Player Avatar" class="h-24 w-2h-24" />
+        }@else{
+          <img src="icons/user.png" alt="Player Avatar" class="h-24 w-2h-24" />
+        }
       </div>
 
       <!-- Nome -->
