@@ -97,40 +97,43 @@ export class LeagueDetailsComponent implements OnInit {
       players: [],
       overall: 0,
     }));
-  
+
     // Agrupa jogadores por flag (ou "no-flag")
     const groupedByFlag: Record<string, Player[]> = {};
-  
+
     for (const player of selectedPlayers) {
       const flag = player.flags?.[0];
       const key = flag ? flag.name : 'no-flag';
-  
+
       if (!groupedByFlag[key]) groupedByFlag[key] = [];
       groupedByFlag[key].push(player);
     }
-  
+
     // Distribui os grupos de flag entre os times
     for (const [flag, players] of Object.entries(groupedByFlag)) {
-      const allowRepeat = flag === 'Café com Leite' || this.selectedTeamCount === 2;
+      const allowRepeat = flag === 'Café com Leite';
       const shuffled = players.sort(() => Math.random() - 0.5);
-  
+
       let teamIndex = 0;
-  
+
       for (const player of shuffled) {
         let assigned = false;
-  
+
         if (allowRepeat) {
+          // Rotaciona livremente
           this.generatedTeams[teamIndex].players.push(player);
           teamIndex = (teamIndex + 1) % this.generatedTeams.length;
           continue;
         }
-  
+
+        // Para os demais grupos, evitar duplicar no mesmo time
         for (let i = 0; i < this.generatedTeams.length; i++) {
           const currentTeam = this.generatedTeams[(teamIndex + i) % this.generatedTeams.length];
+
           const alreadyHasFlag = currentTeam.players.some(p =>
             p.flags?.[0]?.id === player.flags?.[0]?.id
           );
-  
+
           if (!alreadyHasFlag) {
             currentTeam.players.push(player);
             teamIndex = (teamIndex + 1) % this.generatedTeams.length;
@@ -138,7 +141,7 @@ export class LeagueDetailsComponent implements OnInit {
             break;
           }
         }
-  
+
         if (!assigned) {
           // Se todos os times já têm essa flag, joga no time com menos jogadores
           const smallest = this.generatedTeams.reduce((a, b) =>
@@ -148,10 +151,11 @@ export class LeagueDetailsComponent implements OnInit {
         }
       }
     }
-  
+
+
     this.recalculateTeamAverages();
   }
-  
+
   recalculateTeamAverages() {
     for (const team of this.generatedTeams) {
       team.overall = Math.round(
@@ -160,7 +164,7 @@ export class LeagueDetailsComponent implements OnInit {
       );
     }
   }
-  
+
 
   togglePlayerSelection(player: Player) {
     player.selected = !player.selected;
@@ -201,5 +205,5 @@ export class LeagueDetailsComponent implements OnInit {
     if (rating <= 85) return 'bg-lime-500';
     return 'bg-green-700';
   }
-  
+
 }

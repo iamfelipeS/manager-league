@@ -233,16 +233,16 @@
                                 <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-zinc-800">
                                   {{ player.name[0] }}
                                 </div>
-                                <div class="min-w-0">
-                                  <h3 class="font-medium text-sm truncate">{{ player.name }}</h3>
+                                <div class="flex flex-col min-w-0">
+                                    <h3 class="font-medium text-sm truncate">{{ player.name }}</h3>
+                                  
+                                    @if (player.flags?.length) {
+                                        <div class="text-[7px] md:text-[10px] text-amber-600 font-semibold uppercase">
+                                            {{ player.flags?.[0]?.name ?? 'Sem flag' }}
+                                        </div>
+                                    } 
                                 </div>
                               </div>
-
-                              @if (player.flags?.length) {
-                                <div class="text-xs text-amber-600 font-semibold uppercase">
-                                    {{ player.flags?.[0]?.name ?? 'Sem flag' }}
-                                </div>
-                              } 
                       
                               <!-- Rating -->
                               <div
