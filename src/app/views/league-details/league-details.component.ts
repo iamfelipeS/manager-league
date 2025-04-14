@@ -113,53 +113,92 @@ export class LeagueDetailsComponent implements OnInit {
       return;
     }
   
-    // Ordena jogadores por rating decrescente para balancear
-    const players = [...selectedPlayers].sort((a, b) => b.rating - a.rating);
+    const attempts = 100;
+    let bestTeams: any[] = [];
+    let bestDiff = Infinity;
   
-    const baseCount = Math.floor(totalPlayers / teamCount);
-    const extraPlayers = totalPlayers % teamCount;
+    // Flags que devem ser únicas por time
+    const restrictiveFlags = ['cabeça de chave', 'quantidade de zagueiros', 'estrela em formação'];
   
-    const teams: { name: string; players: Player[]; overall: number }[] = [];
-    for (let i = 0; i < teamCount; i++) {
-      teams.push({ name: `Time ${i + 1}`, players: [], overall: 0 });
-    }
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      const shuffled = [...selectedPlayers].sort(() => Math.random() - 0.5);
+      const baseSize = Math.floor(totalPlayers / teamCount);
+      const extras = totalPlayers % teamCount;
   
-    let teamIndex = 0;
-    for (let i = 0; i < totalPlayers; i++) {
-      teams[teamIndex].players.push(players[i]);
-      teamIndex = (teamIndex + 1) % teamCount;
-    }
+      const teams: { name: string; players: Player[]; overall: number }[] = Array.from({ length: teamCount }, (_, i) => ({
+        name: `Time ${i + 1}`,
+        players: [],
+        overall: 0,
+      }));
   
-    // Se houver jogadores extras, vamos redistribuir um extra para os 2 primeiros times
-    if (extraPlayers > 0) {
-      const excessPlayers = teams.flatMap(t => t.players).slice(teamCount * baseCount);
-      for (let i = 0; i < extraPlayers; i++) {
-        teams[i].players.push(excessPlayers[i]);
-      }
-      // Remover duplicatas dos times seguintes
-      for (let i = teamCount * baseCount; i < totalPlayers; i++) {
-        const idx = i % teamCount;
-        if (idx >= extraPlayers) {
-          const player = players[i];
-          const tIndex = teams.findIndex(t => t.players.includes(player));
-          if (tIndex !== -1) {
-            teams[tIndex].players = teams[tIndex].players.filter(p => p.id !== player.id);
+      const flagMap: Map<number, Set<number>> = new Map(); // flagId -> Set<teamIndex>
+  
+      let failed = false;
+  
+      for (const player of shuffled) {
+        let placed = false;
+  
+        for (let t = 0; t < teamCount; t++) {
+          const team = teams[t];
+          const maxSize = baseSize + (t < extras ? 1 : 0);
+  
+          if (team.players.length >= maxSize) continue;
+  
+          const hasRestrictedFlagConflict = player.flags?.some(flag => {
+            const isRestrictive = restrictiveFlags.includes(flag.name.toLowerCase());
+            return isRestrictive && flagMap.get(flag.id)?.has(t);
+          });
+  
+          if (!hasRestrictedFlagConflict) {
+            team.players.push(player);
+  
+            // Armazena apenas as flags restritivas
+            player.flags?.forEach(flag => {
+              if (restrictiveFlags.includes(flag.name.toLowerCase())) {
+                if (!flagMap.has(flag.id)) flagMap.set(flag.id, new Set());
+                flagMap.get(flag.id)!.add(t);
+              }
+            });
+  
+            placed = true;
+            break;
           }
-          teams[idx].players.push(player);
+        }
+  
+        if (!placed) {
+          failed = true;
+          break;
         }
       }
+  
+      if (failed) continue;
+  
+      for (const team of teams) {
+        const total = team.players.reduce((acc, p) => acc + p.rating, 0);
+        team.overall = Math.round(total / team.players.length);
+      }
+  
+      const ratings = teams.map(t => t.overall);
+      const diff = Math.max(...ratings) - Math.min(...ratings);
+  
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        bestTeams = teams.map(t => ({
+          name: t.name,
+          overall: t.overall,
+          players: [...t.players],
+        }));
+      }
     }
   
-    // Atualiza média dos times
-    for (const team of teams) {
-      const total = team.players.reduce((acc, p) => acc + p.rating, 0);
-      team.overall = Math.round(total / team.players.length);
+    if (bestTeams.length === 0) {
+      this.toaster.error('Não foi possível gerar times válidos com as restrições de distribuição.');
+    } else {
+      this.generatedTeams = bestTeams;
+      console.log('[DEBUG] Times gerados:', this.generatedTeams);
     }
-  
-    this.generatedTeams = teams;
   }
   
-
   recalculateTeamAverages() {
     for (const team of this.generatedTeams) {
       team.overall = Math.round(
