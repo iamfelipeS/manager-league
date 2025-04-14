@@ -118,7 +118,7 @@ export class LeagueDetailsComponent implements OnInit {
     let bestDiff = Infinity;
   
     // Flags que devem ser únicas por time
-    const restrictiveFlags = ['cabeça de chave', 'quantidade de zagueiros', 'estrela em formação'];
+    const restrictiveFlags = ['cabeça de chave', 'quantidade de zagueiros', 'estrela em formação', 'resistência física'];
   
     for (let attempt = 0; attempt < attempts; attempt++) {
       const shuffled = [...selectedPlayers].sort(() => Math.random() - 0.5);
