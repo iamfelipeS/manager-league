@@ -104,104 +104,59 @@ export class LeagueDetailsComponent implements OnInit {
   }
 
   generateTeams() {
-    const selectedPlayers = this.sortedPlayers.filter(p =>
-      p.selected && !this.isLesionado(p)
-    );
-
+    const selectedPlayers = this.sortedPlayers.filter(p => p.selected);
     const teamCount = this.selectedTeamCount;
+    const totalPlayers = selectedPlayers.length;
   
-    // Inicializa os times vazios
-    this.generatedTeams = Array.from({ length: teamCount }, (_, i) => ({
-      name: `Time ${i + 1}`,
-      players: [],
-      overall: 0,
-    }));
-  
-    // Flags conflitantes que não podem estar juntas
-    const conflictFlags = ['Zaga Fixa', 'Cabeça de Chave', 'Estrela em Formação', 'Pulmão Infinito'];
-  
-    // Agrupa jogadores por flag (ou no-flag)
-    const groupedByFlag: Record<string, Player[]> = {};
-  
-    for (const player of selectedPlayers) {
-      const flag = player.flags?.[0];
-      const key = flag ? flag.name : 'no-flag';
-  
-      if (!groupedByFlag[key]) groupedByFlag[key] = [];
-      groupedByFlag[key].push(player);
+    if (teamCount < 2 || totalPlayers < teamCount) {
+      this.toaster.error('Jogadores insuficientes para formar os times');
+      return;
     }
   
-    // Distribui jogadores por flag
-    for (const [flag, players] of Object.entries(groupedByFlag)) {
-      const allowRepeat = flag === 'Café com Leite';
-      const isConflictFlag = conflictFlags.includes(flag);
-      const shuffled = players.sort(() => Math.random() - 0.5);
+    // Ordena jogadores por rating decrescente para balancear
+    const players = [...selectedPlayers].sort((a, b) => b.rating - a.rating);
   
-      let teamIndex = 0;
+    const baseCount = Math.floor(totalPlayers / teamCount);
+    const extraPlayers = totalPlayers % teamCount;
   
-      for (const player of shuffled) {
-        let assigned = false;
+    const teams: { name: string; players: Player[]; overall: number }[] = [];
+    for (let i = 0; i < teamCount; i++) {
+      teams.push({ name: `Time ${i + 1}`, players: [], overall: 0 });
+    }
   
-        if (allowRepeat) {
-          // Café com Leite pode repetir em qualquer time
-          this.generatedTeams[teamIndex].players.push(player);
-          teamIndex = (teamIndex + 1) % teamCount;
-          continue;
-        }
+    let teamIndex = 0;
+    for (let i = 0; i < totalPlayers; i++) {
+      teams[teamIndex].players.push(players[i]);
+      teamIndex = (teamIndex + 1) % teamCount;
+    }
   
-        for (let i = 0; i < teamCount; i++) {
-          const currentTeam = this.generatedTeams[(teamIndex + i) % teamCount];
-  
-          const hasConflict = isConflictFlag &&
-            currentTeam.players.some(p =>
-              p.flags?.length && conflictFlags.includes(p.flags[0].name)
-            );
-  
-          const sameFlagAlready = currentTeam.players.some(p =>
-            p.flags?.[0]?.id === player.flags?.[0]?.id
-          );
-  
-          if (!hasConflict && !sameFlagAlready) {
-            currentTeam.players.push(player);
-            teamIndex = (teamIndex + 1) % teamCount;
-            assigned = true;
-            break;
+    // Se houver jogadores extras, vamos redistribuir um extra para os 2 primeiros times
+    if (extraPlayers > 0) {
+      const excessPlayers = teams.flatMap(t => t.players).slice(teamCount * baseCount);
+      for (let i = 0; i < extraPlayers; i++) {
+        teams[i].players.push(excessPlayers[i]);
+      }
+      // Remover duplicatas dos times seguintes
+      for (let i = teamCount * baseCount; i < totalPlayers; i++) {
+        const idx = i % teamCount;
+        if (idx >= extraPlayers) {
+          const player = players[i];
+          const tIndex = teams.findIndex(t => t.players.includes(player));
+          if (tIndex !== -1) {
+            teams[tIndex].players = teams[tIndex].players.filter(p => p.id !== player.id);
           }
-        }
-  
-        if (!assigned) {
-          // Se não conseguiu alocar sem conflito, coloca no time com menos jogadores
-          const smallest = this.generatedTeams.reduce((a, b) =>
-            a.players.length <= b.players.length ? a : b
-          );
-          smallest.players.push(player);
+          teams[idx].players.push(player);
         }
       }
     }
   
-    // Reorganiza para equilibrar número de jogadores (distribui excedentes)
-    let allPlayers = this.generatedTeams.flatMap(t => t.players);
-    allPlayers = allPlayers.sort(() => Math.random() - 0.5); // embaralha total
-  
-    this.generatedTeams = Array.from({ length: teamCount }, (_, i) => ({
-      name: `Time ${i + 1}`,
-      players: [],
-      overall: 0,
-    }));
-  
-    const baseCount = Math.floor(allPlayers.length / teamCount);
-    const extra = allPlayers.length % teamCount;
-  
-    let index = 0;
-    for (const player of allPlayers) {
-      const maxForThisTeam = baseCount + (index >= teamCount - extra ? 1 : 0);
-      while (this.generatedTeams[index].players.length >= maxForThisTeam) {
-        index = (index + 1) % teamCount;
-      }
-      this.generatedTeams[index].players.push(player);
+    // Atualiza média dos times
+    for (const team of teams) {
+      const total = team.players.reduce((acc, p) => acc + p.rating, 0);
+      team.overall = Math.round(total / team.players.length);
     }
   
-    this.recalculateTeamAverages();
+    this.generatedTeams = teams;
   }
   
 
