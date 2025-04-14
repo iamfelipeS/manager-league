@@ -35,15 +35,28 @@
         <div class="flex flex-row gap-2 items-center justify-center">
           <div class="ml-[22px]">
 
-            <!-- Avatar -->
-            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 rounded-full p-2">
-              @if (player.avatarUrl) {
-                <img [src]="player.avatarUrl" alt="Player Avatar" class="h-24 w-2h-24" />
-              }@else{
-                <img src="icons/user.png" alt="Player Avatar" class="h-24 w-2h-24" />
-              }
+            <!-- Avatar com botão de upload (estilo escuro) -->
+            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2">
+              <div class="relative flex justify-center items-center">
+                <div class="w-[7rem] h-[7rem] rounded-full overflow-hidden">
+                  <img
+                    [src]="player.avatarUrl || 'icons/user.png'"
+                    alt="Avatar"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+
+                <!-- Botão de editar avatar -->
+                <label
+                  class="flex justify-center items-center absolute right-[7px] bottom-[0.7rem] bg-blue-800 hover:bg-blue-600 w-[2rem] h-[2rem] rounded-full cursor-pointer"
+                  title="Alterar avatar"
+                >
+                  <i class="fa-solid fa-pencil mt-1 text-sm text-white"></i>
+                  <input type="file" hidden (change)="onAvatarChange($event, player)" />
+                </label>
+              </div>
             </div>
-    
+
             <!-- Nome e posição -->
             <div class="mt-8 text-center">
               <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>

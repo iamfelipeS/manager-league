@@ -210,6 +210,8 @@ export class PlayerListComponent implements OnInit {
     }
   }
 
+  // FLAG
+
   toggleFlag(flag: PlayerFlag) {
     const current = this.selectedPlayer?.flags ?? [];
     const exists = current.find(f => f.id === flag.id);
@@ -243,6 +245,17 @@ export class PlayerListComponent implements OnInit {
     }
   }
 
+  // AVATAR
+  onAvatarChange(event: Event, player: Player) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+  
+    this.playerService.updateAvatar(player, file)
+      .then(() => this.toaster.success('Avatar atualizado com sucesso!'))
+      .catch(() => this.toaster.error('Erro ao atualizar avatar.'));
+  }
+  
 }
 
 
