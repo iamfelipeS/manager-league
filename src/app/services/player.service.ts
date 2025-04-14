@@ -1,50 +1,55 @@
-import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Player } from '../models/player.model';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable, signal } from '@angular/core';
+import { Player, PlayerFlag } from '../models/player.model';
+import { supabase } from '../core/supabase/supabase.client';
+import { SupabaseClient } from '@supabase/supabase-js';
+
+type PlayerWithJoin = Player & {
+  player_flags?: {
+    flag_id: number;
+    flags: PlayerFlag;
+  }[];
+};
 
 @Injectable({ providedIn: 'root' })
 export class PlayerService {
-  private supabaseUrl: string = 'https://jyiqaftpqikqqvfrojiu.supabase.co';
-  private supabaseKey: string = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5aXFhZnRwcWlrcXF2ZnJvaml1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyMDM4MzUsImV4cCI6MjA1OTc3OTgzNX0.zn1sTE9DrWjSloORfCi67TLqfm1wM5SEtXzP7MIGBgU';
   
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly isBrowser = isPlatformBrowser(this.platformId);
-
   private players = signal<Player[]>([]);
-  private readonly supabase: SupabaseClient | null = this.isBrowser
-    ? createClient(this.supabaseUrl, this.supabaseKey)
-    : null;
+  private supabase: SupabaseClient = supabase;
 
   async getPlayers(): Promise<Player[]> {
-    if (!this.supabase) return [];
-
     const { data, error } = await this.supabase
       .from('players')
-      .select('*')
-      .order('name', { ascending: true });
-
+      .select('*, player_flags:player_flags(flag_id, flags(id, name))');
+  
     if (error) throw error;
-    return data as Player[];
+  
+    const players = (data as PlayerWithJoin[] ?? []).map(player => ({
+      ...player,
+      flags: player.player_flags?.map(pf => pf.flags) ?? []
+    }));
+  
+    return players.map(p => ({
+      ...p,
+      flags: p.flags ?? []
+    }));
   }
 
-  async addPlayer(player: Player): Promise<void> {
-    if (!this.supabase) return;
-    const { error } = await this.supabase.from('players').insert([player]);
+  async addPlayer(player: PlayerWithJoin): Promise<void> {
+    const { flags, player_flags, ...playerData } = player;
+    const { error } = await this.supabase.from('players').insert([playerData]);
     if (error) throw error;
   }
-
-  async updatePlayer(player: Player): Promise<void> {
-    if (!this.supabase) return;
+  
+  async updatePlayer(player: PlayerWithJoin): Promise<void> {
+    const { flags, player_flags, ...playerData } = player;
     const { error } = await this.supabase
       .from('players')
-      .update(player)
+      .update(playerData)
       .eq('id', player.id);
     if (error) throw error;
   }
 
   async deletePlayer(id: string): Promise<void> {
-    if (!this.supabase) return;
     const { error } = await this.supabase
       .from('players')
       .delete()

@@ -28,9 +28,8 @@ export class LeagueDetailsComponent implements OnInit {
   private playerService = inject(PlayerService);
   private ratingService = inject(RatingService);
   private route = inject(ActivatedRoute);
-  private teamService = inject(TeamService);
   private leaguesService = inject(LeaguesService);
-  private toasterService = inject(ToasterService);
+  private toaster = inject(ToasterService);
 
   leagueName: string = '';
   league: Leagues | null = null;
@@ -91,16 +90,77 @@ export class LeagueDetailsComponent implements OnInit {
   }
 
   generateTeams() {
-    const selectedPlayers = this.players().filter(p => p.selected);
-
-    if (selectedPlayers.length < 2) {
-      this.toasterService.warning('Selecione pelo menos dois jogadores para gerar os times.');
-      return;
+    const selectedPlayers = this.sortedPlayers.filter(p => p.selected);
+    // Cria os times vazios
+    this.generatedTeams = Array.from({ length: this.selectedTeamCount }, (_, i) => ({
+      name: `Time ${i + 1}`,
+      players: [],
+      overall: 0,
+    }));
+  
+    // Agrupa jogadores por flag (ou "no-flag")
+    const groupedByFlag: Record<string, Player[]> = {};
+  
+    for (const player of selectedPlayers) {
+      const flag = player.flags?.[0];
+      const key = flag ? flag.name : 'no-flag';
+  
+      if (!groupedByFlag[key]) groupedByFlag[key] = [];
+      groupedByFlag[key].push(player);
     }
-
-    this.teamService.generateTeams(selectedPlayers, this.selectedTeamCount);
-    this.generatedTeams = this.teamService.teams();
+  
+    // Distribui os grupos de flag entre os times
+    for (const [flag, players] of Object.entries(groupedByFlag)) {
+      const allowRepeat = flag === 'Café com Leite' || this.selectedTeamCount === 2;
+      const shuffled = players.sort(() => Math.random() - 0.5);
+  
+      let teamIndex = 0;
+  
+      for (const player of shuffled) {
+        let assigned = false;
+  
+        if (allowRepeat) {
+          this.generatedTeams[teamIndex].players.push(player);
+          teamIndex = (teamIndex + 1) % this.generatedTeams.length;
+          continue;
+        }
+  
+        for (let i = 0; i < this.generatedTeams.length; i++) {
+          const currentTeam = this.generatedTeams[(teamIndex + i) % this.generatedTeams.length];
+          const alreadyHasFlag = currentTeam.players.some(p =>
+            p.flags?.[0]?.id === player.flags?.[0]?.id
+          );
+  
+          if (!alreadyHasFlag) {
+            currentTeam.players.push(player);
+            teamIndex = (teamIndex + 1) % this.generatedTeams.length;
+            assigned = true;
+            break;
+          }
+        }
+  
+        if (!assigned) {
+          // Se todos os times já têm essa flag, joga no time com menos jogadores
+          const smallest = this.generatedTeams.reduce((a, b) =>
+            a.players.length <= b.players.length ? a : b
+          );
+          smallest.players.push(player);
+        }
+      }
+    }
+  
+    this.recalculateTeamAverages();
   }
+  
+  recalculateTeamAverages() {
+    for (const team of this.generatedTeams) {
+      team.overall = Math.round(
+        team.players.reduce((sum, p) => sum + this.getRating(p), 0) /
+        (team.players.length || 1)
+      );
+    }
+  }
+  
 
   togglePlayerSelection(player: Player) {
     player.selected = !player.selected;

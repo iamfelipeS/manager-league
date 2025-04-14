@@ -1,12 +1,13 @@
 <div class="p-4 max-w-4xl mx-auto">
   <!-- Cabeçalho -->
   <div class="flex justify-end mb-6">
+    <span class="absolute left-4 top-7">Jogadores: <strong>{{ players().length }}</strong></span>
     <button
-    (click)="addPlayer()"
-    class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
-    title="Adicionar Jogador"
-    >
-    <i class="fas fa-user-plus text-white text-lg"></i>
+      (click)="addPlayer()"
+      class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
+      title="Adicionar Jogador"
+      >
+      <i class="fas fa-user-plus text-white text-lg"></i>
     </button>
   </div>
   
@@ -27,7 +28,7 @@
   <app-loader></app-loader>
   } @else {
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      @for (player of orderedPlayers(); track $index) {
+      @for (player of orderedPlayers(); track player.id) {
       <div class="relative bg-white text-zinc-800 rounded-2xl p-6 border shadow-sm">
      
 
@@ -46,9 +47,17 @@
             <!-- Nome e posição -->
             <div class="mt-8 text-center">
               <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>
-              <span class="text-xs uppercase tracking-wide text-gray-500">
-                {{ getPosicaoLabel(player.posicao) }}
-              </span>
+              <div class="flex flex-col">
+                <span class="text-xs uppercase tracking-wide text-gray-500">
+                  {{ getPosicaoLabel(player.posicao) }}
+                </span>
+            
+                @if (player?.flags?.length) {
+                  <div class="mt-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 inline-block">
+                    {{ player.flags?.[0]?.name ?? 'Sem grupo' }}
+                  </div>
+                } 
+              </div>
             </div>
           </div>
           
@@ -129,22 +138,49 @@
           placeholder="Nome do jogador"
         />
       </div>
-  
-      <!-- Posição -->
-      <div>
-        <label class="text-sm font-medium">Posição</label>
-        <select
-          [(ngModel)]="selectedPlayer!.posicao"
-          name="posicao"
-          required
-          class="w-full p-3 border rounded-xl bg-white"
+      
+      <div class="flex flex-row justify-between gap-2 w-full">
+        <!-- Posição -->
+        <div class="flex flex-col w-3/4">
+          <label class="text-sm font-medium">Posição</label>
+          <select
+            [(ngModel)]="selectedPlayer!.posicao"
+            name="posicao"
+            required
+            class="w-full p-3 border rounded-xl bg-white"
+          >
+            <option disabled value="">Selecione a posição</option>
+            <option value="G">Goleiro</option>
+            <option value="D">Defensor</option>
+            <option value="M">Meio Campo</option>
+            <option value="A">Atacante</option>
+          </select>
+        </div>
+      
+        <!-- Flag -->
+        <div class="flex flex-col w-full">
+            <label class="text-sm font-medium">Grupo</label>
+            <select
+              [(ngModel)]="selectedFlagId"
+              name="flag"
+              class="flex-1 p-3 border rounded-xl bg-white text-sm w-full"
+              >
+              <option [ngValue]="null">Nenhuma</option>
+              @for (flag of availableFlags(); track flag.id) {
+                <option [ngValue]="flag.id">{{ flag.name }}</option>
+              }
+          </select>
+        </div>
+        
+        <button
+          type="button"
+          (click)="createAndSelectFlag()"
+          class="p-2 mt-5 bg-green-600 text-white rounded-xl h-11 text-xs hover:bg-green-700"
+          title="Criar novo grupo"
         >
-          <option disabled value="">Selecione a posição</option>
-          <option value="G">Goleiro</option>
-          <option value="D">Defensor</option>
-          <option value="M">Meio Campo</option>
-          <option value="A">Atacante</option>
-        </select>
+          +
+        </button>
+        
       </div>
   
       <!-- Qualidade -->

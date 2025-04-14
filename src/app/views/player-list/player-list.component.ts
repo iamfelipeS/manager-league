@@ -13,9 +13,10 @@ import { CommonModule } from '@angular/common';
 import { PlayerService } from '../../services/player.service';
 import { RatingService } from '../../services/rating.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { Player } from '../../models/player.model';
+import { Player, PlayerFlag } from '../../models/player.model';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { ToasterService } from '../../services/toaster.service';
+import { FlagService } from '../../services/flag.service';
 
 @Component({
   selector: 'app-player-list',
@@ -27,96 +28,21 @@ import { ToasterService } from '../../services/toaster.service';
 export class PlayerListComponent implements OnInit {
   private playerService = inject(PlayerService);
   private ratingService = inject(RatingService);
+  private flagService = inject(FlagService);
   private toaster = inject(ToasterService);
 
   @ViewChild('modal') modal!: ModalComponent;
   @ViewChild('playerFormTemplate') formTemplateRef!: TemplateRef<any>;
 
   selectedPlayer: Player | null = null;
+  selectedFlagId: number | null = null;
 
-  players = signal<Player[]>([]);
   isLoading = signal(true);
+  players = signal<Player[]>([]);
+  readonly availableFlags = signal<PlayerFlag[]>([]);
 
   orderBy = signal<'rating' | 'name' | 'posicao'>('rating');
-
-  ngOnInit(): void {
-    this.loadPlayers();
-  }
-
-  ngAfterViewInit(): void {
-    this.modal.confirmed.subscribe(() => this.savePlayer());
-  }
-
-  async loadPlayers() {
-    this.isLoading.set(true);
-    try {
-      const data = await this.playerService.getPlayers();
-      this.players.set(data);
-    } catch (err) {
-      this.toaster.error('Erro ao carregar jogadores');
-    } finally {
-      this.isLoading.set(false);
-    }
-  }
-
-  addPlayer() {
-    this.selectedPlayer = {
-      id: uuidv4(),
-      name: '',
-      qualidade: 3,
-      velocidade: 6,
-      fase: 6,
-      movimentacao: 'Normal',
-      posicao: 'M',
-      rating: 0
-    };
-    this.modal.open({
-      title: 'Adicionar Jogador',
-      template: this.formTemplateRef,
-    });
-  }
-
-  editPlayer(player: Player) {
-    this.selectedPlayer = { ...player };
-    this.modal.open({
-      title: 'Editar Jogador',
-      template: this.formTemplateRef,
-    });
-  }
-
-  async savePlayer() {
-    if (!this.selectedPlayer) return;
-    this.selectedPlayer.rating = this.getRating(this.selectedPlayer);
-
-    try {
-      const exists = this.players().some(p => p.id === this.selectedPlayer!.id);
-
-      if (exists) {
-        await this.playerService.updatePlayer(this.selectedPlayer!);
-      } else {
-        await this.playerService.addPlayer(this.selectedPlayer!);
-      }
-
-      await this.loadPlayers();
-
-      this.toaster.success(exists ? 'Jogador atualizado!' : 'Jogador adicionado!');
-    } catch (err) {
-      this.toaster.error('Erro ao salvar jogador');
-    }
-  }
-
-  async deletePlayer(id: string) {
-    if (!confirm('Deseja remover este jogador?')) return;
-
-    try {
-      await this.playerService.deletePlayer(id);
-      this.toaster.success('Jogador removido!');
-      this.players.update(p => p.filter(j => j.id !== id));
-    } catch {
-      this.toaster.error('Erro ao remover jogador');
-    }
-  }
-
+  
   orderedPlayers = computed(() => {
     const players = [...this.players()];
     const sortBy = this.orderBy();
@@ -129,6 +55,106 @@ export class PlayerListComponent implements OnInit {
     });
   });
 
+  async ngOnInit() {
+    const flags = await this.flagService.getAllFlags();
+    this.availableFlags.set(flags);
+
+    this.loadPlayers();
+  }
+
+  ngAfterViewInit(): void {
+    this.modal.confirmed.subscribe(() => this.savePlayer());
+  }
+
+  async loadPlayers() {
+    this.isLoading.set(true);
+    try {
+      this.players.set(await this.playerService.getPlayers());
+    } catch (err) {
+      this.toaster.error('Erro ao carregar jogadores');
+    } finally {
+      this.isLoading.set(false);
+    }
+    console.log(this.players().map(p => ({ name: p.name, flags: p.flags })));
+
+  }
+
+  addPlayer() {
+    this.selectedPlayer = {
+      id: uuidv4(),
+      name: '',
+      qualidade: 3,
+      velocidade: 6,
+      fase: 6,
+      movimentacao: 'Normal',
+      posicao: 'M',
+      rating: 0,
+      flags: []
+    };
+    this.selectedFlagId = null;
+  
+    this.modal.open({
+      title: 'Adicionar Jogador',
+      template: this.formTemplateRef,
+    });
+  }
+  
+  async editPlayer(player: Player) {
+    this.selectedPlayer = { ...player };
+  
+    const flags = await this.flagService.getFlagsByPlayerId(player.id);
+    this.selectedPlayer.flags = flags;
+    this.selectedFlagId = flags.length ? flags[0].id : null;
+  
+    this.modal.open({
+      title: 'Editar Jogador',
+      template: this.formTemplateRef,
+    });
+  }
+  
+  async savePlayer() {
+    if (!this.selectedPlayer) return;
+  
+    this.selectedPlayer.rating = this.getRating(this.selectedPlayer);
+  
+    try {
+      const exists = this.players().some(p => p.id === this.selectedPlayer!.id);
+  
+      if (exists) {
+        await this.playerService.updatePlayer(this.selectedPlayer!);
+      } else {
+        await this.playerService.addPlayer(this.selectedPlayer!);
+      }
+  
+      // Garante que sempre exista a propriedade flags, mesmo vazia
+      this.selectedPlayer.flags = this.selectedPlayer.flags ?? [];
+  
+      const flagId = this.selectedFlagId;
+      await this.flagService.updatePlayerFlags(
+        this.selectedPlayer.id,
+        flagId ? [flagId] : []
+      );
+  
+      await this.loadPlayers();
+  
+      this.toaster.success(exists ? 'Jogador atualizado!' : 'Jogador adicionado!');
+    } catch (err) {
+      this.toaster.error('Erro ao salvar jogador');
+    }
+  }
+  
+
+  async deletePlayer(id: string) {
+    if (!confirm('Deseja remover este jogador?')) return;
+
+    try {
+      await this.playerService.deletePlayer(id);
+      this.toaster.success('Jogador removido!');
+      this.players.update(p => p.filter(j => j.id !== id));
+    } catch {
+      this.toaster.error('Erro ao remover jogador');
+    }
+  }
 
   getRating(player: Player): number {
     return this.ratingService.calculate(player);
@@ -167,7 +193,7 @@ export class PlayerListComponent implements OnInit {
       return {
         icon: 'fa-caret-down',
         color: 'text-red-500',
-        animation: 'animate-bounce-down' 
+        animation: 'animate-bounce-down'
       };
     } else if (player.fase <= 7) {
       return {
@@ -179,11 +205,44 @@ export class PlayerListComponent implements OnInit {
       return {
         icon: 'fa-caret-up',
         color: 'text-green-500',
-        animation: 'animate-bounce-up' 
+        animation: 'animate-bounce-up'
       };
     }
   }
+
+  toggleFlag(flag: PlayerFlag) {
+    const current = this.selectedPlayer?.flags ?? [];
+    const exists = current.find(f => f.id === flag.id);
+
+    this.selectedPlayer!.flags = exists
+      ? current.filter(f => f.id !== flag.id)
+      : [...current, flag];
+  }
+
+  hasFlag(player: Player, flag: PlayerFlag): boolean {
+    return !!player.flags?.some(f => f.id === flag.id);
+  }
+
+  async createAndSelectFlag() {
+    const name = prompt('Nome da nova flag:');
+    if (!name || !name.trim()) return;
   
+    try {
+      const newFlag = await this.flagService.createFlag(name.trim());
+  
+      // atualiza lista
+      const updated = [...this.availableFlags(), newFlag];
+      this.availableFlags.set(updated);
+  
+      // seta como selecionada
+      this.selectedFlagId = newFlag.id;
+  
+      this.toaster.success('Flag criada com sucesso!');
+    } catch {
+      this.toaster.error('Erro ao criar flag');
+    }
+  }
+
 }
 
 

@@ -237,6 +237,12 @@
                                   <h3 class="font-medium text-sm truncate">{{ player.name }}</h3>
                                 </div>
                               </div>
+
+                              @if (player.flags?.length) {
+                                <div class="text-xs text-amber-600 font-semibold uppercase">
+                                    {{ player.flags?.[0]?.name ?? 'Sem flag' }}
+                                </div>
+                              } 
                       
                               <!-- Rating -->
                               <div
