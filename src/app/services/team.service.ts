@@ -1,12 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Player } from '../models/player.model';
 import { RatingService } from './rating.service';
-
-export interface Team {
-  name: string;
-  players: Player[];
-  overall: number; // média dos ratings
-}
+import { Team } from '../models/team.model'; // ✅ import correto do model
 
 @Injectable({ providedIn: 'root' })
 export class TeamService {
@@ -15,7 +10,7 @@ export class TeamService {
   constructor(private ratingService: RatingService) {}
 
   generateTeams(players: Player[], teamCount: number) {
-    // Ordena do jogador com maior para o menor rating
+    // Ordena os jogadores do maior para o menor rating
     const sorted = [...players].sort(
       (a, b) => this.ratingService.calculate(b) - this.ratingService.calculate(a)
     );
@@ -24,24 +19,26 @@ export class TeamService {
     const teams: Team[] = Array.from({ length: teamCount }, (_, i) => ({
       name: `Time ${i + 1}`,
       players: [],
-      overall: 0
+      overall: 0,
+      averageRating: 0 // ✅ incluímos se estiver no model
     }));
 
-    // Distribui de forma round-robin
+    // Distribuição round-robin
     sorted.forEach((player, i) => {
       const teamIndex = i % teamCount;
       teams[teamIndex].players.push(player);
     });
 
-    // Calcula a média de rating de cada time
+    // Calcula média de ratings
     for (const team of teams) {
-      const totalRating = team.players.reduce(
-        (sum, p) => sum + this.ratingService.calculate(p),
-        0
+      const total = team.players.reduce(
+        (sum, p) => sum + this.ratingService.calculate(p), 0
       );
-      team.overall = team.players.length
-        ? Math.round(totalRating / team.players.length)
-        : 0;
+
+      const media = team.players.length ? total / team.players.length : 0;
+
+      team.overall = Math.round(media);
+      team.averageRating = parseFloat(media.toFixed(2)); // ✅ detalhamento opcional
     }
 
     this.teamsList = teams;

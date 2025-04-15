@@ -1,0 +1,42 @@
+<div class="relative w-full mx-auto aspect-[9/16] bg-cover bg-center rounded-xl shadow-md"
+  style="background-image: url('img/campo-futebol.jpeg')">
+  <!-- Goleiro -->
+  <div class="absolute left-0 right-0 top-[5%] flex justify-center">
+    @for (player of groupByPosition().G; track player.id) {
+    <div class="flex flex-col items-center">
+      <img [src]="player.avatarUrl || 'icons/user.png'" class="w-14 h-1w-14 rounded-full shadow" />
+      <span class="mt-1 px-2 py-0.5 text-white bg-black bg-opacity-50 text-xs rounded w-fit">{{ player.name }}</span>
+    </div>
+    }
+  </div>
+
+  <!-- Defensores -->
+  <div class="absolute left-0 right-0 top-[20%] flex justify-center gap-4">
+    @for (player of groupByPosition().D; track player.id) {
+    <div class="flex flex-col items-center">
+      <img [src]="player.avatarUrl || 'icons/user.png'" class="w-14 h-1w-14 rounded-full shadow" />
+      <span class="mt-1 px-2 py-0.5 text-white bg-black bg-opacity-50 text-xs rounded w-fit">{{ player.name }}</span>
+    </div>
+    }
+  </div>
+
+  <!-- Meio-campo -->
+  <div class="absolute left-0 right-0 top-[38%] flex justify-center gap-4">
+    @for (player of groupByPosition().M; track player.id) {
+    <div class="flex flex-col items-center">
+      <img [src]="player.avatarUrl || 'icons/user.png'" class="w-14 h-1w-14 rounded-full shadow" />
+      <span class="mt-1 px-2 py-0.5 text-white bg-black bg-opacity-50 text-xs rounded w-fit">{{ player.name }}</span>
+    </div>
+    }
+  </div>
+
+  <!-- Atacantes -->
+  <div class="absolute left-0 right-0 top-[60%] flex justify-center gap-4">
+    @for (player of groupByPosition().A; track player.id) {
+    <div class="flex flex-col items-center">
+      <img [src]="player.avatarUrl || 'icons/user.png'" class="w-14 h-1w-14 rounded-full shadow" />
+      <span class="mt-1 px-2 py-0.5 text-white bg-black bg-opacity-50 text-xs rounded w-fit">{{ player.name }}</span>
+    </div>
+    }
+  </div>
+</div>
