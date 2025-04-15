@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PlayerService } from '../../services/player.service';
-import { TeamService, Team } from '../../services/team.service';
 import { Player } from '../../models/player.model';
 import { RatingService } from '../../services/rating.service';
 import { LeaguesService } from '../../services/leagues.service';
@@ -16,11 +15,13 @@ import { Leagues } from '../../models/leagues.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { TeamLineupModalComponent } from '../../shared/components/team-lineup-modal/team-lineup-modal.component';
+import { Team } from '../../models/team.model';
 
 @Component({
   selector: 'app-league-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoaderComponent],
+  imports: [CommonModule, FormsModule, LoaderComponent, TeamLineupModalComponent],
   templateUrl: './league-details.component.html',
   styleUrl: './league-details.component.scss'
 })
@@ -50,6 +51,8 @@ export class LeagueDetailsComponent implements OnInit {
   players = signal<Player[]>([]);
   isLoading = signal(true);
   totalPlayers = signal(0);
+  teamModalVisible = signal(false);
+
   generatedTeams: Team[] = [];
 
   ngOnInit(): void {
@@ -224,6 +227,8 @@ export class LeagueDetailsComponent implements OnInit {
           players: [...t.players],
         }));
       }
+
+      this.openTeamModal();
     }
   
     if (bestTeams.length === 0) {
@@ -292,6 +297,9 @@ export class LeagueDetailsComponent implements OnInit {
     this.allPlayersSelected = selectAll;
   }
   
+  openTeamModal() {
+    this.teamModalVisible.set(true);
+  }
 
   getRating(player: Player): number {
     return this.ratingService.calculate(player);
