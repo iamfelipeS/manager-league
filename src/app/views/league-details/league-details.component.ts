@@ -228,11 +228,13 @@ export class LeagueDetailsComponent implements OnInit {
   }
 
   togglePlayerSelection(player: Player) {
+    if (this.isLesionado(player)) return;
     player.selected = !player.selected;
-    this.allPlayersSelected = this.sortedPlayers.every(p => p.selected);
+    this.allPlayersSelected = this.sortedPlayers
+      .filter(p => !this.isLesionado(p))
+      .every(p => p.selected);
   }
-
-
+  
   areAllPlayersSelected(): boolean {
     return this.sortedPlayers.every(player => player.selected);
   }
@@ -241,9 +243,15 @@ export class LeagueDetailsComponent implements OnInit {
     const checkbox = event.target as HTMLInputElement;
     const selectAll = checkbox.checked;
   
-    this.sortedPlayers.forEach(player => player.selected = selectAll);
+    this.sortedPlayers.forEach(player => {
+      if (!this.isLesionado(player)) {
+        player.selected = selectAll;
+      }
+    });
+  
     this.allPlayersSelected = selectAll;
   }
+  
 
   getRating(player: Player): number {
     return this.ratingService.calculate(player);
