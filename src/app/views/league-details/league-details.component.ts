@@ -122,7 +122,7 @@ export class LeagueDetailsComponent implements OnInit {
       'quantidade de zagueiros',
       'estrela em formação',
       'resistencia fisica',
-      'gos of zaga'
+      'god of zaga'
     ].map(normalize);
   
     const attempts = 100;
