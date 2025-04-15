@@ -65,12 +65,19 @@ export class LeagueDetailsComponent implements OnInit {
   async loadPlayers() {
     this.isLoading.set(true);
     const result = await this.playerService.getPlayers();
+  
+    result.forEach(player => {
+      if (player.posicao === 'D') {
+        player.flags = player.flags || [];
+        player.flags.push({ id: 999, name: 'quantidade de zagueiros' });
+      }
+    });
+  
     this.players.set(result);
-    this.isLoading.set(false);
-
     this.totalPlayers.set(result.length);
     this.isLoading.set(false);
   }
+  
 
   loadLeagueDetails() {
     this.leaguesService.getLeagueByName(this.leagueName).subscribe({
@@ -109,33 +116,41 @@ export class LeagueDetailsComponent implements OnInit {
     const selectedPlayers = this.sortedPlayers.filter(p => p.selected);
     const teamCount = this.selectedTeamCount;
     const totalPlayers = selectedPlayers.length;
-
+  
     if (teamCount < 2 || totalPlayers < teamCount) {
-      this.toaster.error('Jogadores insuficientes para formar os times');
+      this.toaster.error('Selecione ao menos 2 times e jogadores suficientes.');
       return;
     }
-
-    // Função utilitária para padronizar nomes de flags
+  
     const normalize = (str: string) =>
       str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-
+  
     const restrictiveFlags = [
       'cabeça de chave',
-      'quantidade de zagueiros',
+      // 'quantidade de zagueiros',
       'estrela em formação',
       'resistencia fisica',
       'god of zaga'
     ].map(normalize);
-
-    const attempts = 100;
+  
+    const hasEnoughForRestrictions = selectedPlayers.length >= teamCount;
+    if (!hasEnoughForRestrictions) {
+      this.toaster.error('Número de jogadores insuficiente para respeitar as restrições de flags.');
+      return;
+    }
+  
+    const attempts = 500;
     let bestTeams: any[] = [];
     let bestDiff = Infinity;
-
+  
+    const distribution = this.calculateTeamDistribution(totalPlayers, teamCount);
+    console.log('[DEBUG] Distribuição ideal:', distribution);
+  
+    let lastFailReason = '';
+  
     for (let attempt = 0; attempt < attempts; attempt++) {
       const shuffled = [...selectedPlayers].sort(() => Math.random() - 0.5);
-      const baseSize = Math.floor(totalPlayers / teamCount);
-      const extras = totalPlayers % teamCount;
-
+  
       const teams: { name: string; players: Player[]; overall: number }[] = Array.from(
         { length: teamCount },
         (_, i) => ({
@@ -144,57 +159,63 @@ export class LeagueDetailsComponent implements OnInit {
           overall: 0,
         })
       );
-
+  
       const flagMap: Map<number, Set<number>> = new Map();
       let failed = false;
-
-      for (const player of shuffled) {
-        let placed = false;
-
-        for (let t = 0; t < teamCount; t++) {
-          const team = teams[t];
-          const maxSize = baseSize + (t < extras ? 1 : 0);
-
-          if (team.players.length >= maxSize) continue;
-
-          const hasRestrictedFlagConflict = player.flags?.some(flag => {
-            const normalizedName = normalize(flag.name);
-            return restrictiveFlags.includes(normalizedName) && flagMap.get(flag.id)?.has(t);
-          });
-
-          if (!hasRestrictedFlagConflict) {
-            team.players.push(player);
-
+      let playerIndex = 0;
+  
+      for (let t = 0; t < teamCount; t++) {
+        const maxSize = distribution[t];
+  
+        while (teams[t].players.length < maxSize && playerIndex < shuffled.length) {
+          const player = shuffled[playerIndex++];
+  
+          const hasConflict = player.flags?.some(flag => {
+            const normalized = normalize(flag.name);
+            return restrictiveFlags.includes(normalized) && flagMap.get(flag.id)?.has(t);
+          }) ?? false;
+  
+          if (!hasConflict) {
+            teams[t].players.push(player);
+  
             player.flags?.forEach(flag => {
-              const normalizedName = normalize(flag.name);
-              if (restrictiveFlags.includes(normalizedName)) {
+              const normalized = normalize(flag.name);
+              if (restrictiveFlags.includes(normalized)) {
                 if (!flagMap.has(flag.id)) flagMap.set(flag.id, new Set());
                 flagMap.get(flag.id)!.add(t);
               }
             });
-
-            placed = true;
+          } else {
+            const conflictingFlags = player.flags?.filter(flag =>
+              restrictiveFlags.includes(normalize(flag.name))
+            ).map(f => f.name);
+  
+            console.warn(`[Tentativa ${attempt}] Conflito ao alocar ${player.name} no Time ${t + 1} com flags:`, conflictingFlags);
+            lastFailReason = `Conflito ao alocar ${player.name} no Time ${t + 1} com flags: ${conflictingFlags?.join(', ')}`;
+            failed = true;
+            break;
+          }
+  
+          if (playerIndex > totalPlayers * 2) {
+            failed = true;
+            lastFailReason = 'Tentativa excedeu o número máximo de iterações para encaixar jogadores.';
             break;
           }
         }
-
-        if (!placed) {
-          failed = true;
-          break;
-        }
+  
+        if (failed) break;
       }
-
+  
       if (failed) continue;
-
-      // Calcular médias de rating
+  
       for (const team of teams) {
         const total = team.players.reduce((acc, p) => acc + p.rating, 0);
         team.overall = Math.round(total / team.players.length);
       }
-
+  
       const ratings = teams.map(t => t.overall);
       const diff = Math.max(...ratings) - Math.min(...ratings);
-
+  
       if (diff < bestDiff) {
         bestDiff = diff;
         bestTeams = teams.map(t => ({
@@ -204,16 +225,21 @@ export class LeagueDetailsComponent implements OnInit {
         }));
       }
     }
-
+  
     if (bestTeams.length === 0) {
-      this.toaster.error('Não foi possível gerar times válidos com as restrições de flags.');
+      console.error('[ERRO FINAL] Falha ao gerar times mesmo após várias tentativas.');
+      this.toaster.error(`Não foi possível gerar times válidos. ${lastFailReason || 'Verifique os jogadores e flags selecionados.'}`);
     } else {
       this.generatedTeams = bestTeams;
-      console.log('[DEBUG] Times gerados:', this.generatedTeams);
+      console.log('[SUCESSO] Times gerados com diferença de rating de', bestDiff);
+      console.table(this.generatedTeams.map(t => ({
+        nome: t.name,
+        jogadores: t.players.length,
+        média: t.overall
+      })));
     }
   }
-
-
+  
   recalculateTeamAverages() {
     for (const team of this.generatedTeams) {
       team.overall = Math.round(
@@ -222,6 +248,20 @@ export class LeagueDetailsComponent implements OnInit {
       );
     }
   }
+
+  private calculateTeamDistribution(totalPlayers: number, teamCount: number): number[] {
+    const baseSize = Math.floor(totalPlayers / teamCount);
+    const extras = totalPlayers % teamCount;
+  
+    const distribution = Array(teamCount).fill(baseSize);
+  
+    for (let i = 0; i < extras; i++) {
+      distribution[i]++;
+    }
+  
+    return distribution.sort((a, b) => b - a); // opcional: organiza para começar pelos maiores
+  }
+  
 
   get availablePlayers(): Player[] {
     return this.sortedPlayers.filter(player => !this.isLesionado(player));
