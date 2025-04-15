@@ -31,11 +31,14 @@ export class LeagueDetailsComponent implements OnInit {
   private leaguesService = inject(LeaguesService);
   private toaster = inject(ToasterService);
 
-  leagueName: string = '';
-  league: Leagues | null = null;
   imagemPadrao = '';
+  leagueName: string = '';
+
   isAdmin = true;
   isFollowing = false;
+  league: Leagues | null = null;
+  allPlayersSelected: boolean = false;
+
   activeTab: string = 'info';
   selectedTeamCount = 2;
   sortBy: 'name' | 'rating' | 'qualidade' | 'velocidade' | 'posicao' | 'fase' = 'name';
@@ -43,7 +46,6 @@ export class LeagueDetailsComponent implements OnInit {
   isLesionado(player: Player): boolean {
     return player.flags?.some(f => f.name.toLowerCase() === 'lesionado') ?? false;
   }
-  
 
   players = signal<Player[]>([]);
   isLoading = signal(true);
@@ -96,7 +98,7 @@ export class LeagueDetailsComponent implements OnInit {
       if (this.sortBy === 'rating') {
         return this.getRating(b) - this.getRating(a);
       }
-      if (this.sortBy === 'posicao'){
+      if (this.sortBy === 'posicao') {
         return posicaoOrder.indexOf(a.posicao) - posicaoOrder.indexOf(b.posicao);
       }
       return (b[this.sortBy] ?? 0) - (a[this.sortBy] ?? 0);
@@ -107,16 +109,16 @@ export class LeagueDetailsComponent implements OnInit {
     const selectedPlayers = this.sortedPlayers.filter(p => p.selected);
     const teamCount = this.selectedTeamCount;
     const totalPlayers = selectedPlayers.length;
-  
+
     if (teamCount < 2 || totalPlayers < teamCount) {
       this.toaster.error('Jogadores insuficientes para formar os times');
       return;
     }
-  
+
     // Função utilitária para padronizar nomes de flags
     const normalize = (str: string) =>
       str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-  
+
     const restrictiveFlags = [
       'cabeça de chave',
       'quantidade de zagueiros',
@@ -124,16 +126,16 @@ export class LeagueDetailsComponent implements OnInit {
       'resistencia fisica',
       'god of zaga'
     ].map(normalize);
-  
+
     const attempts = 100;
     let bestTeams: any[] = [];
     let bestDiff = Infinity;
-  
+
     for (let attempt = 0; attempt < attempts; attempt++) {
       const shuffled = [...selectedPlayers].sort(() => Math.random() - 0.5);
       const baseSize = Math.floor(totalPlayers / teamCount);
       const extras = totalPlayers % teamCount;
-  
+
       const teams: { name: string; players: Player[]; overall: number }[] = Array.from(
         { length: teamCount },
         (_, i) => ({
@@ -142,27 +144,27 @@ export class LeagueDetailsComponent implements OnInit {
           overall: 0,
         })
       );
-  
+
       const flagMap: Map<number, Set<number>> = new Map();
       let failed = false;
-  
+
       for (const player of shuffled) {
         let placed = false;
-  
+
         for (let t = 0; t < teamCount; t++) {
           const team = teams[t];
           const maxSize = baseSize + (t < extras ? 1 : 0);
-  
+
           if (team.players.length >= maxSize) continue;
-  
+
           const hasRestrictedFlagConflict = player.flags?.some(flag => {
             const normalizedName = normalize(flag.name);
             return restrictiveFlags.includes(normalizedName) && flagMap.get(flag.id)?.has(t);
           });
-  
+
           if (!hasRestrictedFlagConflict) {
             team.players.push(player);
-  
+
             player.flags?.forEach(flag => {
               const normalizedName = normalize(flag.name);
               if (restrictiveFlags.includes(normalizedName)) {
@@ -170,29 +172,29 @@ export class LeagueDetailsComponent implements OnInit {
                 flagMap.get(flag.id)!.add(t);
               }
             });
-  
+
             placed = true;
             break;
           }
         }
-  
+
         if (!placed) {
           failed = true;
           break;
         }
       }
-  
+
       if (failed) continue;
-  
+
       // Calcular médias de rating
       for (const team of teams) {
         const total = team.players.reduce((acc, p) => acc + p.rating, 0);
         team.overall = Math.round(total / team.players.length);
       }
-  
+
       const ratings = teams.map(t => t.overall);
       const diff = Math.max(...ratings) - Math.min(...ratings);
-  
+
       if (diff < bestDiff) {
         bestDiff = diff;
         bestTeams = teams.map(t => ({
@@ -202,7 +204,7 @@ export class LeagueDetailsComponent implements OnInit {
         }));
       }
     }
-  
+
     if (bestTeams.length === 0) {
       this.toaster.error('Não foi possível gerar times válidos com as restrições de flags.');
     } else {
@@ -210,8 +212,8 @@ export class LeagueDetailsComponent implements OnInit {
       console.log('[DEBUG] Times gerados:', this.generatedTeams);
     }
   }
-  
-  
+
+
   recalculateTeamAverages() {
     for (const team of this.generatedTeams) {
       team.overall = Math.round(
@@ -227,6 +229,20 @@ export class LeagueDetailsComponent implements OnInit {
 
   togglePlayerSelection(player: Player) {
     player.selected = !player.selected;
+    this.allPlayersSelected = this.sortedPlayers.every(p => p.selected);
+  }
+
+
+  areAllPlayersSelected(): boolean {
+    return this.sortedPlayers.every(player => player.selected);
+  }
+
+  toggleSelectAll(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    const selectAll = checkbox.checked;
+  
+    this.sortedPlayers.forEach(player => player.selected = selectAll);
+    this.allPlayersSelected = selectAll;
   }
 
   getRating(player: Player): number {

@@ -197,9 +197,18 @@
                       </button>
                     </div>
                   
-                    <!-- Lado direito: ordenação -->
-                    <div class="flex items-center gap-2">
-                      <label class="text-sm text-gray-700">Ordenar por:</label>
+                    <div class="flex flex-row items-center gap-2">
+                        <!-- Checkbox Selecionar Todos os Jogadores -->
+                        <input
+                        type="checkbox"
+                        (change)="toggleSelectAll($event)"
+                        [checked]="allPlayersSelected"
+                        />
+                        <label class="text-sm text-gray-700">Selecionar Todos os Jogadores</label>
+  
+  
+                        <!-- Ordenação -->
+                      <!-- <label class="text-sm text-gray-700">Ordenar por:</label> -->
                       <select [(ngModel)]="sortBy" class="border px-2 py-1 rounded text-sm">
                         <option value="name">Nome (A-Z)</option>
                         <option value="rating">Rating</option>
@@ -214,13 +223,10 @@
                   @if (isLoading()) {
                     <app-loader />
                   }@else {
+                    
                       <!-- Lista de jogadores disponíveis -->
                       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         @for (player of availablePlayers; track player.id) {
-
-
-
-
                           <div
                             (click)="togglePlayerSelection(player)"
                             class="relative flex items-center justify-between border rounded-lg p-4 shadow-sm transition-all duration-150 cursor-pointer"
