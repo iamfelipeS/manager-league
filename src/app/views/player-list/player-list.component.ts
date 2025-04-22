@@ -249,11 +249,39 @@ export class PlayerListComponent implements OnInit {
   onAvatarChange(event: Event, player: Player) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file) return;
+  
+    if (!file) {
+      this.toaster.error('Nenhum arquivo selecionado.');
+      return;
+    }
+  
+    const validTypes = ['image/jpeg', 'image/png'];
+    const maxSizeMB = 10;
+  
+    console.log('Arquivo selecionado:', {
+      name: file.name,
+      type: file.type,
+      sizeMB: (file.size / (1024 * 1024)).toFixed(2),
+    });
+  
+    if (!validTypes.includes(file.type)) {
+      this.toaster.error('Formato inválido. Envie uma imagem JPG ou PNG.');
+      return;
+    }
+  
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      this.toaster.error(`Imagem muito grande. Máximo permitido: ${maxSizeMB}MB.`);
+      return;
+    }
   
     this.playerService.updateAvatar(player, file)
-      .then(() => this.toaster.success('Avatar atualizado com sucesso!'))
-      .catch(() => this.toaster.error('Erro ao atualizar avatar.'));
+      .then(() => {
+        this.toaster.success('Avatar atualizado com sucesso!');
+      })
+      .catch((err) => {
+        console.error('Erro ao atualizar avatar:', err);
+        this.toaster.error('Erro ao atualizar avatar.');
+      });
   }
   
 }

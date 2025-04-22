@@ -16,6 +16,7 @@ export class PlayerService {
 
   private players = signal<Player[]>([]);
   private supabase: SupabaseClient = supabase;
+  
 
   async getPlayers(): Promise<Player[]> {
     const { data, error } = await this.supabase
@@ -59,47 +60,37 @@ export class PlayerService {
   }
 
   // AVATAR // 
-  async uploadAvatar(playerId: string, file: File): Promise<string | null> {
-    const fileExt = file.name.split('.').pop();
-    const filePath = `players/${playerId}-${uuidv4()}.${fileExt}`;
-
-    const { error } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file, { upsert: true });
-
-    if (error) {
-      console.error('Erro ao fazer upload:', error);
-      return null;
-    }
-
-    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-    return data.publicUrl;
-  }
-  
   async updateAvatar(player: Player, file: File): Promise<void> {
     const ext = file.name.split('.').pop();
     const filePath = `players/${player.id}-${uuidv4()}.${ext}`;
-
-    const { error: uploadError } = await supabase.storage
+    const session = await this.supabase.auth.getSession();
+    console.log('Sessão atual:', session);
+    const { error: uploadError } = await this.supabase.storage
       .from('avatars')
-      .upload(filePath, file, { upsert: true });
-
+      .upload(filePath, file, {
+        upsert: true,
+        contentType: file.type, // ← obrigatório!
+      });
+  
     if (uploadError) {
+      console.error('Upload error:', uploadError);
       throw new Error('Erro ao fazer upload do avatar');
     }
-
-    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+  
+    const { data } = this.supabase.storage.from('avatars').getPublicUrl(filePath);
     const avatarUrl = data.publicUrl;
-
-    const { error: updateError } = await supabase
+  
+    const { error: updateError } = await this.supabase
       .from('players')
       .update({ avatarUrl })
       .eq('id', player.id);
-
+  
     if (updateError) {
       throw new Error('Erro ao atualizar o jogador com avatar');
     }
-
+  
     player.avatarUrl = avatarUrl;
   }
+  
+  
 }

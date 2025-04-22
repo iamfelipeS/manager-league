@@ -1,65 +1,43 @@
 import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToasterService } from '../../services/toaster.service';
-import { Router } from 'express';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
   private auth = inject(AuthService);
   private toaster = inject(ToasterService);
   private router = inject(Router);
 
-  user = {
-    email: '',
-    password: '',
-  };
+  email = signal('');
+  password = signal('');
+  loading = signal(false);
 
-  isLoading = signal(false);
-  showPassword = false;
-  showForgotPassword = false;
+  async onLogin() {
+    this.loading.set(true);
+    const error = await this.auth.login(this.email(), this.password());
+    this.loading.set(false);
 
-  toggleForgotPasswordCard() {
-    this.showForgotPassword = !this.showForgotPassword;
-  }
+    if (!error) {
+      const role = this.auth.role();
+      this.toaster.success('Login realizado com sucesso!');
 
-  toggleShowPassword() {
-    this.showPassword = !this.showPassword;
-  }
-
-  async submitLogin() {
-    if (!this.user.email || !this.user.password) {
-      this.toaster.error('Preencha e-mail e senha');
-      return;
-    }
-
-    this.isLoading.set(true);
-    const error = await this.auth.login(this.user.email, this.user.password);
-    this.isLoading.set(false);
-
-    if (error) {
-      this.toaster.error('Erro no login: ' + error.message);
+      // redireciona baseado na role
+      if (role === 'super' || role === 'admin') {
+        this.router.navigateByUrl('/admin');
+      } else {
+        this.router.navigateByUrl('/meu-perfil');
+      }
     } else {
-      this.toaster.success('Login realizado!');
-      this.router.navigateByUrl('/'); // ou redirecione para dashboard
+      this.toaster.error('Erro ao logar: ' + error.message);
     }
   }
-
-  // async submitSendEmailToResetPassword() {
-  //   const { error } = await this.auth.supabase.auth.resetPasswordForEmail(this.user.email, {
-  //     redirectTo: 'https://verssat.netlify.app/update-password',
-  //   });
-
-  //   if (error) {
-  //     this.toaster.error('Erro ao enviar e-mail: ' + error.message);
-  //   } else {
-  //     this.toaster.success('Link de redefinição enviado!');
-  //   }
-  // }
 }
