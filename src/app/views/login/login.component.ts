@@ -44,11 +44,8 @@ export class LoginComponent {
     this.toaster.success('Login realizado com sucesso!');
     const role = this.auth.role();
   
-    if (role === 'admin' || role === 'super') {
-      this.router.navigateByUrl('/admin');
-    } else {
-      this.router.navigateByUrl('/meu-perfil');
-    }
+    this.router.navigateByUrl('/');
+   
   }
   
   private getMensagemErroTraduzida(code: string): string {
