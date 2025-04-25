@@ -36,7 +36,10 @@ export const routes: Routes = [
         path: 'meu-perfil',
         loadComponent: () => import('./views/user/usern-panel/user-panel.component').then(m => m.UserPanelComponent),
         canActivate: [roleGuard(['guest', 'admin', 'super'])],
+    },
+    {
+        path: 'confirmar-conta',
+        loadComponent: () => import('./views/confirm-account/confirm-account.component').then(m => m.ConfirmAccountComponent)
     }
-
 
 ];

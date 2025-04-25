@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { createClient } from '@supabase/supabase-js';
-import { SupabaseClient, User } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../enviroments/enviroment';
 import { Profile, Role } from '../models/profile.model';
 
@@ -11,10 +11,10 @@ export class AuthService {
   role = signal<'super' | 'admin' | 'guest' | null>(null);
 
   constructor() {
-    this.loadSession(); // ← garante sessão ao iniciar
+    this.refreshUserSession(); // Carrega sessão ao iniciar
   }
 
-  private async loadSession() {
+  async refreshUserSession() {
     const { data } = await this.supabase.auth.getUser();
     if (data.user) {
       const { data: profile } = await this.supabase
@@ -32,7 +32,7 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const { error } = await this.supabase.auth.signInWithPassword({ email, password });
-    await this.loadSession(); // ← atualiza user após login
+    await this.refreshUserSession();
     return error;
   }
 
@@ -41,7 +41,7 @@ export class AuthService {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin + '/login'
+        emailRedirectTo: window.location.origin + '/confirmar-conta'
       }
     });
     return error;
@@ -97,5 +97,12 @@ export class AuthService {
     return data as Profile[];
   }
 
-}
+  async setSessionWithHashToken(access_token: string, refresh_token: string) {
+    return await this.supabase.auth.setSession({ access_token, refresh_token });
+  }
 
+  async getCurrentRawUser() {
+    const { data } = await this.supabase.auth.getUser();
+    return data.user;
+  }
+}
