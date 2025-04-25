@@ -34,51 +34,54 @@ export class LoginComponent {
     this.loading.set(true);
     const error = await this.auth.login(this.email(), this.password());
     this.loading.set(false);
-
-    if (!error) {
-      const role = this.auth.role();
-      this.toaster.success('Login realizado com sucesso!');
-
-      // Redireciona por tipo de usuário
-      if (role === 'admin' || role === 'super') {
-        this.router.navigateByUrl('/admin');
-      } else {
-        this.router.navigateByUrl('/meu-perfil');
-      }
+  
+    if (error) {
+      const mensagemTraduzida = this.getMensagemErroTraduzida(error.code as string);
+      this.toaster.error(mensagemTraduzida);
+      return;
+    }
+  
+    this.toaster.success('Login realizado com sucesso!');
+    const role = this.auth.role();
+  
+    if (role === 'admin' || role === 'super') {
+      this.router.navigateByUrl('/admin');
     } else {
-      this.toaster.error('Erro ao logar: ' + error.message);
+      this.router.navigateByUrl('/meu-perfil');
     }
   }
-
-  async submitLogin() {
-    if (!this.email() || !this.password()) return;
-
-    this.loading.set(true);
-    try {
-      const error = await this.auth.login(this.email(), this.password());
-      if (!error) {
-        this.toaster.success('Login realizado com sucesso!');
-        const role = this.auth.role();
-        this.router.navigateByUrl(role === 'admin' || role === 'super' ? '/admin' : '/meu-perfil');
-      } else {
-        this.toaster.error('Erro ao logar: ' + error.message);
-      }
-    } finally {
-      this.loading.set(false);
+  
+  private getMensagemErroTraduzida(code: string): string {
+    switch (code) {
+      case 'invalid_login_credentials':
+      case 'invalid_credentials':
+        return 'E-mail ou senha incorretos.';
+      case 'user_not_confirmed':
+        return 'Verifique seu e-mail para confirmar sua conta.';
+      case 'user_not_found':
+        return 'Usuário não encontrado.';
+      case 'email_not_confirmed':
+        return 'Você precisa confirmar o e-mail antes de continuar.';
+      default:
+        return 'Erro inesperado. Tente novamente.';
     }
   }
-
+  
   async submitSendEmailToResetPassword() {
-    if (!this.email()) return;
-
+    if (!this.email()) {
+      this.toaster.warning('Informe seu e-mail.');
+      return;
+    }
+  
     const { error } = await this.auth.sendPasswordReset(this.email());
-
+  
     if (!error) {
       this.toaster.success('Email enviado com sucesso');
     } else {
       this.toaster.error('Erro: ' + error.message);
     }
   }
+  
 
   toggleView(target: 'login' | 'recover' | 'register') {
     const flip = document.querySelector('.flip');
@@ -99,8 +102,25 @@ export class LoginComponent {
     this.isLoginView = false;
   }
 
-  onRegister() {
-
+  async onRegister() {
+    if (!this.email() || !this.password() || !this.confirmarSenha()) {
+      this.toaster.error('Preencha todos os campos.');
+      return;
+    }
+  
+    if (this.password() !== this.confirmarSenha()) {
+      this.toaster.error('As senhas não coincidem.');
+      return;
+    }
+  
+    const error = await this.auth.register(this.email(), this.password());
+  
+    if (!error) {
+      this.toaster.success('Cadastro realizado! Verifique seu e-mail para ativar a conta.');
+      this.toggleView('login');
+    } else {
+      this.toaster.error('Erro ao cadastrar: ' + error.message);
+    }
   }
 
   backToLogin() {

@@ -37,8 +37,20 @@ export class AuthService {
   }
 
   async register(email: string, password: string) {
-    const { error } = await this.supabase.auth.signUp({ email, password });
+    const { error } = await this.supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin + '/login'
+      }
+    });
     return error;
+  }
+
+  async sendPasswordReset(email: string) {
+    return await this.supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/nova-senha',
+    });
   }
 
   async logout() {
@@ -64,11 +76,11 @@ export class AuthService {
       .from('profiles')
       .update({ role: newRole })
       .eq('id', userId);
-  
+
     if (!error) {
       this.role.set(newRole);
     }
-  
+
     return error;
   }
 
@@ -76,14 +88,14 @@ export class AuthService {
     const { data, error } = await this.supabase
       .from('profiles')
       .select('id, username, role, avatar_url');
-  
+
     if (error) {
       console.error('Erro ao buscar usuários:', error);
       return [];
     }
-  
+
     return data as Profile[];
   }
-  
+
 }
 
