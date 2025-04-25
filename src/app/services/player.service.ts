@@ -63,13 +63,13 @@ export class PlayerService {
   async updateAvatar(player: Player, file: File): Promise<void> {
     const ext = file.name.split('.').pop();
     const filePath = `players/${player.id}-${uuidv4()}.${ext}`;
-    const session = await this.supabase.auth.getSession();
-    console.log('Sessão atual:', session);
+  
     const { error: uploadError } = await this.supabase.storage
       .from('avatars')
       .upload(filePath, file, {
         upsert: true,
-        contentType: file.type, // ← obrigatório!
+        contentType: file.type,
+        cacheControl: '3600', // adicionado aqui!
       });
   
     if (uploadError) {
@@ -77,15 +77,15 @@ export class PlayerService {
       throw new Error('Erro ao fazer upload do avatar');
     }
   
-    const { data } = this.supabase.storage.from('avatars').getPublicUrl(filePath);
-    const avatarUrl = data.publicUrl;
+    const avatarUrl = `https://jyiqaftpqikqqvfrojiu.supabase.co/storage/v1/object/public/avatars/${filePath}`;
   
     const { error: updateError } = await this.supabase
       .from('players')
-      .update({ avatarUrl })
+      .update({ avatar_url: avatarUrl })
       .eq('id', player.id);
   
     if (updateError) {
+      console.error('Update player error:', updateError);
       throw new Error('Erro ao atualizar o jogador com avatar');
     }
   
