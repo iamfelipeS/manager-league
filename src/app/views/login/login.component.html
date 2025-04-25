@@ -1,241 +1,237 @@
 <div class="min-h-screen flex items-center justify-center px-4">
-  <div class="relative w-full max-w-md perspective">
-    <div class="relative w-full min-h-[36rem]">
-      <div class="flip w-full h-full" [ngClass]="{ 'rotate': currentView() !== 'login', 'rotate-back': currentView() === 'login' }">
+    <div class="flip w-full h-full" [ngClass]="{ 'rotate': currentView() !== 'login', 'rotate-back': currentView() === 'login' }">
 
-        <!-- LOGIN -->
-          <div class="bg-white rotate-back shadow-md border border-gray-200 rounded-lg p-6 max-w-md w-[20rem] h-[33rem] md:w-[30rem] lg:p-8 ">
+      <!-- LOGIN -->
+        <div class="bg-white rotate-back shadow-md border border-gray-200 rounded-lg p-2 px-8 max-w-md w-[20rem] h-[33rem] md:w-[30rem]">
 
-            <div class="flex flex-col justify-center items-center">
-                <a routerLink="/">
-                    <img src="../../assets/img/logo.png" class="w-20 p-2 rounded-lg" style="border-radius: 99px;" alt="logo">
-                </a>
-            </div>
+          <div class="flex flex-col justify-center items-center">
+              <a routerLink="/">
+                  <img src="./img/logo.jpg" class="w-[10rem] p-2 rounded-lg" style="border-radius: 99px;" alt="logo">
+              </a>
+          </div>
 
-            <div class="flex flex-col justify-center items-center mb-4">
-                <span class="font-semibold text-gray-700 text-3xl">Bem-vindo!</span>
-                <h3 class="text-small text-gray-400 font-semibold">Faça login na nossa plataforma</h3>
-            </div>
-            <div class="relative py-4">
-              <input
-                type="text"
-                class="peer block w-full px-2.5 pb-2.5 pt-4 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-orange-500"
-                placeholder=" "
-                [ngModel]="email()"
-                (ngModelChange)="email.set($event)"
-                (keydown.enter)="onLogin()" />
-            
-                <label
+          <div class="flex flex-col justify-center items-center mb-4">
+              <span class="font-semibold text-gray-700 text-3xl">Bem-vindo!</span>
+              <h3 class="text-small text-gray-400 font-semibold">Faça login na nossa plataforma</h3>
+          </div>
+          <div class="relative py-4">
+            <input
+              type="text"
+              class="peer block w-full px-2.5 pb-2.5 pt-4 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-orange-500"
+              placeholder=" "
+              [ngModel]="email()"
+              (ngModelChange)="email.set($event)"
+              (keydown.enter)="onLogin()" />
+          
+              <label
                 class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
                 peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
                 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
                 before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1] before:backdrop-blur-sm before:bg-transparent">
-                Seu e-mail
-              </label>
-              
-            </div>
+              Seu e-mail
+            </label>
             
+          </div>
+          
+          <div class="relative py-4">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              class="peer block w-full px-2.5 pb-2.5 pt-4 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-orange-500"
+              placeholder=" "
+              [ngModel]="password()"
+              (ngModelChange)="password.set($event)"
+              (keydown.enter)="onLogin()" />
+            <label class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
+              peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
+              peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
+              before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1] before:backdrop-blur-sm before:bg-transparent">
+              Sua senha
+            </label>
+              <button (click)="toggleShowPassword()"
+                  class="absolute right-3 bottom-6 text-sm flex justify-center items-center w-8 h-8 rounded-full bg-transparent hover:bg-gray-200 transition-transform duration-600"
+              >
+                  <i *ngIf="showPassword" class="fa fa-eye"></i>
+                  <i *ngIf="!showPassword" class="fa fa-eye-slash"></i>
+              </button>
+          </div>
+          <div class="flex items-start mb-6">
+              <div class="flex items-start">
+                  <div class="flex items-center h-5">
+                      <input id="remember" aria-describedby="remember" type="checkbox"
+                          class="bg-gray-50 border border-gray-300 focus:ring-3 focus:ring-orange-300 h-4 w-4 rounded ring-offset-gray-800"
+                          required="">
+                  </div>
+                  <div class="text-sm ml-3">
+                      <label for="remember" class="font-medium text-gray-900">Lembrar-me</label>
+                  </div>
+              </div>
+              <a class="text-sm cursor-pointer text-orangeDark hover:underline ml-auto"
+                  (click)="toggleView('recover')">
+                  Esqueceu a senha?
+              </a>
+          </div>
+          <div>
+            <button (click)="onLogin()"
+              class="w-full h-[40px] bg-black text-white hover:opacity-90 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 flex justify-center items-center mb-3">
+              @if (loading()) {
+                <div class="animate-spin h-5 w-5 border-b-2 border-white rounded-full"></div>
+              } @else {
+                Entrar na sua conta
+              }
+            </button>
+
+            <div class="text-center text-sm text-gray-500">
+              Não tem uma conta?
+              <a (click)="toggleView('register')" class="text-orange-600 hover:underline cursor-pointer">Criar conta</a>
+            </div>
+          </div>
+          
+      </div>
+
+      <!-- RECUPERAR SENHA  -->
+      @if (currentView() === 'recover') {
+        <div class="card-face card-back bg-white shadow-md border border-gray-200 rounded-lg p-6 flex flex-col justify-between w-full h-full">
+          <div>
+            <div class="flex flex-col items-center mb-6">
+              <img src="./img/logo.jpg" class="w-[10rem] p-2 rounded-lg" style="border-radius: 99px;" alt="logo">
+              <span class="text-lg font-semibold text-gray-700 mt-2">Recuperar Senha</span>
+            </div>
+      
+            <p class="text-sm text-center text-gray-600 mb-4">Insira seu e-mail para redefinir sua senha:</p>
+      
             <div class="relative py-4">
               <input
-                [type]="showPassword() ? 'text' : 'password'"
-                class="peer block w-full px-2.5 pb-2.5 pt-4 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-orange-500"
+                type="text"
+                [(ngModel)]="email"
                 placeholder=" "
-                [ngModel]="password()"
-                (ngModelChange)="password.set($event)"
-                (keydown.enter)="onLogin()" />
-              <label class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
-                peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
-                peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
-                before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1] before:backdrop-blur-sm before:bg-transparent">
-                Sua senha
+                id="email-recover"
+                class="peer block w-full px-2.5 pt-4 pb-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-0 focus:border-orange-500" />
+              <label
+                class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
+                        transition-all duration-300 ease-in-out
+                        peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
+                        peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
+                        before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1]
+                        before:backdrop-blur-sm before:bg-transparent">
+                Seu e-mail
               </label>
-                <button (click)="toggleShowPassword()"
-                    class="absolute right-3 bottom-6 text-sm flex justify-center items-center w-8 h-8 rounded-full bg-transparent hover:bg-gray-200 transition-transform duration-600"
-                >
-                    <i *ngIf="showPassword" class="fa fa-eye"></i>
-                    <i *ngIf="!showPassword" class="fa fa-eye-slash"></i>
-                </button>
             </div>
-            <div class="flex items-start mb-10">
-                <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                        <input id="remember" aria-describedby="remember" type="checkbox"
-                            class="bg-gray-50 border border-gray-300 focus:ring-3 focus:ring-orange-300 h-4 w-4 rounded ring-offset-gray-800"
-                            required="">
-                    </div>
-                    <div class="text-sm ml-3">
-                        <label for="remember" class="font-medium text-gray-900">Lembrar-me</label>
-                    </div>
-                </div>
-                <a class="text-sm cursor-pointer text-orangeDark hover:underline ml-auto"
-                    (click)="toggleView('recover')">
-                    Esqueceu a senha?
-                </a>
+          </div>
+      
+          <div>
+            <button (click)="submitSendEmailToResetPassword()"
+              class="w-full bg-black text-white hover:opacity-90 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-3">
+              Enviar
+            </button>
+      
+            <div class="text-center text-sm text-gray-500">
+              Já tem uma conta?
+              <a (click)="toggleView('login')" class="text-orange-600 hover:underline cursor-pointer">Clique aqui</a>
             </div>
-            <div>
-              <button (click)="onLogin()"
-                class="w-full h-[40px] bg-black text-white hover:opacity-90 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 flex justify-center items-center mb-3">
-                @if (loading()) {
-                  <div class="animate-spin h-5 w-5 border-b-2 border-white rounded-full"></div>
-                } @else {
-                  Entrar na sua conta
-                }
-              </button>
-  
-              <div class="text-center text-sm text-gray-500">
-                Não tem uma conta?
-                <a (click)="toggleView('register')" class="text-orange-600 hover:underline cursor-pointer">Criar conta</a>
-              </div>
-            </div>
-            
+          </div>
         </div>
+      }
+      
 
-        <!-- RECUPERAR SENHA  -->
-        @if (currentView() === 'recover') {
-          <div class="card-face card-back bg-white shadow-md border border-gray-200 rounded-lg p-6 flex flex-col justify-between w-full h-full">
-            <div>
-              <div class="flex flex-col items-center mb-6">
-                <img src="../../assets/img/logo.png" class="w-16 h-16 rounded-lg" alt="logo verssat" />
-                <span class="text-lg font-semibold text-gray-700 mt-2">Recuperar Senha</span>
-              </div>
-        
-              <p class="text-sm text-center text-gray-600 mb-4">Insira seu e-mail para redefinir sua senha:</p>
-        
-              <div class="relative py-4">
-                <input
-                  type="text"
-                  [(ngModel)]="email"
-                  placeholder=" "
-                  id="email-recover"
-                  class="peer block w-full px-2.5 pt-4 pb-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-0 focus:border-orange-500" />
-                <label
-                  class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
-                         transition-all duration-300 ease-in-out
-                         peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
-                         peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
-                         before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1]
-                         before:backdrop-blur-sm before:bg-transparent">
-                  Seu e-mail
-                </label>
-              </div>
+      <!-- CRIAR CONTA -->
+      @if (currentView() === 'register') {
+        <div class="card-face card-back bg-white shadow-md border border-gray-200 rounded-lg p-2 px-6 flex flex-col justify-between w-full h-full">
+          <div>
+            <div class="flex flex-col items-center mb-4">
+              <img src="./img/logo.jpg" class="w-[5rem] p-2 rounded-lg" style="border-radius: 99px;" alt="logo">
+              <span class="text-lg font-semibold text-gray-700">Criar Conta</span>
             </div>
-        
-            <div>
-              <button (click)="submitSendEmailToResetPassword()"
-                class="w-full bg-black text-white hover:opacity-90 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-3">
-                Enviar
-              </button>
-        
-              <div class="text-center text-sm text-gray-500">
-                Já tem uma conta?
-                <a (click)="toggleView('login')" class="text-orange-600 hover:underline cursor-pointer">Clique aqui</a>
-              </div>
+      
+            <!-- Nome -->
+            <div class="relative py-4">
+              <input
+                type="text"
+                [(ngModel)]="nome"
+                placeholder=" "
+                id="nome"
+                class="peer block w-full px-2.5 pt-4 pb-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-0 focus:border-orange-500" />
+              <label
+                class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
+                        transition-all duration-300 ease-in-out
+                        peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
+                        peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
+                        before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1]
+                        before:backdrop-blur-sm before:bg-transparent">
+                Nome completo
+              </label>
+            </div>
+      
+            <!-- Email -->
+            <div class="relative py-4">
+              <input
+                type="email"
+                [(ngModel)]="email"
+                placeholder=" "
+                id="email-register"
+                class="peer block w-full px-2.5 pt-4 pb-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-0 focus:border-orange-500" />
+              <label
+                class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
+                        transition-all duration-300 ease-in-out
+                        peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
+                        peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
+                        before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1]
+                        before:backdrop-blur-sm before:bg-transparent">
+                Seu e-mail
+              </label>
+            </div>
+      
+            <!-- Senha -->
+            <div class="relative py-4">
+              <input
+                type="password"
+                [(ngModel)]="password"
+                placeholder=" "
+                id="senha-register"
+                class="peer block w-full px-2.5 pt-4 pb-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-0 focus:border-orange-500" />
+              <label
+                class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
+                        transition-all duration-300 ease-in-out
+                        peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
+                        peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
+                        before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1]
+                        before:backdrop-blur-sm before:bg-transparent">
+                Criar senha
+              </label>
+            </div>
+      
+            <!-- Confirmar senha -->
+            <div class="relative py-4">
+              <input
+                type="password"
+                [(ngModel)]="confirmarSenha"
+                placeholder=" "
+                id="confirmar-senha"
+                class="peer block w-full px-2.5 pt-4 pb-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-0 focus:border-orange-500" />
+              <label
+                class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
+                        transition-all duration-300 ease-in-out
+                        peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
+                        peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
+                        before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1]
+                        before:backdrop-blur-sm before:bg-transparent">
+                Confirmar senha
+              </label>
             </div>
           </div>
-        }
-        
-
-        <!-- CRIAR CONTA -->
-        @if (currentView() === 'register') {
-          <div class="card-face card-back bg-white shadow-md border border-gray-200 rounded-lg p-6 flex flex-col justify-between w-full h-full">
-            <div>
-              <div class="flex flex-col items-center mb-4">
-                <img src="../../assets/img/logo.png" class="w-16 h-16 rounded-lg" alt="logo verssat" />
-                <span class="text-lg font-semibold text-gray-700">Criar Conta</span>
-              </div>
-        
-              <!-- Nome -->
-              <div class="relative py-4">
-                <input
-                  type="text"
-                  [(ngModel)]="nome"
-                  placeholder=" "
-                  id="nome"
-                  class="peer block w-full px-2.5 pt-4 pb-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-0 focus:border-orange-500" />
-                <label
-                  class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
-                         transition-all duration-300 ease-in-out
-                         peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
-                         peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
-                         before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1]
-                         before:backdrop-blur-sm before:bg-transparent">
-                  Nome completo
-                </label>
-              </div>
-        
-              <!-- Email -->
-              <div class="relative py-4">
-                <input
-                  type="email"
-                  [(ngModel)]="email"
-                  placeholder=" "
-                  id="email-register"
-                  class="peer block w-full px-2.5 pt-4 pb-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-0 focus:border-orange-500" />
-                <label
-                  class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
-                         transition-all duration-300 ease-in-out
-                         peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
-                         peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
-                         before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1]
-                         before:backdrop-blur-sm before:bg-transparent">
-                  Seu e-mail
-                </label>
-              </div>
-        
-              <!-- Senha -->
-              <div class="relative py-4">
-                <input
-                  type="password"
-                  [(ngModel)]="password"
-                  placeholder=" "
-                  id="senha-register"
-                  class="peer block w-full px-2.5 pt-4 pb-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-0 focus:border-orange-500" />
-                <label
-                  class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
-                         transition-all duration-300 ease-in-out
-                         peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
-                         peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
-                         before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1]
-                         before:backdrop-blur-sm before:bg-transparent">
-                  Criar senha
-                </label>
-              </div>
-        
-              <!-- Confirmar senha -->
-              <div class="relative py-4">
-                <input
-                  type="password"
-                  [(ngModel)]="confirmarSenha"
-                  placeholder=" "
-                  id="confirmar-senha"
-                  class="peer block w-full px-2.5 pt-4 pb-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg placeholder-transparent focus:outline-none focus:ring-0 focus:border-orange-500" />
-                <label
-                  class="absolute left-3 top-2 z-10 text-sm text-gray-700 transform scale-75 origin-[0] px-1 pointer-events-none
-                         transition-all duration-300 ease-in-out
-                         peer-placeholder-shown:scale-100 peer-placeholder-shown:top-[0.4rem]
-                         peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-0
-                         before:content-[''] before:absolute before:inset-0 before:rounded before:z-[-1]
-                         before:backdrop-blur-sm before:bg-transparent">
-                  Confirmar senha
-                </label>
-              </div>
-            </div>
-        
-            <div>
-              <button (click)="onRegister()"
-                class="w-full bg-black text-white hover:opacity-90 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-3">
-                Cadastrar
-              </button>
-        
-              <div class="text-center text-sm text-gray-500">
-                Já tem uma conta?
-                <a (click)="toggleView('login')" class="text-orange-600 hover:underline cursor-pointer">Entrar</a>
-              </div>
+      
+          <div>
+            <button (click)="onRegister()"
+              class="w-full bg-black text-white hover:opacity-90 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-3">
+              Cadastrar
+            </button>
+      
+            <div class="text-center text-sm text-gray-500">
+              Já tem uma conta?
+              <a (click)="toggleView('login')" class="text-orange-600 hover:underline cursor-pointer">Entrar</a>
             </div>
           </div>
-        }
+        </div>
+      }
 
-      </div>
     </div>
-  </div>
 </div>
