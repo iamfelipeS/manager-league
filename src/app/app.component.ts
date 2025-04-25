@@ -11,5 +11,5 @@ import { FooterComponent } from "./template/footer/footer.component";
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'verssat';
+  title = 'Manager League';
 }
