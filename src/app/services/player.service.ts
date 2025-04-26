@@ -9,6 +9,7 @@ type PlayerWithJoin = Player & {
     flag_id: number;
     flags: PlayerFlag;
   }[];
+  avatar_url?: string | null;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -17,24 +18,26 @@ export class PlayerService {
   private players = signal<Player[]>([]);
   private supabase: SupabaseClient = supabase;
   
-
   async getPlayers(): Promise<Player[]> {
     const { data, error } = await this.supabase
       .from('players')
       .select('*, player_flags:player_flags(flag_id, flags(id, name))');
-
+  
     if (error) throw error;
-
-    const players = (data as PlayerWithJoin[] ?? []).map(player => ({
-      ...player,
-      flags: player.player_flags?.map(pf => pf.flags) ?? []
-    }));
-
-    return players.map(p => ({
-      ...p,
-      flags: p.flags ?? []
-    }));
+  
+    const players = (data as PlayerWithJoin[] ?? []).map(player => {
+      const { player_flags, avatar_url, ...rest } = player;
+  
+      return {
+        ...rest,
+        avatarUrl: avatar_url ?? null, 
+        flags: player_flags?.map(pf => pf.flags) ?? []
+      };
+    });
+  
+    return players;
   }
+  
 
   async addPlayer(player: PlayerWithJoin): Promise<void> {
     const { flags, player_flags, ...playerData } = player;
@@ -61,15 +64,15 @@ export class PlayerService {
 
   // AVATAR // 
   async updateAvatar(player: Player, file: File): Promise<void> {
-    const ext = file.name.split('.').pop();
-    const filePath = `players/${player.id}-${uuidv4()}.${ext}`;
+    const fileExt = file.name.split('.').pop();
+    const filePath = `players/${player.id}/avatar.${fileExt}`; // novo caminho organizado
   
-    const { error: uploadError } = await this.supabase.storage
+    const { data: uploadData, error: uploadError } = await this.supabase.storage
       .from('avatars')
       .upload(filePath, file, {
         upsert: true,
         contentType: file.type,
-        cacheControl: '3600', // adicionado aqui!
+        cacheControl: '3600',
       });
   
     if (uploadError) {
@@ -77,7 +80,15 @@ export class PlayerService {
       throw new Error('Erro ao fazer upload do avatar');
     }
   
-    const avatarUrl = `https://jyiqaftpqikqqvfrojiu.supabase.co/storage/v1/object/public/avatars/${filePath}`;
+    const { data: publicData } = this.supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+  
+    if (!publicData) {
+      throw new Error('Erro ao obter URL pública do avatar');
+    }
+  
+    const avatarUrl = `${publicData.publicUrl}?v=${Date.now()}`;
   
     const { error: updateError } = await this.supabase
       .from('players')
@@ -92,5 +103,5 @@ export class PlayerService {
     player.avatarUrl = avatarUrl;
   }
   
-  
+    
 }

@@ -11,7 +11,7 @@
     </button>
   </div>
   
-  <div class="flex justify-center mb-8">
+  <div class="flex justify-center mb-10">
     <select
       class="p-2 rounded border text-sm"
       [ngModel]="orderBy()"
@@ -27,7 +27,7 @@
   @if (isLoading()) {
   <app-loader></app-loader>
   } @else {
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[2rem]">
       @for (player of orderedPlayers(); track player.id) {
       <div class="relative bg-white text-zinc-800 rounded-2xl p-6 border shadow-sm">
      
@@ -38,7 +38,7 @@
             <!-- Avatar com botão de upload (estilo escuro) -->
             <div class="absolute -top-10 left-1/2 transform -translate-x-1/2">
               <div class="relative flex justify-center items-center">
-                <div class="w-[7rem] h-[7rem] rounded-full overflow-hidden">
+                <div class="w-[6rem] h-[6rem] rounded-full overflow-hidden">
                   <img
                     [src]="player.avatarUrl || 'icons/user.png'"
                     alt="Avatar"
