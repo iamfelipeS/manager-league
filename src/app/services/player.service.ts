@@ -37,20 +37,20 @@ export class PlayerService {
   
     return players;
   }
-  
-
-  async addPlayer(player: PlayerWithJoin): Promise<void> {
-    const { flags, player_flags, ...playerData } = player;
-    const { error } = await this.supabase.from('players').insert([playerData]);
-    if (error) throw error;
-  }
 
   async updatePlayer(player: PlayerWithJoin): Promise<void> {
-    const { flags, player_flags, ...playerData } = player;
+    const { flags, player_flags, avatarUrl, ...rest } = player;
+  
+    const playerData = {
+      ...rest,
+      avatar_url: avatarUrl, // converte manualmente
+    };
+  
     const { error } = await this.supabase
       .from('players')
       .update(playerData)
       .eq('id', player.id);
+  
     if (error) throw error;
   }
 
