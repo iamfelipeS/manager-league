@@ -11,7 +11,7 @@
     </button>
   </div>
   
-  <div class="flex justify-center mb-10">
+  <div class="flex justify-center mb-14">
     <select
       class="p-2 rounded border text-sm"
       [ngModel]="orderBy()"
@@ -27,18 +27,15 @@
   @if (isLoading()) {
   <app-loader></app-loader>
   } @else {
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[2rem]">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[4rem]">
       @for (player of orderedPlayers(); track player.id) {
       <div class="relative bg-white text-zinc-800 rounded-2xl p-6 border shadow-sm">
      
-
         <div class="flex flex-row gap-2 items-center justify-center">
-          <div class="ml-[22px]">
-
             <!-- Avatar com botão de upload (estilo escuro) -->
             <div class="absolute -top-10 left-1/2 transform -translate-x-1/2">
               <div class="relative flex justify-center items-center">
-                <div class="w-[6rem] h-[6rem] rounded-full overflow-hidden">
+                <div class="w-[5.5rem] h-[5.5rem] rounded-full overflow-hidden">
                   <img
                     [src]="player.avatarUrl || 'icons/user.png'"
                     alt="Avatar"
@@ -48,7 +45,7 @@
 
                 <!-- Botão de editar avatar -->
                 <label
-                  class="flex justify-center items-center absolute right-[10px] bottom-[0.7rem] bg-blue-800 hover:bg-blue-600 w-[1.7rem] h-[1.7rem] rounded-full cursor-pointer"
+                  class="flex justify-center items-center absolute right-[2px] bottom-[0.2rem] bg-blue-800 hover:bg-blue-600 w-[1.7rem] h-[1.7rem] rounded-full cursor-pointer"
                   title="Alterar avatar"
                 >
                   <i class="fa-solid fa-plus mt-1 text-sm text-white"></i>
@@ -71,7 +68,6 @@
                   </div>
                 } 
               </div>
-            </div>
           </div>
           
           <!-- Ícone de Fase -->
@@ -110,7 +106,7 @@
         <!-- Rating -->
         <div class="mt-6 flex justify-center">
           <div
-            class="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold"
+            class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold"
             [ngClass]="getRatingColor(getRating(player))"
           >
             {{ getRating(player) }}
