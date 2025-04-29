@@ -138,7 +138,25 @@ export class PlayerListComponent implements OnInit {
       await this.loadPlayers();
   
       this.toaster.success(exists ? 'Jogador atualizado!' : 'Jogador adicionado!');
-    } catch (err) {
+    } catch (err: any) {
+      let errorMessage = 'Erro ao salvar jogador';
+    
+      // Se o erro for um objeto com status ou message
+      if (err?.status) {
+        if (err.status === 401) {
+          errorMessage = 'Sem autorização para executar essa ação.';
+        } else if (err.status === 403) {
+          errorMessage = 'Acesso proibido.';
+        } else if (err.status === 404) {
+          errorMessage = 'Jogador não encontrado.';
+        } else if (err.status === 409) {
+          errorMessage = 'Conflito: jogador já existe.';
+        } else if (err.status >= 500) {
+          errorMessage = 'Erro interno no servidor. Tente novamente mais tarde.';
+        }
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
       this.toaster.error('Erro ao salvar jogador');
     }
   }
