@@ -1,33 +1,35 @@
 <div class="p-4 max-w-4xl mx-auto">
   <!-- Cabeçalho -->
-  <div class="flex justify-end mb-6">
-    <span class="absolute left-4 top-7">Jogadores: <strong>{{ players().length }}</strong></span>
-    <button
-      (click)="addPlayer()"
-      class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
-      title="Adicionar Jogador"
-      >
-      <i class="fas fa-user-plus text-white text-lg"></i>
-    </button>
+  <span class="absolute left-4 top-7">Jogadores: <strong>{{ players().length }}</strong></span>
+  <div class="grid grid-cols-3 mb-12">
+    <div></div>
+      <select class="p-2 rounded border text-sm hover:border-orange-300"
+        [ngModel]="orderBy()"
+        (ngModelChange)="orderBy.set($event)"
+        >
+        <option value="rating">Classificar por Rating</option>
+        <option value="name">Classificar por Nome</option>
+        <option value="posicao">Classificar por Posição</option>
+      </select>
+
+      <div class="flex justify-end">
+
+        <button
+        (click)="addPlayer()"
+        class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
+        title="Adicionar Jogador"
+        >
+        <i class="fas fa-user-plus text-white text-lg"></i>
+      </button>
+    </div>
   </div>
   
-  <div class="flex justify-center mb-14">
-    <select
-      class="p-2 rounded border text-sm"
-      [ngModel]="orderBy()"
-      (ngModelChange)="orderBy.set($event)"
-    >
-      <option value="rating">Classificar por Rating</option>
-      <option value="name">Classificar por Nome</option>
-      <option value="posicao">Classificar por Posição</option>
-    </select>
-  </div>
 
   <!-- Grid de jogadores -->
   @if (isLoading()) {
   <app-loader></app-loader>
   } @else {
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[4rem]">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[3.5rem]">
       @for (player of orderedPlayers(); track player.id) {
       <div class="relative bg-white text-zinc-800 rounded-2xl p-6 border shadow-sm">
      
@@ -54,6 +56,9 @@
               </div>
             </div>
 
+        </div>
+
+        <div class="flex flex-row items-center justify-center ml-4">
             <!-- Nome e posição -->
             <div class="mt-8 text-center">
               <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>
@@ -68,19 +73,19 @@
                   </div>
                 } 
               </div>
-          </div>
+            </div>
           
-          <!-- Ícone de Fase -->
-          <div class="mt-2">
-            <i class="fas"
-              [ngClass]="[
-                getFaseIcon(player).icon,
-                getFaseIcon(player).color,
-                getFaseIcon(player).animation,
-                'text-xl'
-              ]">
-            </i>
-          </div>
+            <!-- Ícone de Fase -->
+            <div class="mt-2">
+              <i class="fas"
+                [ngClass]="[
+                  getFaseIcon(player).icon,
+                  getFaseIcon(player).color,
+                  getFaseIcon(player).animation,
+                  'text-xl'
+                ]">
+              </i>
+            </div>
         </div>
     
         <!-- Atributos -->
