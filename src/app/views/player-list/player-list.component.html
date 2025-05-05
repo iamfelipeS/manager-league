@@ -153,49 +153,72 @@
         />
       </div>
       
-      <div class="flex flex-row justify-between gap-2 w-full">
-        <!-- Posição -->
-        <div class="flex flex-col w-3/4">
-          <label class="text-sm font-medium">Posição</label>
-          <select
-            [(ngModel)]="selectedPlayer!.posicao"
-            name="posicao"
-            required
-            class="w-full p-3 border rounded-xl bg-white"
-          >
-            <option disabled value="">Selecione a posição</option>
-            <option value="G">Goleiro</option>
-            <option value="D">Defensor</option>
-            <option value="M">Meio Campo</option>
-            <option value="A">Atacante</option>
-          </select>
-        </div>
-      
-        <!-- Flag -->
-        <div class="flex flex-col w-full">
-            <label class="text-sm font-medium">Grupo</label>
-            <select
-              [(ngModel)]="selectedFlagId"
-              name="flag"
-              class="flex-1 p-3 border rounded-xl bg-white text-sm w-full"
-              >
-              <option [ngValue]="null">Nenhuma</option>
-              @for (flag of availableFlags(); track flag.id) {
-                <option [ngValue]="flag.id">{{ flag.name }}</option>
-              }
-          </select>
-        </div>
-        
-        <button
-          type="button"
-          (click)="createAndSelectFlag()"
-          class="p-2 mt-5 bg-green-600 text-white rounded-xl h-11 text-xs hover:bg-green-700"
-          title="Criar novo grupo"
+      <!-- Posição -->
+      <div class="flex flex-col">
+        <label class="text-sm font-medium">Posição</label>
+        <select
+          [(ngModel)]="selectedPlayer!.posicao"
+          name="posicao"
+          required
+          class="w-full p-3 border rounded-xl bg-white"
         >
-          +
-        </button>
-        
+          <option disabled value="">Selecione a posição</option>
+          <option value="G">Goleiro</option>
+          <option value="D">Defensor</option>
+          <option value="M">Meio Campo</option>
+          <option value="A">Atacante</option>
+        </select>
       </div>
+      
+      <!-- Flags  -->
+      <div class="flex items-end gap-3 w-full">
+        <div class="flex flex-col w-full">
+          <label class="text-sm font-medium">Grupo (Flag)</label>
+          <select
+            [(ngModel)]="selectedFlagId"
+            name="flag"
+            class="p-3 border rounded-xl bg-white text-sm w-full"
+          >
+            <option [ngValue]="null">Nenhuma</option>
+            @for (flag of availableFlags(); track flag.id) {
+              <option [ngValue]="flag.id">{{ flag.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Toggle -->
+        <div class="flex flex-col items-center mt-[1.6rem]">
+          <span class="text-[10px] mt-1 text-gray-500">Grupo</span>
+
+          <label class="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              [(ngModel)]="selectedFlagUsarNaGeracao"
+              name="usarNaGeracao"
+            />
+            <div
+              class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer
+              peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px]
+              after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full
+              after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+            ></div>
+          </label>
+        </div>
+
+        <!-- Botão criar nova flag -->
+        <div class="flex justify-end">
+          <button
+            type="button"
+            (click)="createAndSelectFlag()"
+            class="p-2 bg-green-600 text-white rounded-xl h-11 text-xs hover:bg-green-700"
+            title="Criar novo grupo"
+          >
+            +
+          </button>
+        </div>
+      </div>
+
   
       <!-- Qualidade -->
       <div>

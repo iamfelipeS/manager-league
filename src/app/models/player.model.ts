@@ -1,6 +1,7 @@
 export interface PlayerFlag {
   id: number;
   name: string;
+  usarNaGeracao: boolean;
 }
 export interface Player {
   id: string;

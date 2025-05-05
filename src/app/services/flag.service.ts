@@ -1,10 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { supabase } from '../core/supabase/supabase.client';
-
-export interface PlayerFlag {
-  id: number;
-  name: string;
-}
+import { PlayerFlag } from '../models/player.model';
 
 @Injectable({ providedIn: 'root' })
 export class FlagService {
@@ -22,11 +18,16 @@ export class FlagService {
   }
 
   async getAllFlags(): Promise<PlayerFlag[]> {
-    const { data, error } = await supabase.from('flags').select('*');
+    const { data, error } = await supabase
+      .from<'flags', PlayerFlag>('flags')
+      .select('*');
+  
     if (error) throw error;
+  
     this.flags.set(data ?? []);
     return data ?? [];
   }
+  
 
   async getFlagsByPlayerId(playerId: string): Promise<PlayerFlag[]> {
     const { data, error } = await supabase

@@ -36,6 +36,7 @@ export class PlayerListComponent implements OnInit {
 
   selectedPlayer: Player | null = null;
   selectedFlagId: number | null = null;
+  selectedFlagUsarNaGeracao: boolean = false;
 
   isLoading = signal(true);
   players = signal<Player[]>([]);
@@ -56,10 +57,8 @@ export class PlayerListComponent implements OnInit {
   });
 
   async ngOnInit() {
-    const flags = await this.flagService.getAllFlags();
-    this.availableFlags.set(flags);
-
     this.loadPlayers();
+    this.loadFlags();
   }
 
   ngAfterViewInit(): void {
@@ -76,7 +75,16 @@ export class PlayerListComponent implements OnInit {
       this.isLoading.set(false);
     }
     console.log(this.players().map(p => ({ name: p.name, flags: p.flags })));
+  }
 
+  async loadFlags(): Promise<void> {
+    try {
+      const flags = await this.flagService.getAllFlags();
+      this.availableFlags.set(flags);
+    } catch (error) {
+      console.error('Erro ao carregar flags:', error);
+      this.toaster.error('Erro ao carregar grupos');
+    }
   }
 
   addPlayer() {
@@ -99,18 +107,20 @@ export class PlayerListComponent implements OnInit {
     });
   }
   
-  async editPlayer(player: Player) {
-    this.selectedPlayer = { ...player };
+  editPlayer(player: Player) {
+    this.selectedPlayer = { ...player }; 
   
-    const flags = await this.flagService.getFlagsByPlayerId(player.id);
-    this.selectedPlayer.flags = flags;
-    this.selectedFlagId = flags.length ? flags[0].id : null;
+    const flagPrincipal = player.flags?.[0] ?? null;
+  
+    this.selectedFlagId = flagPrincipal?.id ?? null;
+    this.selectedFlagUsarNaGeracao = flagPrincipal?.usarNaGeracao ?? false;
   
     this.modal.open({
       title: 'Editar Jogador',
       template: this.formTemplateRef,
     });
   }
+  
   
   async savePlayer() {
     if (!this.selectedPlayer) return;
@@ -229,7 +239,6 @@ export class PlayerListComponent implements OnInit {
   }
 
   // FLAG
-
   toggleFlag(flag: PlayerFlag) {
     const current = this.selectedPlayer?.flags ?? [];
     const exists = current.find(f => f.id === flag.id);
@@ -243,25 +252,22 @@ export class PlayerListComponent implements OnInit {
     return !!player.flags?.some(f => f.id === flag.id);
   }
 
-  async createAndSelectFlag() {
-    const name = prompt('Nome da nova flag:');
-    if (!name || !name.trim()) return;
+  createAndSelectFlag() {
+    if (!this.selectedPlayer) return;
   
-    try {
-      const newFlag = await this.flagService.createFlag(name.trim());
+    const novaFlag = {
+      id: Date.now(), // temporário ou gerado via backend
+      name: `Grupo ${Date.now()}`,
+      usarNaGeracao: this.selectedFlagUsarNaGeracao
+    };
   
-      // atualiza lista
-      const updated = [...this.availableFlags(), newFlag];
-      this.availableFlags.set(updated);
+    this.selectedPlayer.flags = this.selectedPlayer.flags || [];
+    this.selectedPlayer.flags.push(novaFlag);
   
-      // seta como selecionada
-      this.selectedFlagId = newFlag.id;
-  
-      this.toaster.success('Flag criada com sucesso!');
-    } catch {
-      this.toaster.error('Erro ao criar flag');
-    }
+    this.selectedFlagId = novaFlag.id;
+    this.selectedFlagUsarNaGeracao = false;
   }
+  
 
   // AVATAR
   onAvatarChange(event: Event, player: Player) {
