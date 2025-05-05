@@ -3,49 +3,75 @@
     <div class="flex justify-end p-4">
         <button (click)="close()" class="text-white text-2xl hover:text-gray-300">&times;</button>
     </div>
-
+    <div class="flex justify-center mt-2 mb-4">
+      <button (click)="generateAllTeamsCanvas(teams)" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+        <i class="fas fa-share-square"></i> Compartilhar Todas Escalações
+      </button>
+    </div>
+    
     <!-- Desktop: até 4 times lado a lado -->
     <div class="hidden md:flex md:flex-wrap md:justify-center md:gap-4 px-6 pb-6 overflow-y-auto">
-        @for (team of teams; track team.name) {
-          <div class="bg-white rounded-xl p-4 shadow-lg w-full md:w-[22rem]">
-            <div class="flex flex-col items-center mb-2">
-              <h2 class="text-base font-bold text-zinc-800 mb-1">{{ team.name }}</h2>
-              <div
-                class="text-xs font-bold rounded-full px-2 py-1 text-white"
-                [ngClass]="{
-                  'bg-red-600': team.overall < 50,
-                  'bg-yellow-500': team.overall >= 50 && team.overall < 70,
-                  'bg-green-600': team.overall >= 70
-                }"
-              >
-                Média: {{ team.overall }}
+          @for (team of teams; track team.name) {
+            <div class="bg-white rounded-xl p-4 shadow-lg w-full md:w-[22rem]">
+              <div class="flex justify-center mt-2">
+                <button (click)="generateCanvasFromTeamRealAvatars(team, $index)" class="flex items-center gap-2 text-green-600 hover:text-green-800 text-sm">
+                  <i class="fas fa-download"></i> Compartilhar este time
+                </button>
+              </div>
+              <div class="flex flex-col items-center mb-2">
+                <h2 class="text-base font-bold text-zinc-800 mb-1">{{ team.name }}</h2>
+                <div
+                  class="text-xs font-bold rounded-full px-2 py-1 text-white"
+                  [ngClass]="{
+                    'bg-red-600': team.overall < 50,
+                    'bg-yellow-500': team.overall >= 50 && team.overall < 70,
+                    'bg-green-600': team.overall >= 70
+                  }"
+                >
+                  Média: {{ team.overall }}
+                </div>
+              </div>
+          
+              <div [id]="'capture-field-' + team.name" class="bg-black rounded-xl overflow-hidden">
+                <app-field-lineup [teamName]="team.name" [players]="team.players" />
               </div>
             </div>
-            <app-field-lineup [teamName]="team.name" [players]="team.players" />
-          </div>
-        }
+          }
       </div>
       
 
     <!-- Mobile: carrossel horizontal -->
     <div class="md:hidden flex overflow-x-auto snap-x px-4 gap-4 pb-2">
-        @for (team of teams; track team.name) {
-          <div class="min-w-full snap-center bg-white rounded-xl p-4 shadow-lg max-h-[95vh] overflow-hidden">
-            <!-- Header do time -->
-            <div class="flex flex-col items-center mb-2">
-                <h2 class="text-lg font-bold text-zinc-800 mb-1">{{ team.name }}</h2>
-                <div class="text-xs font-bold rounded-full px-2 py-1 text-white" [ngClass]="{
-                'bg-red-600': team.overall < 50,
-                'bg-yellow-500': team.overall >= 50 && team.overall < 70,
-                'bg-green-600': team.overall >= 70
-              }">
-                    Média: {{ team.overall }}
+          @for (team of teams; track team.name) {
+            <div class="bg-white rounded-xl p-4 shadow-lg w-full md:w-[22rem]">
+              <div class="flex justify-center mt-2">
+                <button (click)="generateCanvasFromTeamRealAvatars(team, $index)" class="flex items-center gap-2 text-green-600 hover:text-green-800 text-sm">
+                  <i class="fas fa-download"></i> Compartilhar este time
+                </button>
+              </div>
+              <div class="flex flex-col items-center mb-2">
+                <h2 class="text-base font-bold text-zinc-800 mb-1">{{ team.name }}</h2>
+                <div
+                  class="text-xs font-bold rounded-full px-2 py-1 text-white"
+                  [ngClass]="{
+                    'bg-red-600': team.overall < 50,
+                    'bg-yellow-500': team.overall >= 50 && team.overall < 70,
+                    'bg-green-600': team.overall >= 70
+                  }"
+                >
+                  Média: {{ team.overall }}
                 </div>
+              </div>
+          
+              <div [id]="'capture-field-' + team.name" class="bg-black rounded-xl overflow-hidden">
+                <app-field-lineup [teamName]="team.name" [players]="team.players" />
+              </div>
             </div>
-
-            <!-- Escalação em campo -->
-            <app-field-lineup [teamName]="team.name" [players]="team.players" />
-        </div>
-        }
+          }
     </div>
-</div>
+  </div>
+  
+  @if (isLoading()) {
+    <app-loader />
+
+  }
