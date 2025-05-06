@@ -77,7 +77,7 @@ export class LeagueDetailsComponent implements OnInit {
           player.flags.push({
             id: 999,
             name: 'quantidade de zagueiros',
-            usarNaGeracao: true
+            affectsTeamGeneration: true
           });
         }
       }
@@ -258,11 +258,13 @@ export class LeagueDetailsComponent implements OnInit {
 
 
   //METODO MAIS ALEATORIEDADE
-  shuffleArray<T>(array: T[]): T[] {
-    return array
-      .map(item => ({ sort: Math.random(), value: item }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(obj => obj.value);
+  shuffleArray(array: Player[]): Player[] {
+    const result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
   }
 
   generateTeams(): void {
@@ -278,17 +280,27 @@ export class LeagueDetailsComponent implements OnInit {
     let attempts = 0;
     let validTeams: Team[] = [];
   
-    // Mapeia os jogadores por flags consideradas na geração
+    // Mapeia jogadores por flags ativas
     const playersByFlag: { [flagId: number]: Player[] } = {};
     const allFlaggedPlayers = new Set<string>();
   
     for (const player of selectedPlayers) {
       for (const flag of player.flags || []) {
-        if (flag.usarNaGeracao) {
+        if (flag.affectsTeamGeneration) {
           if (!playersByFlag[flag.id]) playersByFlag[flag.id] = [];
           playersByFlag[flag.id].push(player);
           allFlaggedPlayers.add(player.id);
         }
+      }
+    }
+  
+    // Flags com quantidade insuficiente
+    const flagsComProblema: string[] = [];
+  
+    for (const [flagId, players] of Object.entries(playersByFlag)) {
+      if (players.length < teamCount) {
+        const nome = players[0]?.flags?.find(f => f.id === +flagId)?.name ?? `Flag ${flagId}`;
+        flagsComProblema.push(nome);
       }
     }
   
@@ -301,22 +313,29 @@ export class LeagueDetailsComponent implements OnInit {
   
       const alreadyAdded = new Set<string>();
   
-      // Distribuição por flag com ordem aleatória de times
+      // 1. Distribuição das flags ativas
       for (const players of Object.values(playersByFlag)) {
+        const countPerTeam = Math.floor(players.length / teamCount);
+        const extra = players.length % teamCount;
         const shuffled = this.shuffleArray(players);
-        const teamOrder = this.shuffleArray([...Array(teamCount).keys()]);
+        let playerIndex = 0;
   
-        for (let i = 0; i < shuffled.length; i++) {
-          const player = shuffled[i];
-          const teamIndex = teamOrder[i % teamCount];
-          if (!teams[teamIndex].players.includes(player)) {
-            teams[teamIndex].players.push(player);
-            alreadyAdded.add(player.id);
+        for (let t = 0; t < teamCount; t++) {
+          const max = countPerTeam + (t < extra ? 1 : 0);
+          let added = 0;
+  
+          while (added < max && playerIndex < shuffled.length) {
+            const player = shuffled[playerIndex++];
+            if (!alreadyAdded.has(player.id)) {
+              teams[t].players.push(player);
+              alreadyAdded.add(player.id);
+            }
+            added++;
           }
         }
       }
   
-      // Distribuição restante balanceando com mais aleatoriedade
+      // 2. Distribuição dos jogadores restantes, balanceando rating
       const remainingPlayers = selectedPlayers.filter(p => !alreadyAdded.has(p.id));
       const sortedRemaining = remainingPlayers
         .map(p => ({ p, r: this.ratingService.calculate(p) }))
@@ -325,16 +344,13 @@ export class LeagueDetailsComponent implements OnInit {
   
       while (sortedRemaining.length) {
         const group = sortedRemaining.splice(0, teamCount);
-        const teamOrder = this.shuffleArray([...Array(teamCount).keys()]);
-  
-        for (let i = 0; i < group.length; i++) {
-          const player = group[i];
-          const teamIndex = teamOrder[i % teamCount];
-          if (player) teams[teamIndex].players.push(player);
-        }
+        const shuffled = this.shuffleArray(group);
+        shuffled.forEach((player, i) => {
+          if (player) teams[i % teamCount].players.push(player);
+        });
       }
   
-      // Cálculo de rating médio
+      // 3. Cálculo do rating médio dos times
       for (const team of teams) {
         const total = team.players.reduce((sum, p) => sum + this.ratingService.calculate(p), 0);
         team.overall = Math.round(total / team.players.length);
@@ -353,12 +369,17 @@ export class LeagueDetailsComponent implements OnInit {
     }
   
     this.generatedTeams = validTeams;
+  
+    if (flagsComProblema.length) {
+      this.toaster.info(
+        `Alguns grupos não foram totalmente separados entre os times: ${flagsComProblema.join(', ')}.`
+      );
+    }
+
     this.openTeamModal();
   }
   
-
   //METODO MAIS ALEATORIEDADE
-
   recalculateTeamAverages() {
     for (const team of this.generatedTeams) {
       team.overall = Math.round(

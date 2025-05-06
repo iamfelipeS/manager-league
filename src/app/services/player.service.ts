@@ -21,7 +21,7 @@ export class PlayerService {
   async getPlayers(): Promise<Player[]> {
     const { data, error } = await this.supabase
       .from('players')
-      .select('*, player_flags:player_flags(flag_id, flags(id, name))');
+      .select('*, player_flags:player_flags(flag_id, flags(id, name, affectsTeamGeneration))')
   
     if (error) throw error;
   
@@ -31,13 +31,12 @@ export class PlayerService {
       return {
         ...rest,
         avatarUrl: avatar_url ?? null, 
-        flags: player_flags?.map(pf => pf.flags) ?? []
+        flags: player_flags?.map(pf => pf.flags) ?? [],
       };
     });
   
     return players;
   }
-  
 
   async addPlayer(player: PlayerWithJoin): Promise<void> {
     const { flags, player_flags, avatarUrl, ...playerData } = player;

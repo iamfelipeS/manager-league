@@ -36,7 +36,7 @@ export class PlayerListComponent implements OnInit {
 
   selectedPlayer: Player | null = null;
   selectedFlagId: number | null = null;
-  selectedFlagUsarNaGeracao: boolean = false;
+  selectedFlagAffectsTeamGeneration: boolean = false;
 
   isLoading = signal(true);
   players = signal<Player[]>([]);
@@ -113,7 +113,7 @@ export class PlayerListComponent implements OnInit {
     const flagPrincipal = player.flags?.[0] ?? null;
   
     this.selectedFlagId = flagPrincipal?.id ?? null;
-    this.selectedFlagUsarNaGeracao = flagPrincipal?.usarNaGeracao ?? false;
+    this.selectedFlagAffectsTeamGeneration = flagPrincipal?.affectsTeamGeneration ?? false;
   
     this.modal.open({
       title: 'Editar Jogador',
@@ -258,14 +258,14 @@ export class PlayerListComponent implements OnInit {
     const novaFlag = {
       id: Date.now(), // temporário ou gerado via backend
       name: `Grupo ${Date.now()}`,
-      usarNaGeracao: this.selectedFlagUsarNaGeracao
+      affectsTeamGeneration: this.selectedFlagAffectsTeamGeneration
     };
   
     this.selectedPlayer.flags = this.selectedPlayer.flags || [];
     this.selectedPlayer.flags.push(novaFlag);
   
     this.selectedFlagId = novaFlag.id;
-    this.selectedFlagUsarNaGeracao = false;
+    this.selectedFlagAffectsTeamGeneration = false;
   }
   
 

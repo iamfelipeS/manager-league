@@ -1,7 +1,7 @@
 export interface PlayerFlag {
   id: number;
   name: string;
-  usarNaGeracao: boolean;
+  affectsTeamGeneration: boolean;
 }
 export interface Player {
   id: string;
