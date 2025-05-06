@@ -1,11 +1,12 @@
 import { Component, Input, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Player } from '../../../models/player.model';
+import { PlayerAvatarComponent } from '../player-avatar/player-avatar.component';
 
 @Component({
   selector: 'app-field-lineup',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PlayerAvatarComponent],
   templateUrl: './field-lineup.component.html',
   styleUrl: './field-lineup.component.scss'
 })

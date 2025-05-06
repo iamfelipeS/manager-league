@@ -292,10 +292,14 @@
                 </div>
                 }
             </div>
-            <app-team-lineup-modal
-                [teams]="generatedTeams"
-                [visible]="teamModalVisible"
-            />
+            @if (!isLoading()){
+                <app-team-lineup-modal
+                    [teams]="generatedTeams"
+                    [visible]="teamModalVisible"
+                />
+            }@else {
+                <app-loader />
+            }
             }
         </div>
     </div>

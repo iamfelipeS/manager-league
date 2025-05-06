@@ -268,6 +268,8 @@ export class LeagueDetailsComponent implements OnInit {
   }
 
   generateTeams(): void {
+    this.isLoading.set(true);
+
     const selectedPlayers = this.players().filter(p => p.selected);
     const teamCount = this.selectedTeamCount || 2;
   
@@ -342,13 +344,18 @@ export class LeagueDetailsComponent implements OnInit {
         .sort((a, b) => b.r - a.r)
         .map(obj => obj.p);
   
-      while (sortedRemaining.length) {
-        const group = sortedRemaining.splice(0, teamCount);
-        const shuffled = this.shuffleArray(group);
-        shuffled.forEach((player, i) => {
-          if (player) teams[i % teamCount].players.push(player);
-        });
-      }
+        while (sortedRemaining.length) {
+          const player = sortedRemaining.shift();
+          if (!player) continue;
+        
+          // Encontra o time com menos jogadores atualmente
+          const targetTeam = teams.reduce((minTeam, currTeam) =>
+            currTeam.players.length < minTeam.players.length ? currTeam : minTeam
+          );
+        
+          targetTeam.players.push(player);
+        }
+        
   
       // 3. Cálculo do rating médio dos times
       for (const team of teams) {
@@ -369,14 +376,18 @@ export class LeagueDetailsComponent implements OnInit {
     }
   
     this.generatedTeams = validTeams;
-  
+    setTimeout(() => {
+      2000
+      this.openTeamModal();
+      this.isLoading.set(false);
+    }, 0);
+
     if (flagsComProblema.length) {
       this.toaster.info(
         `Alguns grupos não foram totalmente separados entre os times: ${flagsComProblema.join(', ')}.`
       );
     }
 
-    this.openTeamModal();
   }
   
   //METODO MAIS ALEATORIEDADE

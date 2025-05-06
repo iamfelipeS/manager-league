@@ -1,0 +1,32 @@
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+}
+
+.field-container {
+  @apply relative w-full h-full rounded-xl overflow-hidden;
+}
+
+.field-background {
+  @apply absolute top-0 left-0 w-full h-full object-cover z-0;
+}
+
+/* Posições dos jogadores - mais próximas do topo e com gap aumentado */
+.lineup-layer {
+  @apply absolute left-0 right-0 flex justify-center flex-wrap gap-2;
+}
+
+.goleiro   { top: 6%; }
+.defensores { top: 18%; }
+.meio-campo { top: 36%; }
+.atacantes { top: 72%; }
+
+@media (min-width: 768px) {
+  .goleiro   { top: 5%; }
+  .defensores { top: 17%; }
+  .meio-campo { top: 35%; }
+  .atacantes { top: 70%; }
+}

@@ -1,82 +1,39 @@
-<div class="relative w-full mx-auto aspect-[9/16] rounded-xl shadow-md overflow-hidden bg-black p-2">
+<div class="field-container">
+  <img src="img/campo-futebol.jpeg" alt="Campo de Futebol" class="field-background" />
 
-  <!-- Imagem do campo -->
-  <img src="img/campo-futebol.jpeg" alt="Campo de Futebol" class="absolute top-0 left-0 w-full h-full object-cover z-0" />
-
-  <!-- Goleiro -->
-  <div class="absolute left-0 right-0 top-[5%] flex justify-center">
-    <div class="flex justify-center gap-4">
-      @for (player of groupByPosition().G; track player.id) {
-      <div class="flex flex-col items-center relative">
-        <div class="relative w-12 h-12">
-          <img [src]="player.avatarUrl || 'icons/user.png'" class="w-12 h-12 rounded-full object-cover shadow" />
-          <span class="absolute -top-2 -left-5 w-5 h-5 bg-zinc-800 text-white text-[10px] flex items-center justify-center font-bold shadow rounded-full">
-            {{ player.posicao }}
-          </span>
-        </div>
-        <span class="mt-1 w-12 text-xs text-white bg-black bg-opacity-50 rounded text-center px-1">
-          {{ player.name }}
-        </span>
-      </div>
-      }
-    </div>
+  <div class="lineup-layer goleiro">
+    @for (player of groupByPosition().G; track player.id) {
+      <app-player-avatar
+        [name]="player.name"
+        [posicao]="player.posicao"
+        [avatarUrl]="player.avatarUrl ?? null" />
+    }
   </div>
 
-  <!-- Defensores -->
-  <div class="absolute left-0 right-0 top-[20%] flex justify-center">
-    <div class="flex justify-center gap-4">
-      @for (player of groupByPosition().D; track player.id) {
-      <div class="flex flex-col items-center relative">
-        <div class="relative w-12 h-12">
-          <img [src]="player.avatarUrl || 'icons/user.png'" class="w-12 h-12 rounded-full object-cover shadow" />
-          <span class="absolute -top-1 left-0 w-5 h-5 bg-zinc-800 text-white text-[10px] flex items-center justify-center font-bold shadow rounded-full">
-            {{ player.posicao }}
-          </span>
-        </div>
-        <span class="mt-1 w-12 text-xs text-white bg-black bg-opacity-50 rounded text-center px-1">
-          {{ player.name }}
-        </span>
-      </div>
-      }
-    </div>
+  <div class="lineup-layer defensores">
+    @for (player of groupByPosition().D; track player.id) {
+      <app-player-avatar
+        [name]="player.name"
+        [posicao]="player.posicao"
+        [avatarUrl]="player.avatarUrl ?? null" />
+    }
   </div>
 
-  <!-- Meio-Campo -->
-  <div class="absolute left-0 right-0 top-[38%] flex justify-center">
-    <div class="flex justify-center gap-4">
-      @for (player of groupByPosition().M; track player.id) {
-      <div class="flex flex-col items-center relative">
-        <div class="relative w-12 h-12">
-          <img [src]="player.avatarUrl || 'icons/user.png'" class="w-12 h-12 rounded-full object-cover shadow" />
-          <span class="absolute -top-1 left-0 w-5 h-5 bg-zinc-800 text-white text-[10px] flex items-center justify-center font-bold shadow rounded-full">
-            {{ player.posicao }}
-          </span>
-        </div>
-        <span class="mt-1 w-12 text-xs text-white bg-black bg-opacity-50 rounded text-center px-1">
-          {{ player.name }}
-        </span>
-      </div>
-      }
-    </div>
+  <div class="lineup-layer meio-campo">
+    @for (player of groupByPosition().M; track player.id) {
+      <app-player-avatar
+        [name]="player.name"
+        [posicao]="player.posicao"
+        [avatarUrl]="player.avatarUrl ?? null" />
+    }
   </div>
 
-  <!-- Atacantes -->
-  <div class="absolute left-0 right-0 top-[60%] flex justify-center">
-    <div class="flex justify-center gap-4">
-      @for (player of groupByPosition().A; track player.id) {
-      <div class="flex flex-col items-center relative">
-        <div class="relative w-12 h-12">
-          <img [src]="player.avatarUrl || 'icons/user.png'" class="w-12 h-12 rounded-full object-cover shadow" />
-          <span class="absolute -top-1 left-0 w-5 h-5 bg-zinc-800 text-white text-[10px] flex items-center justify-center font-bold shadow rounded-full">
-            {{ player.posicao }}
-          </span>
-        </div>
-        <span class="mt-1 w-12 text-xs text-white bg-black bg-opacity-50 rounded text-center px-1">
-          {{ player.name }}
-        </span>
-      </div>
-      }
-    </div>
+  <div class="lineup-layer atacantes">
+    @for (player of groupByPosition().A; track player.id) {
+      <app-player-avatar
+        [name]="player.name"
+        [posicao]="player.posicao"
+        [avatarUrl]="player.avatarUrl ?? null" />
+    }
   </div>
-
 </div>
