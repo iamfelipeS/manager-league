@@ -268,13 +268,16 @@ export class LeagueDetailsComponent implements OnInit {
   }
 
   generateTeams(): void {
-    this.isLoading.set(true);
-
     const selectedPlayers = this.players().filter(p => p.selected);
     const teamCount = this.selectedTeamCount || 2;
   
+    if (selectedPlayers.length === 0) {
+      this.toaster.warning('Selecione pelo menos um jogador para gerar os times.');
+      return;
+    }
+  
     if (selectedPlayers.length < teamCount) {
-      this.toaster.warning('Número insuficiente de jogadores.');
+      this.toaster.warning('Número insuficiente de jogadores para a quantidade de times.');
       return;
     }
   
@@ -296,7 +299,6 @@ export class LeagueDetailsComponent implements OnInit {
       }
     }
   
-    // Flags com quantidade insuficiente
     const flagsComProblema: string[] = [];
   
     for (const [flagId, players] of Object.entries(playersByFlag)) {
@@ -315,7 +317,7 @@ export class LeagueDetailsComponent implements OnInit {
   
       const alreadyAdded = new Set<string>();
   
-      // 1. Distribuição das flags ativas
+      // 1. Distribuição das flags
       for (const players of Object.values(playersByFlag)) {
         const countPerTeam = Math.floor(players.length / teamCount);
         const extra = players.length % teamCount;
@@ -337,27 +339,25 @@ export class LeagueDetailsComponent implements OnInit {
         }
       }
   
-      // 2. Distribuição dos jogadores restantes, balanceando rating
+      // 2. Distribuição restante, balanceada por quantidade
       const remainingPlayers = selectedPlayers.filter(p => !alreadyAdded.has(p.id));
       const sortedRemaining = remainingPlayers
         .map(p => ({ p, r: this.ratingService.calculate(p) }))
         .sort((a, b) => b.r - a.r)
         .map(obj => obj.p);
   
-        while (sortedRemaining.length) {
-          const player = sortedRemaining.shift();
-          if (!player) continue;
-        
-          // Encontra o time com menos jogadores atualmente
-          const targetTeam = teams.reduce((minTeam, currTeam) =>
-            currTeam.players.length < minTeam.players.length ? currTeam : minTeam
-          );
-        
-          targetTeam.players.push(player);
-        }
-        
+      while (sortedRemaining.length) {
+        const player = sortedRemaining.shift();
+        if (!player) continue;
   
-      // 3. Cálculo do rating médio dos times
+        const targetTeam = teams.reduce((minTeam, currTeam) =>
+          currTeam.players.length < minTeam.players.length ? currTeam : minTeam
+        );
+  
+        targetTeam.players.push(player);
+      }
+  
+      // 3. Rating médio por time
       for (const team of teams) {
         const total = team.players.reduce((sum, p) => sum + this.ratingService.calculate(p), 0);
         team.overall = Math.round(total / team.players.length);
@@ -376,20 +376,48 @@ export class LeagueDetailsComponent implements OnInit {
     }
   
     this.generatedTeams = validTeams;
-    setTimeout(() => {
-      2000
-      this.openTeamModal();
-      this.isLoading.set(false);
-    }, 0);
-
+    this.isLoading.set(true);
+  
+    // Preload campo + avatares
+    const campoImg = new Image();
+    campoImg.src = 'img/campo-futebol.jpeg';
+  
+    const avatarUrls = selectedPlayers
+      .map(p => p.avatarUrl)
+      .filter(Boolean) as string[];
+  
+    const avatarImgs = avatarUrls.map(url => {
+      const img = new Image();
+      img.src = url;
+      return img;
+    });
+  
+    const allImages = [campoImg, ...avatarImgs];
+  
+    let loadedCount = 0;
+    const markLoaded = () => {
+      loadedCount++;
+      if (loadedCount === allImages.length) {
+        setTimeout(() => {
+          this.isLoading.set(false);
+          this.openTeamModal();
+        }, 100);
+      }
+    };
+  
+    allImages.forEach(img => {
+      img.onload = markLoaded;
+      img.onerror = markLoaded;
+    });
+  
     if (flagsComProblema.length) {
       this.toaster.info(
         `Alguns grupos não foram totalmente separados entre os times: ${flagsComProblema.join(', ')}.`
       );
     }
-
   }
   
+
   //METODO MAIS ALEATORIEDADE
   recalculateTeamAverages() {
     for (const team of this.generatedTeams) {
