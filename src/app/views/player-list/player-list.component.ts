@@ -36,7 +36,6 @@ export class PlayerListComponent implements OnInit {
 
   selectedPlayer: Player | null = null;
   selectedFlagId: number | null = null;
-  selectedFlagAffectsTeamGeneration: boolean = false;
 
   isLoading = signal(true);
   players = signal<Player[]>([]);
@@ -74,13 +73,15 @@ export class PlayerListComponent implements OnInit {
     } finally {
       this.isLoading.set(false);
     }
-    console.log(this.players().map(p => ({ name: p.name, flags: p.flags })));
+    // console.log(this.players().map(p => ({ name: p.name, flags: p.flags })));
   }
 
   async loadFlags(): Promise<void> {
     try {
       const flags = await this.flagService.getAllFlags();
-      this.availableFlags.set(flags);
+      this.availableFlags.set(
+        flags.sort((a, b) => a.name.localeCompare(b.name))
+      );
     } catch (error) {
       console.error('Erro ao carregar flags:', error);
       this.toaster.error('Erro ao carregar grupos');
@@ -113,7 +114,6 @@ export class PlayerListComponent implements OnInit {
     const flagPrincipal = player.flags?.[0] ?? null;
   
     this.selectedFlagId = flagPrincipal?.id ?? null;
-    this.selectedFlagAffectsTeamGeneration = flagPrincipal?.affectsTeamGeneration ?? false;
   
     this.modal.open({
       title: 'Editar Jogador',
@@ -239,33 +239,25 @@ export class PlayerListComponent implements OnInit {
   }
 
   // FLAG
-  toggleFlag(flag: PlayerFlag) {
-    const current = this.selectedPlayer?.flags ?? [];
-    const exists = current.find(f => f.id === flag.id);
-
-    this.selectedPlayer!.flags = exists
-      ? current.filter(f => f.id !== flag.id)
-      : [...current, flag];
-  }
-
   hasFlag(player: Player, flag: PlayerFlag): boolean {
     return !!player.flags?.some(f => f.id === flag.id);
   }
 
-  createAndSelectFlag() {
-    if (!this.selectedPlayer) return;
+  async createAndSelectFlag() {
+    const name = prompt('Digite o nome da nova flag:');
+    if (!name || !name.trim()) return;
   
-    const novaFlag = {
-      id: Date.now(), // temporário ou gerado via backend
-      name: `Grupo ${Date.now()}`,
-      affectsTeamGeneration: this.selectedFlagAffectsTeamGeneration
-    };
+    try {
+      const novaFlag = await this.flagService.createFlag(name.trim());
   
-    this.selectedPlayer.flags = this.selectedPlayer.flags || [];
-    this.selectedPlayer.flags.push(novaFlag);
+      this.availableFlags.update(flags => [...flags, novaFlag]);
+      this.selectedFlagId = novaFlag.id;
   
-    this.selectedFlagId = novaFlag.id;
-    this.selectedFlagAffectsTeamGeneration = false;
+      this.toaster.success('Flag criada com sucesso!');
+    } catch (error) {
+      console.error('Erro ao criar flag:', error);
+      this.toaster.error('Erro ao criar flag');
+    }
   }
   
 

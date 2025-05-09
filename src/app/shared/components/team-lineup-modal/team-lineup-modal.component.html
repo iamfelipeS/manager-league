@@ -1,14 +1,21 @@
 <div *ngIf="visible()" class="fixed inset-0 z-50 bg-black bg-opacity-80 flex flex-col">
-  <!-- Botão fechar -->
-  <div class="flex justify-end p-4">
+  
+  <div class="hidden md:block justify-end p-4">
     <button (click)="close()" class="text-white text-2xl hover:text-gray-300">&times;</button>
   </div>
-
-  <!-- Botão Compartilhar Todas -->
-  <div class="flex justify-center mt-2 mb-4">
-    <button (click)="generateAllTeamsCanvas(teams)" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-      <i class="text-sm py-1 px-2 fas fa-share-square"></i> Compartilhar Todas Escalações
-    </button>
+  <div class="flex flex-row justify-center">
+    <!-- Botão Compartilhar Todas -->
+    <div class="flex justify-center mt-2 mb-4">
+      <button (click)="generateAllTeamsCanvas(teams)" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+        <i class="text-sm py-1 px-2 fas fa-share-square"></i> Compartilhar Todas Escalações
+      </button>
+    </div>
+    
+    <!-- Botão fechar -->
+    <div class="block md:hidden justify-end p-4">
+      <button (click)="close()" class="text-white text-2xl hover:text-gray-300">&times;</button>
+    </div>
+  
   </div>
 
   <!-- Versão desktop -->

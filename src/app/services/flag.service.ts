@@ -9,12 +9,12 @@ export class FlagService {
   async createFlag(name: string): Promise<PlayerFlag> {
     const { data, error } = await supabase
       .from('flags')
-      .insert({ name })
+      .insert([{ name, affectsTeamGeneration: true }])
       .select()
       .single();
   
     if (error) throw error;
-    return data as PlayerFlag;
+    return data;
   }
 
   async getAllFlags(): Promise<PlayerFlag[]> {
