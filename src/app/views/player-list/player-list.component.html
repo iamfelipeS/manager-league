@@ -12,15 +12,21 @@
         <option value="posicao">Classificar por Posição</option>
       </select>
 
-      <div class="flex justify-end">
-
-        <button
-        (click)="addPlayer()"
-        class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
-        title="Adicionar Jogador"
+      <div class="flex justify-end gap-2">
+        <button class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
+          (click)="addPlayer()"  
+          title="Adicionar Jogador"
         >
         <i class="fas fa-user-plus text-white text-lg"></i>
       </button>
+
+      <button class="flex items-center justify-center border border-primary hover:bg-grays7 text-white w-12 h-12 rounded-full"
+        (click)="redirectToFlagAdmin()"
+        title="Administrar Grupos"
+      >
+        <i class="fas fa-users text-primary text-lg"></i>
+      </button>
+    
     </div>
   </div>
   

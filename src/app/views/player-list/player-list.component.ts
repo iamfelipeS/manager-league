@@ -17,6 +17,7 @@ import { Player, PlayerFlag } from '../../models/player.model';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { ToasterService } from '../../services/toaster.service';
 import { FlagService } from '../../services/flag.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-player-list',
@@ -30,6 +31,7 @@ export class PlayerListComponent implements OnInit {
   private ratingService = inject(RatingService);
   private flagService = inject(FlagService);
   private toaster = inject(ToasterService);
+  private router = inject(Router);
 
   @ViewChild('modal') modal!: ModalComponent;
   @ViewChild('playerFormTemplate') formTemplateRef!: TemplateRef<any>;
@@ -39,10 +41,11 @@ export class PlayerListComponent implements OnInit {
 
   isLoading = signal(true);
   players = signal<Player[]>([]);
+  novaFlagUsarNaGeracao = signal(true);
   readonly availableFlags = signal<PlayerFlag[]>([]);
 
   orderBy = signal<'rating' | 'name' | 'posicao'>('rating');
-  
+
   orderedPlayers = computed(() => {
     const players = [...this.players()];
     const sortBy = this.orderBy();
@@ -101,56 +104,56 @@ export class PlayerListComponent implements OnInit {
       flags: []
     };
     this.selectedFlagId = null;
-  
+
     this.modal.open({
       title: 'Adicionar Jogador',
       template: this.formTemplateRef,
     });
   }
-  
+
   editPlayer(player: Player) {
-    this.selectedPlayer = { ...player }; 
-  
+    this.selectedPlayer = { ...player };
+
     const flagPrincipal = player.flags?.[0] ?? null;
-  
+
     this.selectedFlagId = flagPrincipal?.id ?? null;
-  
+
     this.modal.open({
       title: 'Editar Jogador',
       template: this.formTemplateRef,
     });
   }
-  
-  
+
+
   async savePlayer() {
     if (!this.selectedPlayer) return;
-  
+
     this.selectedPlayer.rating = this.getRating(this.selectedPlayer);
-  
+
     try {
       const exists = this.players().some(p => p.id === this.selectedPlayer!.id);
-  
+
       if (exists) {
         await this.playerService.updatePlayer(this.selectedPlayer!);
       } else {
         await this.playerService.addPlayer(this.selectedPlayer!);
       }
-  
+
       // Garante que sempre exista a propriedade flags, mesmo vazia
       this.selectedPlayer.flags = this.selectedPlayer.flags ?? [];
-  
+
       const flagId = this.selectedFlagId;
       await this.flagService.updatePlayerFlags(
         this.selectedPlayer.id,
         flagId ? [flagId] : []
       );
-  
+
       await this.loadPlayers();
-  
+
       this.toaster.success(exists ? 'Jogador atualizado!' : 'Jogador adicionado!');
     } catch (err: any) {
       let errorMessage = 'Erro ao salvar jogador';
-    
+
       // Se o erro for um objeto com status ou message
       if (err?.status) {
         if (err.status === 401) {
@@ -170,7 +173,7 @@ export class PlayerListComponent implements OnInit {
       this.toaster.error('Erro ao salvar jogador');
     }
   }
-  
+
 
   async deletePlayer(id: string) {
     if (!confirm('Deseja remover este jogador?')) return;
@@ -239,57 +242,60 @@ export class PlayerListComponent implements OnInit {
   }
 
   // FLAG
+  redirectToFlagAdmin(){
+    this.router.navigateByUrl("/admin/flags");
+  }
+
   hasFlag(player: Player, flag: PlayerFlag): boolean {
     return !!player.flags?.some(f => f.id === flag.id);
   }
 
   async createAndSelectFlag() {
-    const name = prompt('Digite o nome da nova flag:');
+    const name = prompt('Nome da nova flag:');
     if (!name || !name.trim()) return;
-  
+
     try {
-      const novaFlag = await this.flagService.createFlag(name.trim());
-  
+      const novaFlag = await this.flagService.createFlag(name.trim(), this.novaFlagUsarNaGeracao());
+
       this.availableFlags.update(flags => [...flags, novaFlag]);
       this.selectedFlagId = novaFlag.id;
-  
+
       this.toaster.success('Flag criada com sucesso!');
     } catch (error) {
       console.error('Erro ao criar flag:', error);
       this.toaster.error('Erro ao criar flag');
     }
   }
-  
 
   // AVATAR
   onAvatarChange(event: Event, player: Player) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-  
+
     if (!file) {
       this.toaster.error('Nenhum arquivo selecionado.');
       return;
     }
-  
+
     const validTypes = ['image/jpeg', 'image/png'];
     const maxSizeMB = 10;
-  
+
     console.log('Arquivo selecionado:', {
       name: file.name,
       type: file.type,
       sizeMB: (file.size / (1024 * 1024)).toFixed(2),
     });
-  
+
     if (!validTypes.includes(file.type)) {
       this.toaster.error('Formato inválido. Envie uma imagem JPG ou PNG.');
       return;
     }
-  
+
     if (file.size > maxSizeMB * 1024 * 1024) {
       this.toaster.error(`Imagem muito grande. Máximo permitido: ${maxSizeMB}MB.`);
       return;
     }
-  
+
     this.playerService.updateAvatar(player, file)
       .then(() => {
         this.toaster.success('Avatar atualizado com sucesso!');
@@ -299,7 +305,7 @@ export class PlayerListComponent implements OnInit {
         this.toaster.error('Erro ao atualizar avatar.');
       });
   }
-  
+
 }
 
 
