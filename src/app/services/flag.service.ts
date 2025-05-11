@@ -6,10 +6,10 @@ import { PlayerFlag } from '../models/player.model';
 export class FlagService {
   readonly flags = signal<PlayerFlag[]>([]);
 
-  async createFlag(name: string): Promise<PlayerFlag> {
+  async createFlag(name: string, affectsTeamGeneration = true): Promise<PlayerFlag> {
     const { data, error } = await supabase
       .from('flags')
-      .insert([{ name, affectsTeamGeneration: true }])
+      .insert([{ name, affectsTeamGeneration }])
       .select()
       .single();
   
@@ -63,4 +63,20 @@ export class FlagService {
       if (insertError) throw insertError;
     }
   }
+
+  async updateFlag(flag: PlayerFlag): Promise<void> {
+    const { error } = await supabase
+      .from('flags')
+      .update({ affectsTeamGeneration: flag.affectsTeamGeneration })
+      .eq('id', flag.id);
+  
+    if (error) throw error;
+  }
+  
+  async deleteFlag(id: number): Promise<void> {
+    const { error } = await supabase.from('flags').delete().eq('id', id);
+    if (error) throw error;
+  }
+  
+  
 }

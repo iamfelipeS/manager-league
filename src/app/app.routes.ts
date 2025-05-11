@@ -40,6 +40,10 @@ export const routes: Routes = [
     {
         path: 'confirmar-conta',
         loadComponent: () => import('./views/confirm-account/confirm-account.component').then(m => m.ConfirmAccountComponent)
-    }
+    },
+    {
+        path: 'admin/flags',
+        loadComponent: () => import('./views/flag-admin/flag-admin.component').then(m => m.FlagAdminComponent),
+    },
 
 ];

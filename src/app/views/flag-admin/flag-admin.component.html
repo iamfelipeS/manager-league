@@ -1,0 +1,60 @@
+<div class="max-w-3xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Administração de Grupos (Flags)</h1>
+    <div class="flex justify-end mb-4">
+      <button
+        class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+        (click)="createFlagPrompt()"
+      >
+        <i class="fas fa-plus"></i> Novo Grupo
+      </button>
+    </div>
+    
+    @if (isLoading()) {
+      <app-loader />
+    } @else {
+      <table class="w-full border text-sm">
+        <thead>
+          <tr class="bg-gray-100 text-left">
+            <th class="p-2">Nome</th>
+            <th class="p-2">Usar na Geração</th>
+            <th class="p-2 text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (flag of flags(); track flag.id) {
+            <tr class="border-t">
+              <td class="p-2">{{ flag.name }}</td>
+              <td class="p-2">
+                <label class="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    class="sr-only peer"
+                    [checked]="flag.affectsTeamGeneration"
+                    (change)="toggleAffectsGeneration(flag)"
+                  />
+                  <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300
+                           rounded-full peer peer-checked:bg-blue-600 relative transition-colors">
+                    <div
+                      class="absolute top-[2px] left-[2px] bg-white border border-gray-300 h-5 w-5 rounded-full
+                             transition-transform peer-checked:translate-x-full">
+                    </div>
+                  </div>
+                </label>
+              </td>
+              <td class="p-2 text-center">
+                <button
+                  class="text-red-600 hover:text-red-800"
+                  (click)="deleteFlag(flag)"
+                  title="Deletar grupo"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+  
