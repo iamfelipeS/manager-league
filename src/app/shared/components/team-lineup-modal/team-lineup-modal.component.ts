@@ -2,7 +2,7 @@ import { Component, inject, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FieldLineupComponent } from '../field-lineup/field-lineup.component';
 import { Team } from '../../../models/team.model';
-import html2canvas from 'html2canvas';
+import { toBlob } from 'html-to-image';
 import { ToasterService } from '../../../services/toaster.service';
 import { LoaderComponent } from '../loader/loader.component';
 @Component({
@@ -20,6 +20,44 @@ export class TeamLineupModalComponent {
 
   private isCapturing = signal(false);
   private toaster = inject(ToasterService);
+
+  openedShareIndex: number | null = null;
+
+  toggleShareMenu(index: number): void {
+    this.openedShareIndex = this.openedShareIndex === index ? null : index;
+  }
+
+  async shareTeamImage(teamName: string, elementId: string) {
+    const element = document.getElementById(elementId);
+    if (!element) {
+      this.toaster.error('Elemento não encontrado para captura.');
+      return;
+    }
+  
+    try {
+      const blob = await toBlob(element);
+  
+      if (!blob) {
+        throw new Error('Falha ao gerar imagem.');
+      }
+  
+      const file = new File([blob], `${teamName}.png`, { type: blob.type });
+  
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: `Time ${teamName}`,
+          text: `Veja a escalação do time ${teamName} ⚽️`,
+          files: [file],
+        });
+      } else {
+        this.toaster.warning('Este dispositivo não suporta compartilhamento de arquivos.');
+      }
+    } catch (error) {
+      this.toaster.error('Erro ao compartilhar o time.');
+      console.error('Erro ao compartilhar imagem:', error);
+    }
+  }
+  
 
   close() {
     this.visible.set(false);

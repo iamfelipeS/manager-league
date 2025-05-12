@@ -7,11 +7,22 @@
 }
 
 .field-container {
-  @apply relative w-full h-full rounded-xl overflow-hidden;
+  @apply relative w-full;
+
+  // Altura mínima para garantir que os avatares tenham espaço para posicionamento
+  min-height: 510px;
+
+  // Responsivo para telas menores
+  @screen sm {
+    min-height: 700px;
+  }
+
 }
 
 .field-background {
-  @apply absolute top-0 left-0 w-full h-full object-cover z-0;
+  @apply absolute inset-0 w-full h-full object-cover z-0;
+  object-position: center;
+  max-height: 100%;
 }
 
 /* Posições dos jogadores - mais próximas do topo e com gap aumentado */

@@ -1,9 +1,9 @@
-<div *ngIf="visible()" class="fixed inset-0 z-50 bg-black bg-opacity-80 flex flex-col">
+<div *ngIf="visible()" class="fixed inset-0 z-50 flex flex-col">
   
   <div class="hidden md:block justify-end p-4">
     <button (click)="close()" class="text-white text-2xl hover:text-gray-300">&times;</button>
   </div>
-  <div class="flex flex-row justify-center">
+  <div class="hidden md:block flex-row justify-center">
     <!-- Botão Compartilhar Todas -->
     <div class="flex justify-center mt-2 mb-4">
       <button (click)="generateAllTeamsCanvas(teams)" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
@@ -22,7 +22,7 @@
   <div class="hidden md:flex flex-wrap justify-center gap-6 px-8 pb-10 overflow-y-auto">
     @for (team of teams; track team.name) {
       <div class="bg-white rounded-xl p-4 shadow-lg w-full max-w-sm">
-        <div class="flex justify-center mt-2">
+        <div class="flex justify-center mt-1">
           <button (click)="generateCanvasFromTeamRealAvatars(team, $index)" class="flex items-center gap-2 text-green-600 hover:text-green-800 text-sm">
             <i class="fas fa-download"></i> Compartilhar este time
           </button>
@@ -38,7 +38,7 @@
             Média: {{ team.overall }}
           </div>
         </div>
-        <div [id]="'capture-field-' + team.name" class="bg-black rounded-xl overflow-hidden">
+        <div>
           <app-field-lineup [teamName]="team.name" [players]="team.players" />
         </div>
       </div>
@@ -48,12 +48,33 @@
   <!-- Versão mobile (um por vez, ocupando largura total) -->
   <div class="md:hidden flex gap-4 px-0 pb-10 overflow-x-auto snap-x snap-mandatory">
     @for (team of teams; track team.name) {
-      <div class="min-w-full max-w-full w-full shrink-0 snap-center bg-white rounded-xl shadow p-2 pb-4">
-        <div class="flex justify-center mt-1">
-          <button (click)="generateCanvasFromTeamRealAvatars(team, $index)" class="flex items-center gap-2 text-green-600 hover:text-green-800 text-sm">
-            <i class="fas fa-download"></i> Compartilhar este time
+      <div class="min-w-full max-w-full w-full h-full shrink-0 snap-center bg-white rounded-xl shadow p-2 pb-4">
+        <div class="flex justify-center mt-1 relative">
+          <button
+            (click)="toggleShareMenu($index)"
+            class="text-green-600 hover:text-green-800 text-xl"
+            title="Compartilhar"
+          >
+            <i class="fas fa-share-alt"></i>
           </button>
+        
+          <div
+            *ngIf="openedShareIndex === $index"
+            class="absolute z-50 bg-white border rounded shadow-md top-10 right-0 p-2 flex flex-col gap-2 text-sm"
+          >
+            <button (click)="shareTeamImage(team.name, 'capture-field-' + team.name)">
+              📤 Compartilhar este time
+            </button>
+          
+            <button
+              class="hover:bg-gray-100 px-2 py-1 text-left"
+              (click)="generateAllTeamsCanvas(teams)"
+            >
+              📤 Compartilhar todos
+            </button>
+          </div>
         </div>
+        
         <div class="flex flex-col items-center mb-1">
           <h2 class="text-base font-bold text-zinc-800">{{ team.name }}</h2>
           <div class="text-xs font-bold rounded-full px-2 py-1 text-white"
