@@ -24,11 +24,11 @@ export class TeamLineupModalComponent implements OnInit, OnDestroy {
   openedShareIndex: number | null = null;
 
   ngOnInit() {
-    document.body.classList.add('overflow-hidden');
+    // document.body.classList.add('overflow-hidden');
   }
 
   ngOnDestroy() {
-    document.body.classList.remove('overflow-hidden');
+    // document.body.classList.remove('overflow-hidden');
   }
 
 
