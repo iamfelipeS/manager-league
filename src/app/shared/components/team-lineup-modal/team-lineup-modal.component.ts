@@ -1,4 +1,4 @@
-import { Component, inject, Input, signal } from '@angular/core';
+import { Component, inject, Input, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FieldLineupComponent } from '../field-lineup/field-lineup.component';
 import { Team } from '../../../models/team.model';
@@ -12,7 +12,7 @@ import { LoaderComponent } from '../loader/loader.component';
   templateUrl: './team-lineup-modal.component.html',
   styleUrl: './team-lineup-modal.component.scss'
 })
-export class TeamLineupModalComponent {
+export class TeamLineupModalComponent implements OnInit, OnDestroy {
   @Input() teams: Team[] = [];
   @Input() visible = signal(false);
 
@@ -22,6 +22,15 @@ export class TeamLineupModalComponent {
   private toaster = inject(ToasterService);
 
   openedShareIndex: number | null = null;
+
+  ngOnInit() {
+    document.body.classList.add('overflow-hidden');
+  }
+
+  ngOnDestroy() {
+    document.body.classList.remove('overflow-hidden');
+  }
+
 
   toggleShareMenu(index: number): void {
     this.openedShareIndex = this.openedShareIndex === index ? null : index;
@@ -33,16 +42,16 @@ export class TeamLineupModalComponent {
       this.toaster.error('Elemento não encontrado para captura.');
       return;
     }
-  
+
     try {
       const blob = await toBlob(element);
-  
+
       if (!blob) {
         throw new Error('Falha ao gerar imagem.');
       }
-  
+
       const file = new File([blob], `${teamName}.png`, { type: blob.type });
-  
+
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: `Time ${teamName}`,
@@ -57,9 +66,10 @@ export class TeamLineupModalComponent {
       console.error('Erro ao compartilhar imagem:', error);
     }
   }
-  
+
 
   close() {
+    this.visible.set(false);
     this.visible.set(false);
   }
 
