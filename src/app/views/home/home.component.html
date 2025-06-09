@@ -1,31 +1,57 @@
-<!-- home.component.html -->
-<div class="container mx-auto px-4 py-6">
-    <div>
-        <h1 class="text-2xl font-bold mb-6">Campeonatos</h1>
-        <!-- botao com fontawesome -->
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      @for (league of leagues; track league.name) {
-        <div class="flex flex-col p-4 border rounded shadow cursor-pointer hover:shadow-lg transition-shadow"
-             (click)="navigateToDetails(league.name)">
-          @if (league.img && league.img.trim() !== '') {
-            <img [src]="league.img" [alt]="league.name" class="w-full h-40 object-cover">
-          } @else {
-            <img [src]="imagemPadrao" [alt]="league.name" class="w-full h-40 object-cover">
-          }
-          <div class="mt-2">
-            <p class="text-center font-semibold">{{ league.name }}</p>
-            <p class="text-sm text-gray-600">
-              Privado: {{ league.private ? 'Sim' : 'Não' }}
-            </p>
-            @if (league.organizer && league.organizer.length > 0) {
-              <p class="text-sm">
-                Organizador: {{ league.organizer[0].name }}
-              </p>
-            }
-          </div>
-        </div>
-      }
-    </div>
+<div class="container mx-auto px-4 py-6 max-w-6xl">
+  <!-- Logo central -->
+  <div class="flex justify-center">
+    <img
+      src="/img/logo.png"
+      alt="Manager League"
+      class="h-32 md:h-30 object-contain drop-shadow-sm"
+    />
   </div>
+
+  <!-- Título e subtítulo -->
+  <div class="text-center mb-10">
+    <h1 class="text-4xl font-extrabold text-zinc-800">Manager League</h1>
+    <p class="text-sm md:text-base text-gray-600 mt-2">
+      Gerencie campeonatos, cadastre jogadores e acompanhe a classificação em tempo real ⚽
+    </p>
+  </div>
+
+  <!-- Campo de busca -->
+  <div class="flex justify-center mb-8">
+    <input
+      type="text"
+      [(ngModel)]="filtro"
+      placeholder="Buscar liga por nome..."
+      class="w-full max-w-md border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:ring-3 focus:ring-orange-300"
+    />
+  </div>
+
+  <!-- Grid de ligas -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    @for (league of ligasFiltradas(); track league.id) {
+      <div
+        class="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
+        (click)="navigateToDetails(league.name)"
+      >
+        <img
+          [src]="league.img?.trim() || imagemPadrao"
+          alt="Logo da liga"
+          class="w-full h-36 object-cover bg-gray-100"
+        />
+        <div class="p-4 text-center">
+          <h2 class="text-lg font-semibold text-zinc-800 truncate">{{ league.name }}</h2>
+          <p class="text-xs text-gray-500 mt-1">
+            {{ league.private ? 'Liga Privada' : 'Liga Pública' }}
+          </p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Nenhuma liga encontrada -->
+  @if (ligasFiltradas().length === 0 && !isLoading()) {
+    <p class="text-center text-sm text-gray-500 mt-10">
+      Nenhuma liga encontrada com esse nome.
+    </p>
+  }
+</div>
