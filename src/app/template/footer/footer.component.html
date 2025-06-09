@@ -7,25 +7,26 @@
                         [ngClass]="{'text-blue-500': activeMenuItem === 'home'}"></i>
                     <span class="text-[9px] md:text-[16px]">Home</span>
                 </li>
-                <li class="flex flex-col gap-1 items-center cursor-pointer" (click)="navigateTo('classificacao')">
-                    <i class="fa fa-trophy text-[1.7rem]" aria-hidden="true"
-                        [ngClass]="{'text-blue-500': activeMenuItem === 'classificacao'}"></i>
-                    <span class="text-[9px] md:text-[16px]">Campeões</span>
-                </li>
                 <li class="flex flex-col gap-1 items-center cursor-pointer" (click)="navigateTo('jogadores')">
                     <i class="fa fa-users text-[1.7rem]" aria-hidden="true"
                         [ngClass]="{'text-blue-500': activeMenuItem === 'jogadores'}"></i>
                     <span class="text-[9px] md:text-[16px]">Jogadores</span>
                 </li>
-                <li class="flex flex-col gap-1 items-center cursor-pointer" (click)="navigateTo('vencedores')">
-                    <i class="fa fa-medal text-[1.7rem]" aria-hidden="true"
-                        [ngClass]="{'text-blue-500': activeMenuItem === 'vencedores'}"></i>
-                    <span class="text-[9px] md:text-[16px]">Vencedores</span>
-                </li>
                 <li class="flex flex-col gap-1 items-center cursor-pointer" (click)="navigateTo('noticias')">
                     <i class="fa fa-newspaper text-[1.7rem]" aria-hidden="true"
                         [ngClass]="{'text-blue-500': activeMenuItem === 'noticias'}"></i>
                     <span class="text-[9px] md:text-[16px]">Notícias</span>
+                </li>
+                <li class="flex flex-col gap-1 items-center cursor-pointer" (click)="navigateTo('faq')">
+                    <i class="fa fa-question-circle text-[1.7rem]" aria-hidden="true"
+                        [ngClass]="{'text-blue-500': activeMenuItem === 'faq'}"></i>
+                    <span class="text-[9px] md:text-[16px]">FAQ</span>
+                </li>
+
+                <li class="flex flex-col gap-1 items-center cursor-pointer" (click)="navigateTo('config')">
+                    <i class="fa fa-cog text-[1.7rem]" aria-hidden="true"
+                    [ngClass]="{'text-blue-500': activeMenuItem === 'config'}"></i>
+                    <span class="text-[9px] md:text-[16px]">Config</span>
                 </li>
             </ul>
         </div>
