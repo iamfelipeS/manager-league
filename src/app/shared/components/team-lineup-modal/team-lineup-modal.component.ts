@@ -70,7 +70,6 @@ export class TeamLineupModalComponent implements OnInit, OnDestroy {
 
   close() {
     this.visible.set(false);
-    this.visible.set(false);
   }
 
   //GERAR COMPARTILHAMENTO DOS TIMES
