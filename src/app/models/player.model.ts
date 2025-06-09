@@ -12,8 +12,9 @@ export interface Player {
   rating: number;
   selected?: boolean;
   avatarUrl?: string | null;
-  pontua: boolean; 
-  flags: PlayerFlag[]; 
+  pontua: boolean;
+  league_id: string;
+  flags: PlayerFlag[];
   movimentacao: 'Estático' | 'Normal' | 'Intenso';
   posicao: 'A' | 'M' | 'D' | 'G'; // Atacante, Meio campo, Defensor, Goleiro
 }

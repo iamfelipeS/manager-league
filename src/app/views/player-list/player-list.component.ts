@@ -18,6 +18,8 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
 import { ToasterService } from '../../services/toaster.service';
 import { FlagService } from '../../services/flag.service';
 import { Router } from '@angular/router';
+import { Leagues } from '../../models/leagues.model';
+import { LeaguesService } from '../../services/leagues.service';
 
 @Component({
   selector: 'app-player-list',
@@ -27,6 +29,7 @@ import { Router } from '@angular/router';
   styleUrl: './player-list.component.scss',
 })
 export class PlayerListComponent implements OnInit {
+  private leagueService = inject(LeaguesService);
   private playerService = inject(PlayerService);
   private ratingService = inject(RatingService);
   private flagService = inject(FlagService);
@@ -40,8 +43,10 @@ export class PlayerListComponent implements OnInit {
   selectedFlagId: number | null = null;
 
   isLoading = signal(true);
+  leagues = signal<Leagues[]>([]);
   players = signal<Player[]>([]);
   novaFlagUsarNaGeracao = signal(true);
+  ligaSelecionada = signal<string>('');
   readonly availableFlags = signal<PlayerFlag[]>([]);
 
   orderBy = signal<'rating' | 'name' | 'posicao'>('rating');
@@ -59,25 +64,46 @@ export class PlayerListComponent implements OnInit {
   });
 
   async ngOnInit() {
-    this.loadPlayers();
     this.loadFlags();
+
+    try {
+      const allLigas = await this.leagueService.getAllLeagues();
+      this.leagues.set(allLigas);
+
+      if (allLigas.length) {
+        this.ligaSelecionada.set(allLigas[0].id);
+        await this.loadPlayersByLeague();
+      }
+    } catch (err) {
+      this.toaster.error('Erro ao carregar ligas');
+      console.error(err);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   ngAfterViewInit(): void {
     this.modal.confirmed.subscribe(() => this.savePlayer());
   }
 
-  async loadPlayers() {
+  minhasLigas(): Leagues[] {
+    return this.leagues();
+  }
+
+  async loadPlayersByLeague() {
+    if (!this.ligaSelecionada()) return;
     this.isLoading.set(true);
+
     try {
-      this.players.set(await this.playerService.getPlayers());
+      const players = await this.playerService.getPlayersByLeague(this.ligaSelecionada());
+      this.players.set(players);
     } catch (err) {
-      this.toaster.error('Erro ao carregar jogadores');
+      this.toaster.error('Erro ao carregar jogadores da liga');
     } finally {
       this.isLoading.set(false);
     }
-    // console.log(this.players().map(p => ({ name: p.name, flags: p.flags })));
   }
+
 
   async loadFlags(): Promise<void> {
     try {
@@ -102,6 +128,7 @@ export class PlayerListComponent implements OnInit {
       posicao: 'M',
       rating: 0,
       pontua: false,
+      league_id: this.ligaSelecionada(),
       flags: []
     };
     this.selectedFlagId = null;
@@ -112,22 +139,36 @@ export class PlayerListComponent implements OnInit {
     });
   }
 
-  editPlayer(player: Player) {
-    this.selectedPlayer = { ...player };
+editPlayer(player: Player) {
+  this.selectedPlayer = { ...player };
 
-    const flagPrincipal = player.flags?.[0] ?? null;
-
-    this.selectedFlagId = flagPrincipal?.id ?? null;
-
-    this.modal.open({
-      title: 'Editar Jogador',
-      template: this.formTemplateRef,
-    });
+  // 🔧 GARANTIR QUE pontua é boolean
+  if (this.selectedPlayer.pontua === undefined || this.selectedPlayer.pontua === null) {
+    this.selectedPlayer.pontua = false;
   }
+
+  const flagPrincipal = player.flags?.[0] ?? null;
+  this.selectedFlagId = flagPrincipal?.id ?? null;
+
+  this.modal.open({
+    title: 'Editar Jogador',
+    template: this.formTemplateRef,
+  });
+}
 
 
   async savePlayer() {
     if (!this.selectedPlayer) return;
+
+    if (!this.selectedPlayer.name?.trim()) {
+      this.toaster.warning('Nome do jogador é obrigatório.');
+      return;
+    }
+
+    if (!this.selectedPlayer.league_id) {
+      this.toaster.warning('Selecione uma liga para o jogador.');
+      return;
+    }
 
     this.selectedPlayer.rating = this.getRating(this.selectedPlayer);
 
@@ -149,7 +190,7 @@ export class PlayerListComponent implements OnInit {
         flagId ? [flagId] : []
       );
 
-      await this.loadPlayers();
+      await this.loadPlayersByLeague();
 
       this.toaster.success(exists ? 'Jogador atualizado!' : 'Jogador adicionado!');
     } catch (err: any) {
@@ -174,6 +215,10 @@ export class PlayerListComponent implements OnInit {
       this.toaster.error('Erro ao salvar jogador');
     }
   }
+debugPontua() {
+  console.log('Toggle agora está em:', this.selectedPlayer?.pontua);
+}
+
 
 
   async deletePlayer(id: string) {
@@ -242,8 +287,17 @@ export class PlayerListComponent implements OnInit {
     }
   }
 
+  get ligaSelecionadaValue() {
+    return this.ligaSelecionada();
+  }
+
+  set ligaSelecionadaValue(value: string) {
+    this.ligaSelecionada.set(value);
+    this.loadPlayersByLeague();
+  }
+
   // FLAG
-  redirectToFlagAdmin(){
+  redirectToFlagAdmin() {
     this.router.navigateByUrl("/admin/flags");
   }
 

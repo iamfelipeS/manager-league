@@ -2,52 +2,28 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Leagues } from '../models/leagues.model';
+import { supabase } from '../core/supabase/supabase.client';
+import { SupabaseClient } from '@supabase/supabase-js';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class LeaguesService {
-  // Dados mocados para simulação
-  private leagues: Leagues[] = [
-    { 
-      name: 'Liga Verssat', 
-      img: 'caminho/para/img1.jpg', 
-      private: false, 
-      organizer: [
-        {
-          name: 'Felipe',
-          email: 'felipe@email.com'
-        }
-      ] 
-    },
-    { 
-      name: 'Copa do Brasil', 
-      img: '', 
-      private: true,
-      organizer: [
-        {
-          name: 'CBF',
-          email: 'cbf@email.com'
-        }
-      ]
-    },
-    { 
-      name: 'Brasileirão', 
-      img: 'caminho/para/imagem3.jpg',
-      private: false,
-      organizer: [
-        {
-          name: 'CBF',
-          email: 'cbf@email.com'
-        }
-      ]
-    },
-  ];
+  private supabase: SupabaseClient = supabase;
+
+  private leagues: Leagues[] = [];
 
   constructor() { }
 
-  getAllLeagues(): Observable<Leagues[]> {
-    return of(this.leagues);
+  async getAllLeagues(): Promise<Leagues[]> {
+    const { data, error } = await supabase
+      .from('leagues')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+    return data ?? [];
   }
 
   getLeagueByName(name: string): Observable<Leagues | null> {

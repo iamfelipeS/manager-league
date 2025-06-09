@@ -213,7 +213,6 @@
   
   
                         <!-- Ordenação -->
-                      <!-- <label class="text-sm text-gray-700">Ordenar por:</label> -->
                       <select [(ngModel)]="sortBy" class="border px-2 py-1 rounded text-sm">
                         <option value="name">Nome (A-Z)</option>
                         <option value="rating">Rating</option>
@@ -307,8 +306,8 @@
             }
             }
             <!-- Classificação -->
-            @if (activeTab === 'ranking') {
-            <app-ranking />
+            @if (activeTab === 'ranking' && league) {
+            <app-ranking [leagueId]="league.id"/>
             }
 
         </div>

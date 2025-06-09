@@ -1,34 +1,58 @@
-<div class="p-4 max-w-4xl mx-auto">
-  <!-- Cabeçalho -->
-  <span class="absolute left-4 top-7">Jogadores: <strong>{{ players().length }}</strong></span>
-  <div class="grid grid-cols-3 mb-12">
-    <div></div>
-      <select class="p-2 rounded border text-sm hover:border-orange-300"
+<div class="p-4 max-w-6xl mx-auto">
+  <!-- Título fixo -->
+  <div class="mb-6 flex justify-between items-center flex-wrap gap-2">
+    <h1 class="text-xl font-semibold">Jogadores</h1>
+    <span class="text-sm text-gray-600">Total: <strong>{{ players().length }}</strong></span>
+  </div>
+
+  <!-- Filtros e ações -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-14">
+    <!-- Filtros -->
+    <div class="flex flex-wrap gap-3 items-center">
+      <!-- Liga -->
+      <select
+        class="p-2 rounded border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+        [(ngModel)]="ligaSelecionadaValue"
+        (change)="loadPlayersByLeague()"
+      >
+        <option disabled selected>Selecione a Liga</option>
+        @for (liga of minhasLigas(); track liga.id) {
+          <option [value]="liga.id">{{ liga.name }}</option>
+        }
+      </select>
+
+      <!-- Ordenação -->
+      <select
+        class="p-2 rounded border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
         [ngModel]="orderBy()"
         (ngModelChange)="orderBy.set($event)"
-        >
+      >
         <option value="rating">Classificar por Rating</option>
         <option value="name">Classificar por Nome</option>
         <option value="posicao">Classificar por Posição</option>
       </select>
+    </div>
 
-      <div class="flex justify-end gap-2">
-        <button class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
-          (click)="addPlayer()"  
-          title="Adicionar Jogador"
-        >
+    <!-- Ações -->
+    <div class="flex gap-3">
+      <button
+        class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
+        (click)="addPlayer()"
+        title="Adicionar Jogador"
+      >
         <i class="fas fa-user-plus text-white text-lg"></i>
       </button>
 
-      <button class="flex items-center justify-center border border-primary hover:bg-grays7 text-white w-12 h-12 rounded-full"
+      <button
+        class="flex items-center justify-center border border-primary hover:bg-grays7 text-white w-12 h-12 rounded-full"
         (click)="redirectToFlagAdmin()"
         title="Administrar Grupos"
       >
         <i class="fas fa-users text-primary text-lg"></i>
       </button>
-    
     </div>
   </div>
+
   
 
   <!-- Grid de jogadores -->
@@ -129,6 +153,11 @@
           </div>
         </div>
     
+          @if (player.pontua) {
+    <span class="text-green-600 text-xs mr-auto flex items-center gap-1">
+      <i class="fas fa-check-circle text-green-600 text-sm" title="Pontua na classificação"></i>
+    </span>
+  }
         <!-- Botões de ação -->
         <div class="absolute bottom-3 right-3 flex gap-2">
           <button (click)="editPlayer(player)"
@@ -180,6 +209,44 @@
           <option value="A">Atacante</option>
         </select>
       </div>
+
+      <!-- Seletor de Liga + Toggle de Pontuação -->
+      <div class="flex items-end gap-3 w-full mt-4">
+        @if(selectedPlayer) {
+          <!-- Select de Liga -->
+          <div class="flex flex-col w-full">
+            <label class="text-sm font-medium mb-1">Liga</label>
+            <select
+              [(ngModel)]="selectedPlayer.league_id"
+              name="liga"
+              class="w-full p-3 border rounded-xl bg-white text-sm"
+            >
+              <option disabled value="">Selecione uma liga</option>
+              @for (liga of minhasLigas(); track liga.id) {
+                <option [value]="liga.id">{{ liga.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Toggle de Pontuação -->
+          <div class="flex flex-col justify-end items-start mt-[30px]">
+            <label class="text-sm font-medium mb-1">Pontua</label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                [(ngModel)]="selectedPlayer!.pontua"
+                 [ngModelOptions]="{ standalone: true }"
+               (change)="debugPontua()"
+                class="sr-only peer"
+              />
+              <div
+                class="w-11 h-6 bg-gray-200 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"
+              ></div>
+            </label>
+          </div>
+        }
+      </div>
+
       
       <!-- Flags  -->
       <div class="flex items-end gap-3 w-full">

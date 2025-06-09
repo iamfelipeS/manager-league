@@ -5,6 +5,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 
 type PlayerWithJoin = Player & {
+  pontua: boolean;
   player_flags?: {
     flag_id: number;
     flags: PlayerFlag;
@@ -26,10 +27,11 @@ export class PlayerService {
     if (error) throw error;
 
     const players = (data as PlayerWithJoin[] ?? []).map(player => {
-      const { player_flags, avatar_url, ...rest } = player;
+      const { player_flags, avatar_url, pontua, ...rest } = player;
 
       return {
         ...rest,
+        pontua: pontua ?? false,
         avatarUrl: avatar_url ?? null,
         flags: player_flags?.map(pf => pf.flags) ?? [],
       };
@@ -38,20 +40,62 @@ export class PlayerService {
     return players;
   }
 
+
+  async getPlayersByLeague(leagueId: string): Promise<Player[]> {
+    const { data, error } = await supabase
+      .from('players')
+      .select('*, player_flags:player_flags(flag_id, flags(id, name, affectsTeamGeneration))')
+      .eq('league_id', leagueId);
+
+    if (error) throw error;
+
+    return (data as PlayerWithJoin[] ?? []).map(player => {
+      const { player_flags, avatar_url, pontua, ...rest } = player;
+      return {
+        ...rest,
+        pontua: pontua ?? false,
+        avatarUrl: avatar_url ?? null,
+        flags: player_flags?.map(pf => pf.flags) ?? [],
+      };
+    });
+  }
+
   async addPlayer(player: PlayerWithJoin): Promise<void> {
     const { flags, player_flags, avatarUrl, ...playerData } = player;
-    const { error } = await this.supabase.from('players').insert([playerData]);
+
+    const insertData = {
+      ...playerData,
+      pontua: player.pontua ?? false,
+      league_id: player.league_id ?? null,
+      avatar_url: avatarUrl ?? null,
+    };
+
+    const { error } = await this.supabase
+      .from('players')
+      .insert([insertData]);
+
     if (error) throw error;
   }
 
   async updatePlayer(player: PlayerWithJoin): Promise<void> {
-    const { flags, player_flags, avatarUrl, ...playerData } = player;
+    const { flags, player_flags, avatarUrl, ...rest } = player;
+
+    const updatePayload = {
+      ...rest,
+      pontua: player.pontua ?? false,
+      avatar_url: avatarUrl ?? null,
+    };
+
+    console.log('Enviando para update:', updatePayload);
+
     const { error } = await this.supabase
       .from('players')
-      .update(playerData)
+      .update(updatePayload)
       .eq('id', player.id);
+
     if (error) throw error;
   }
+
 
   async deletePlayer(id: string): Promise<void> {
     const { error } = await this.supabase
@@ -61,16 +105,17 @@ export class PlayerService {
     if (error) throw error;
   }
 
-  async getPlayersPontuaveis(): Promise<Player[]> {
+  async getPlayersPontuaveis(leagueId: string): Promise<Player[]> {
     const { data, error } = await supabase
       .from('players')
       .select('*, player_flags:player_flags(flag_id, flags(id, name))')
-      .eq('pontua', true);
+      .eq('pontua', true)
+      .eq('league_id', leagueId);
 
     if (error) throw error;
-
     return data ?? [];
   }
+
 
   async update(player: Player): Promise<void> {
     const { error } = await supabase
@@ -83,7 +128,7 @@ export class PlayerService {
         fase: player.fase,
         movimentacao: player.movimentacao,
         avatar_url: player.avatarUrl,
-        pontua: player.pontua, 
+        pontua: player.pontua,
       })
       .eq('id', player.id);
 

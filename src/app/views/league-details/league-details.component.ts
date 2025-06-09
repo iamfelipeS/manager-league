@@ -69,7 +69,7 @@ export class LeagueDetailsComponent implements OnInit {
   async loadPlayers() {
     this.isLoading.set(true);
     const result = await this.playerService.getPlayers();
-  
+
     result.forEach(player => {
       if (player.posicao === 'D') {
         const jaTemFlag = player.flags?.some(f => f.id === 999);
@@ -83,7 +83,7 @@ export class LeagueDetailsComponent implements OnInit {
         }
       }
     });
-  
+
     this.players.set(result);
     this.totalPlayers.set(result.length);
     this.isLoading.set(false);
@@ -91,18 +91,12 @@ export class LeagueDetailsComponent implements OnInit {
 
   loadLeagueDetails() {
     this.leaguesService.getLeagueByName(this.leagueName).subscribe({
-      next: (league) => (this.league = league),
+      next: (league) => {
+        console.log('[DEBUG] Liga carregada:', league);
+        this.league = league;
+      },
       error: (err) => console.error('Erro ao carregar detalhes da liga', err)
     });
-
-    this.league = {
-      name: this.leagueName,
-      img: '',
-      private: true,
-      organizer: [
-        { name: 'Organizador 1', email: 'contato@organizador.com' }
-      ]
-    };
   }
 
   get sortedPlayers(): Player[] {
@@ -271,25 +265,25 @@ export class LeagueDetailsComponent implements OnInit {
   generateTeams(): void {
     const selectedPlayers = this.players().filter(p => p.selected);
     const teamCount = this.selectedTeamCount || 2;
-  
+
     if (selectedPlayers.length === 0) {
       this.toaster.warning('Selecione pelo menos um jogador para gerar os times.');
       return;
     }
-  
+
     if (selectedPlayers.length < teamCount) {
       this.toaster.warning('Número insuficiente de jogadores para a quantidade de times.');
       return;
     }
-  
+
     const MAX_ATTEMPTS = 50;
     let attempts = 0;
     let validTeams: Team[] = [];
-  
+
     // Mapeia jogadores por flags ativas
     const playersByFlag: { [flagId: number]: Player[] } = {};
     const allFlaggedPlayers = new Set<string>();
-  
+
     for (const player of selectedPlayers) {
       for (const flag of player.flags || []) {
         if (flag.affectsTeamGeneration) {
@@ -299,36 +293,36 @@ export class LeagueDetailsComponent implements OnInit {
         }
       }
     }
-  
+
     const flagsComProblema: string[] = [];
-  
+
     for (const [flagId, players] of Object.entries(playersByFlag)) {
       if (players.length < teamCount) {
         const nome = players[0]?.flags?.find(f => f.id === +flagId)?.name ?? `Flag ${flagId}`;
         flagsComProblema.push(nome);
       }
     }
-  
+
     while (attempts < MAX_ATTEMPTS) {
       const teams = Array.from({ length: teamCount }, (_, i) => ({
         name: `Time ${i + 1}`,
         players: [] as Player[],
         overall: 0,
       }));
-  
+
       const alreadyAdded = new Set<string>();
-  
+
       // 1. Distribuição das flags
       for (const players of Object.values(playersByFlag)) {
         const countPerTeam = Math.floor(players.length / teamCount);
         const extra = players.length % teamCount;
         const shuffled = this.shuffleArray(players);
         let playerIndex = 0;
-  
+
         for (let t = 0; t < teamCount; t++) {
           const max = countPerTeam + (t < extra ? 1 : 0);
           let added = 0;
-  
+
           while (added < max && playerIndex < shuffled.length) {
             const player = shuffled[playerIndex++];
             if (!alreadyAdded.has(player.id)) {
@@ -339,62 +333,62 @@ export class LeagueDetailsComponent implements OnInit {
           }
         }
       }
-  
+
       // 2. Distribuição restante, balanceada por quantidade
       const remainingPlayers = selectedPlayers.filter(p => !alreadyAdded.has(p.id));
       const sortedRemaining = remainingPlayers
         .map(p => ({ p, r: this.ratingService.calculate(p) }))
         .sort((a, b) => b.r - a.r)
         .map(obj => obj.p);
-  
+
       while (sortedRemaining.length) {
         const player = sortedRemaining.shift();
         if (!player) continue;
-  
+
         const targetTeam = teams.reduce((minTeam, currTeam) =>
           currTeam.players.length < minTeam.players.length ? currTeam : minTeam
         );
-  
+
         targetTeam.players.push(player);
       }
-  
+
       // 3. Rating médio por time
       for (const team of teams) {
         const total = team.players.reduce((sum, p) => sum + this.ratingService.calculate(p), 0);
         team.overall = Math.round(total / team.players.length);
       }
-  
+
       const overalls = teams.map(t => t.overall);
       const max = Math.max(...overalls);
       const min = Math.min(...overalls);
-  
+
       if (max - min <= 5 || teamCount <= 2) {
         validTeams = teams;
         break;
       }
-  
+
       attempts++;
     }
-  
+
     this.generatedTeams = validTeams;
     this.isLoading.set(true);
-  
+
     // Preload campo + avatares
     const campoImg = new Image();
     campoImg.src = 'img/campo-futebol.jpeg';
-  
+
     const avatarUrls = selectedPlayers
       .map(p => p.avatarUrl)
       .filter(Boolean) as string[];
-  
+
     const avatarImgs = avatarUrls.map(url => {
       const img = new Image();
       img.src = url;
       return img;
     });
-  
+
     const allImages = [campoImg, ...avatarImgs];
-  
+
     let loadedCount = 0;
     const markLoaded = () => {
       loadedCount++;
@@ -405,19 +399,19 @@ export class LeagueDetailsComponent implements OnInit {
         }, 100);
       }
     };
-  
+
     allImages.forEach(img => {
       img.onload = markLoaded;
       img.onerror = markLoaded;
     });
-  
+
     if (flagsComProblema.length) {
       this.toaster.info(
         `Alguns grupos não foram totalmente separados entre os times: ${flagsComProblema.join(', ')}.`
       );
     }
   }
-  
+
 
   //METODO MAIS ALEATORIEDADE
   recalculateTeamAverages() {
