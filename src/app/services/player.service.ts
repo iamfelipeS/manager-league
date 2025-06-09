@@ -17,24 +17,24 @@ export class PlayerService {
 
   private players = signal<Player[]>([]);
   private supabase: SupabaseClient = supabase;
-  
+
   async getPlayers(): Promise<Player[]> {
     const { data, error } = await this.supabase
       .from('players')
       .select('*, player_flags:player_flags(flag_id, flags(id, name, affectsTeamGeneration))')
-  
+
     if (error) throw error;
-  
+
     const players = (data as PlayerWithJoin[] ?? []).map(player => {
       const { player_flags, avatar_url, ...rest } = player;
-  
+
       return {
         ...rest,
-        avatarUrl: avatar_url ?? null, 
+        avatarUrl: avatar_url ?? null,
         flags: player_flags?.map(pf => pf.flags) ?? [],
       };
     });
-  
+
     return players;
   }
 
@@ -61,11 +61,41 @@ export class PlayerService {
     if (error) throw error;
   }
 
+  async getPlayersPontuaveis(): Promise<Player[]> {
+    const { data, error } = await supabase
+      .from('players')
+      .select('*, player_flags:player_flags(flag_id, flags(id, name))')
+      .eq('pontua', true);
+
+    if (error) throw error;
+
+    return data ?? [];
+  }
+
+  async update(player: Player): Promise<void> {
+    const { error } = await supabase
+      .from('players')
+      .update({
+        name: player.name,
+        posicao: player.posicao,
+        qualidade: player.qualidade,
+        velocidade: player.velocidade,
+        fase: player.fase,
+        movimentacao: player.movimentacao,
+        avatar_url: player.avatarUrl,
+        pontua: player.pontua, 
+      })
+      .eq('id', player.id);
+
+    if (error) throw error;
+  }
+
+
   // AVATAR // 
   async updateAvatar(player: Player, file: File): Promise<void> {
     const fileExt = file.name.split('.').pop();
     const filePath = `players/${player.id}/avatar.${fileExt}`; // novo caminho organizado
-  
+
     const { data: uploadData, error: uploadError } = await this.supabase.storage
       .from('avatars')
       .upload(filePath, file, {
@@ -73,34 +103,34 @@ export class PlayerService {
         contentType: file.type,
         cacheControl: '3600',
       });
-  
+
     if (uploadError) {
       console.error('Upload error:', uploadError);
       throw new Error('Erro ao fazer upload do avatar');
     }
-  
+
     const { data: publicData } = this.supabase.storage
       .from('avatars')
       .getPublicUrl(filePath);
-  
+
     if (!publicData) {
       throw new Error('Erro ao obter URL pública do avatar');
     }
-  
+
     const avatarUrl = `${publicData.publicUrl}?v=${Date.now()}`;
-  
+
     const { error: updateError } = await this.supabase
       .from('players')
       .update({ avatar_url: avatarUrl })
       .eq('id', player.id);
-  
+
     if (updateError) {
       console.error('Update player error:', updateError);
       throw new Error('Erro ao atualizar o jogador com avatar');
     }
-  
+
     player.avatarUrl = avatarUrl;
   }
-  
-    
+
+
 }

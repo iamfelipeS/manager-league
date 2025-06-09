@@ -101,6 +101,7 @@ export class PlayerListComponent implements OnInit {
       movimentacao: 'Normal',
       posicao: 'M',
       rating: 0,
+      pontua: false,
       flags: []
     };
     this.selectedFlagId = null;

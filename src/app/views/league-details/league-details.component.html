@@ -62,6 +62,11 @@
                     class="py-2 cursor-pointer">
                     Criar times
                 </a>
+                <a (click)="activeTab = 'ranking'" [class.text-blue-600]="activeTab === 'ranking'"
+                    [class.border-b-2]="activeTab === 'ranking'" [class.border-blue-600]="activeTab === 'ranking'"
+                    class="py-2 cursor-pointer">
+                    Classificação
+                </a>
 
             </nav>
         </div>
@@ -301,6 +306,11 @@
                 <app-loader />
             }
             }
+            <!-- Classificação -->
+            @if (activeTab === 'ranking') {
+            <app-ranking />
+            }
+
         </div>
     </div>
 </div>

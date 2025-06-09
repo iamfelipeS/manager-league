@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "verssat": {
+    "manager-league": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/verssat",
+            "outputPath": "dist/manager-league",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -64,10 +64,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "verssat:build:production"
+              "buildTarget": "manager-league:build:production"
             },
             "development": {
-              "buildTarget": "verssat:build:development"
+              "buildTarget": "manager-league:build:development"
             }
           },
           "defaultConfiguration": "development"

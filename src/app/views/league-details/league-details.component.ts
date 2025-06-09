@@ -17,11 +17,12 @@ import { FormsModule } from '@angular/forms';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { TeamLineupModalComponent } from '../../shared/components/team-lineup-modal/team-lineup-modal.component';
 import { Team } from '../../models/team.model';
+import { RankingComponent } from '../../shared/components/ranking/ranking.component';
 
 @Component({
   selector: 'app-league-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoaderComponent, TeamLineupModalComponent],
+  imports: [CommonModule, FormsModule, LoaderComponent, TeamLineupModalComponent, RankingComponent],
   templateUrl: './league-details.component.html',
   styleUrl: './league-details.component.scss'
 })
