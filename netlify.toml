@@ -1,6 +1,6 @@
 [build]
 command = "npx ng build --configuration production"
-publish = "dist/verssat/browser"
+publish = "dist/manager-league/browser"
 
 [[redirects]]
 from = "/*"
