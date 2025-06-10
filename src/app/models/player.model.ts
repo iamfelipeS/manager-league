@@ -17,5 +17,5 @@ export interface Player {
   trofeus?: number;
   flags: PlayerFlag[];
   movimentacao: 'Estático' | 'Normal' | 'Intenso';
-  posicao: 'A' | 'M' | 'D' | 'G'; // Atacante, Meio campo, Defensor, Goleiro
+  posicao: 'G' | 'D' | 'M' | 'A'; 
 }

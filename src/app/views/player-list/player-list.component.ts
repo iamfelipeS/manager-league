@@ -50,18 +50,20 @@ export class PlayerListComponent implements OnInit {
   readonly availableFlags = signal<PlayerFlag[]>([]);
 
   orderBy = signal<'rating' | 'name' | 'posicao'>('rating');
+  searchTerm = signal<string>('');
 
-  orderedPlayers = computed(() => {
-    const players = [...this.players()];
-    const sortBy = this.orderBy();
+  // orderedPlayers = computed(() => {
+  //   const players = [...this.players()];
+  //   console.log(this.players.length)
+  //   const sortBy = this.orderBy();
 
-    return players.sort((a, b) => {
-      if (sortBy === 'rating') return this.getRating(b) - this.getRating(a);
-      if (sortBy === 'name') return a.name.localeCompare(b.name);
-      if (sortBy === 'posicao') return a.posicao.localeCompare(b.posicao);
-      return 0;
-    });
-  });
+  //   return players.sort((a, b) => {
+  //     if (sortBy === 'rating') return this.getRating(b) - this.getRating(a);
+  //     if (sortBy === 'name') return a.name.localeCompare(b.name);
+  //     if (sortBy === 'posicao') return a.posicao.localeCompare(b.posicao);
+  //     return 0;
+  //   });
+  // });
 
   async ngOnInit() {
     this.loadFlags();
@@ -81,6 +83,41 @@ export class PlayerListComponent implements OnInit {
       this.isLoading.set(false);
     }
   }
+
+  orderedAndFilteredPlayers = computed(() => {
+    const players = this.players();
+    const searchTerm = this.searchTerm().toLowerCase();
+    const orderBy = this.orderBy();
+
+    const posicaoOrder: { [key: string]: number } = {
+      'G': 1, // Goleiro
+      'D': 2, // Defensor
+      'M': 3, // Meio Campo
+      'A': 4  // Atacante
+    };
+
+    // 1. Filtrar
+    const filtered = players.filter(player =>
+      player.name.toLowerCase().includes(searchTerm) ||
+      player.posicao.toLowerCase().includes(searchTerm) || // A posição aqui é o 'G', 'D', 'M', 'A'
+      player.flags?.some(flag => flag.name.toLowerCase().includes(searchTerm))
+    );
+
+    // 2. Ordenar
+    return filtered.sort((a, b) => {
+      if (orderBy === 'rating') {
+        return b.rating - a.rating; // Maior rating primeiro
+      } else if (orderBy === 'name') {
+        return a.name.localeCompare(b.name);
+      } else if (orderBy === 'posicao') {
+        // Usar o mapa de ordem customizada para as posições
+        const orderA = posicaoOrder[a.posicao];
+        const orderB = posicaoOrder[b.posicao];
+        return orderA - orderB;
+      }
+      return 0;
+    });
+  });
 
   ngAfterViewInit(): void {
     this.modal.confirmed.subscribe(() => this.savePlayer());
@@ -103,7 +140,6 @@ export class PlayerListComponent implements OnInit {
       this.isLoading.set(false);
     }
   }
-
 
   async loadFlags(): Promise<void> {
     try {
@@ -139,22 +175,22 @@ export class PlayerListComponent implements OnInit {
     });
   }
 
-editPlayer(player: Player) {
-  this.selectedPlayer = { ...player };
+  editPlayer(player: Player) {
+    this.selectedPlayer = { ...player };
 
-  // 🔧 GARANTIR QUE pontua é boolean
-  if (this.selectedPlayer.pontua === undefined || this.selectedPlayer.pontua === null) {
-    this.selectedPlayer.pontua = false;
+    // 🔧 GARANTIR QUE pontua é boolean
+    if (this.selectedPlayer.pontua === undefined || this.selectedPlayer.pontua === null) {
+      this.selectedPlayer.pontua = false;
+    }
+
+    const flagPrincipal = player.flags?.[0] ?? null;
+    this.selectedFlagId = flagPrincipal?.id ?? null;
+
+    this.modal.open({
+      title: 'Editar Jogador',
+      template: this.formTemplateRef,
+    });
   }
-
-  const flagPrincipal = player.flags?.[0] ?? null;
-  this.selectedFlagId = flagPrincipal?.id ?? null;
-
-  this.modal.open({
-    title: 'Editar Jogador',
-    template: this.formTemplateRef,
-  });
-}
 
 
   async savePlayer() {
@@ -215,11 +251,6 @@ editPlayer(player: Player) {
       this.toaster.error('Erro ao salvar jogador');
     }
   }
-debugPontua() {
-  console.log('Toggle agora está em:', this.selectedPlayer?.pontua);
-}
-
-
 
   async deletePlayer(id: string) {
     if (!confirm('Deseja remover este jogador?')) return;
@@ -294,6 +325,16 @@ debugPontua() {
   set ligaSelecionadaValue(value: string) {
     this.ligaSelecionada.set(value);
     this.loadPlayersByLeague();
+  }
+
+  searchPlayer(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.searchTerm.set(target.value);
+    console.log(target.value)
+  }
+
+  clearSearch(): void {
+    this.searchTerm.set('');
   }
 
   // FLAG
