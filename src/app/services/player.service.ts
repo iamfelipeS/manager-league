@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 type PlayerWithJoin = Player & {
   pontua: boolean;
+  trofeus?: number;
   player_flags?: {
     flag_id: number;
     flags: PlayerFlag;
@@ -19,7 +20,7 @@ export class PlayerService {
   private players = signal<Player[]>([]);
   private supabase: SupabaseClient = supabase;
 
-  async getPlayers(): Promise<Player[]> {
+    async getPlayers(): Promise<Player[]> {
     const { data, error } = await this.supabase
       .from('players')
       .select('*, player_flags:player_flags(flag_id, flags(id, name, affectsTeamGeneration))')
@@ -40,7 +41,6 @@ export class PlayerService {
     return players;
   }
 
-
   async getPlayersByLeague(leagueId: string): Promise<Player[]> {
     const { data, error } = await supabase
       .from('players')
@@ -50,10 +50,11 @@ export class PlayerService {
     if (error) throw error;
 
     return (data as PlayerWithJoin[] ?? []).map(player => {
-      const { player_flags, avatar_url, pontua, ...rest } = player;
+      const { player_flags, avatar_url, pontua, trofeus, ...rest } = player;
       return {
         ...rest,
         pontua: pontua ?? false,
+        trofeus: trofeus ?? 0,
         avatarUrl: avatar_url ?? null,
         flags: player_flags?.map(pf => pf.flags) ?? [],
       };
@@ -108,14 +109,24 @@ export class PlayerService {
   async getPlayersPontuaveis(leagueId: string): Promise<Player[]> {
     const { data, error } = await supabase
       .from('players')
-      .select('*, player_flags:player_flags(flag_id, flags(id, name))')
+      .select('*, player_flags:player_flags(flag_id, flags(id, name, affectsTeamGeneration))')
       .eq('pontua', true)
       .eq('league_id', leagueId);
 
     if (error) throw error;
-    return data ?? [];
-  }
 
+    return (data as PlayerWithJoin[] ?? []).map(player => {
+      const { player_flags, avatar_url, pontua, trofeus, ...rest } = player;
+
+      return {
+        ...rest,
+        pontua: pontua ?? false,
+        trofeus: trofeus ?? 0,
+        avatarUrl: avatar_url ?? null,
+        flags: player_flags?.map(pf => pf.flags) ?? [],
+      };
+    });
+  }
 
   async update(player: Player): Promise<void> {
     const { error } = await supabase

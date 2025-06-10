@@ -35,6 +35,8 @@ export class RankingComponent implements OnInit {
 
     this.players.set(playersResp);
     this.criterios.set(criteriosResp.sort((a, b) => a.prioridade - b.prioridade));
+
+    console.log(this.players)
   }
 
   ordenarJogadores(): Player[] {

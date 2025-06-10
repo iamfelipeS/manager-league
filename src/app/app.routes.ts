@@ -27,6 +27,10 @@ export const routes: Routes = [
         path: 'league-details/:name',
         component: LeagueDetailsComponent,
     },
+    // {
+    //     path: 'faq',
+    //     loadComponent: () => import('./views/faq/faq.component').then(m => m.FaqComponent)
+    // },
     {
         path: 'admin',
         loadComponent: () => import('./views/admin/admin-panel/admin-panel.component').then(m => m.AdminPanelComponent),

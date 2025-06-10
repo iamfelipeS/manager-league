@@ -14,6 +14,7 @@ export interface Player {
   avatarUrl?: string | null;
   pontua: boolean;
   league_id: string;
+  trofeus?: number;
   flags: PlayerFlag[];
   movimentacao: 'Estático' | 'Normal' | 'Intenso';
   posicao: 'A' | 'M' | 'D' | 'G'; // Atacante, Meio campo, Defensor, Goleiro

@@ -1,5 +1,5 @@
 {
-  "name": "verssat",
+  "name": "manager-league",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,8 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:verssat": "node dist/verssat/server/server.mjs",
-    "build:ssr": "ng build && ng run verssat:server:production"
+    "serve:ssr:manager-league": "node dist/manager-league/server/server.mjs",
+    "build:ssr": "ng build && ng run manager-league:server:production"
   },
   "private": true,
   "dependencies": {
