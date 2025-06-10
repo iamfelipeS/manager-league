@@ -51,7 +51,7 @@ export class HomeComponent implements OnInit {
 
   imagemPadrao = 'liga_padrao.png';
 
-  navigateToDetails(leagueName: string) {
-    this.router.navigate(['/league-details', leagueName]);
+  navigateToDetails(id: string) {
+    this.router.navigate(['/league-details', id]);
   }
 }

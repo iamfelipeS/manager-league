@@ -31,7 +31,7 @@
     @for (league of ligasFiltradas(); track league.id) {
       <div
         class="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
-        (click)="navigateToDetails(league.name)"
+        (click)="navigateToDetails(league.id)"
       >
         <img
           [src]="league.img?.trim() || imagemPadrao"

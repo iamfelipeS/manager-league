@@ -24,7 +24,7 @@ export const routes: Routes = [
         }
     },
     {
-        path: 'league-details/:name',
+        path: 'league-details/:id',
         component: LeagueDetailsComponent,
     },
     // {
