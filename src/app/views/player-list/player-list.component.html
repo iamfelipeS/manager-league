@@ -180,7 +180,237 @@
   }
 
   <ng-template #playerFormTemplate>
-    </ng-template>
+    <form class="space-y-4 text-sm text-zinc-900">
+      <!-- Nome -->
+      <div>
+        <label class="text-sm font-medium">Nome</label>
+        <input
+          [(ngModel)]="selectedPlayer!.name"
+          name="name"
+          required
+          class="w-full p-3 border rounded-xl bg-white"
+          placeholder="Nome do jogador"
+        />
+      </div>
+      
+      <!-- Posição -->
+      <div class="flex flex-col">
+        <label class="text-sm font-medium">Posição</label>
+        <select
+          [(ngModel)]="selectedPlayer!.posicao"
+          name="posicao"
+          required
+          class="w-full p-3 border rounded-xl bg-white"
+        >
+          <option disabled value="">Selecione a posição</option>
+          <option value="G">Goleiro</option>
+          <option value="D">Defensor</option>
+          <option value="M">Meio Campo</option>
+          <option value="A">Atacante</option>
+        </select>
+      </div>
+
+      <!-- Seletor de Liga + Toggle de Pontuação -->
+      <div class="flex items-end gap-3 w-full mt-4">
+        @if(selectedPlayer) {
+          <!-- Select de Liga -->
+          <div class="flex flex-col w-full">
+            <label class="text-sm font-medium mb-1">Liga</label>
+            <select
+              [(ngModel)]="selectedPlayer.league_id"
+              name="liga"
+              class="w-full p-3 border rounded-xl bg-white text-sm"
+            >
+              <option disabled value="">Selecione uma liga</option>
+              @for (liga of minhasLigas(); track liga.id) {
+                <option [value]="liga.id">{{ liga.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Toggle de Pontuação -->
+          <div class="flex flex-col justify-end items-start mt-[30px]">
+            <label class="text-sm font-medium mb-1">Pontua</label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                [(ngModel)]="selectedPlayer!.pontua"
+                [ngModelOptions]="{ standalone: true }"
+                class="sr-only peer"
+              />
+              <div
+                class="w-11 h-6 bg-gray-200 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"
+              ></div>
+            </label>
+          </div>
+        }
+      </div>
+
+      
+      <!-- Flags  -->
+      <div class="flex items-end gap-3 w-full">
+        <div class="flex flex-col w-full">
+          <label class="text-sm font-medium">Grupo (Flag)</label>
+          <select
+            [(ngModel)]="selectedFlagId"
+            name="flag"
+            class="p-3 border rounded-xl bg-white text-sm w-full"
+          >
+            <option [ngValue]="null">Sem grupo</option>
+            @for (flag of availableFlags(); track flag.id) {
+              <option [ngValue]="flag.id">{{ flag.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Botão criar nova flag -->
+        <div class="flex justify-end">
+          <button
+            type="button"
+            (click)="createAndSelectFlag()"
+            class="p-2 bg-green-600 text-white rounded-xl h-11 text-xs hover:bg-green-700"
+            title="Criar novo grupo"
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+  
+      <!-- Qualidade -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label class="text-sm font-medium">Qualidade</label>
+          <span class="text-xs font-semibold text-primary">
+            {{ getLabelFromQualidade(selectedPlayer?.qualidade || 0) }}
+          </span>
+        </div>
+        <div class="flex justify-between gap-2">
+          @for (i of [1, 2, 3, 4, 5]; track i) {
+            <button
+              type="button"
+              class="w-full p-4 rounded-xl"
+              [class.bg-primary]="selectedPlayer?.qualidade === i"
+              [class.bg-gray-300]="selectedPlayer?.qualidade !== i"
+              [class.text-white]="selectedPlayer?.qualidade === i"
+              (click)="selectedPlayer!.qualidade = i"
+            ></button>
+          }
+        </div>
+      </div>
+  
+      <!-- Velocidade -->
+      <div>
+        <label class="text-sm font-medium">Velocidade</label>
+        <div class="flex justify-between gap-2 mt-1">
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.velocidade === 3"
+            [class.bg-gray-300]="selectedPlayer?.velocidade !== 3"
+            [class.text-white]="selectedPlayer?.velocidade === 3"
+            (click)="selectedPlayer!.velocidade = 3"
+          >
+            Lento
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.velocidade === 6"
+            [class.bg-gray-300]="selectedPlayer?.velocidade !== 6"
+            [class.text-white]="selectedPlayer?.velocidade === 6"
+            (click)="selectedPlayer!.velocidade = 6"
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.velocidade === 9"
+            [class.bg-gray-300]="selectedPlayer?.velocidade !== 9"
+            [class.text-white]="selectedPlayer?.velocidade === 9"
+            (click)="selectedPlayer!.velocidade = 9"
+          >
+            Rápido
+          </button>
+        </div>
+      </div>
+  
+      <!-- Movimentação -->
+      <div>
+        <label class="text-sm font-medium">Movimentação</label>
+        <div class="flex justify-between gap-2 mt-1">
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.movimentacao === 'Estático'"
+            [class.bg-gray-300]="selectedPlayer?.movimentacao !== 'Estático'"
+            [class.text-white]="selectedPlayer?.movimentacao === 'Estático'"
+            (click)="selectedPlayer!.movimentacao = 'Estático'"
+          >
+            Estático
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.movimentacao === 'Normal'"
+            [class.bg-gray-300]="selectedPlayer?.movimentacao !== 'Normal'"
+            [class.text-white]="selectedPlayer?.movimentacao === 'Normal'"
+            (click)="selectedPlayer!.movimentacao = 'Normal'"
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.movimentacao === 'Intenso'"
+            [class.bg-gray-300]="selectedPlayer?.movimentacao !== 'Intenso'"
+            [class.text-white]="selectedPlayer?.movimentacao === 'Intenso'"
+            (click)="selectedPlayer!.movimentacao = 'Intenso'"
+          >
+            Intenso
+          </button>
+        </div>
+      </div>
+  
+      <!-- Fase -->
+      <div>
+        <label class="text-sm font-medium">Fase</label>
+        <div class="flex justify-between gap-2 mt-1">
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.fase === 3"
+            [class.bg-gray-300]="selectedPlayer?.fase !== 3"
+            [class.text-white]="selectedPlayer?.fase === 3"
+            (click)="selectedPlayer!.fase = 3"
+          >
+            Ruim
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.fase === 6"
+            [class.bg-gray-300]="selectedPlayer?.fase !== 6"
+            [class.text-white]="selectedPlayer?.fase === 6"
+            (click)="selectedPlayer!.fase = 6"
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl"
+            [class.bg-primary]="selectedPlayer?.fase === 9"
+            [class.bg-gray-300]="selectedPlayer?.fase !== 9"
+            [class.text-white]="selectedPlayer?.fase === 9"
+            (click)="selectedPlayer!.fase = 9"
+          >
+            Boa
+          </button>
+        </div>
+      </div>
+    </form>
+  </ng-template>
 
   <app-modal #modal></app-modal>
 </div>

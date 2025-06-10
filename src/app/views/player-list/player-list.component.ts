@@ -178,7 +178,6 @@ export class PlayerListComponent implements OnInit {
   editPlayer(player: Player) {
     this.selectedPlayer = { ...player };
 
-    // 🔧 GARANTIR QUE pontua é boolean
     if (this.selectedPlayer.pontua === undefined || this.selectedPlayer.pontua === null) {
       this.selectedPlayer.pontua = false;
     }
