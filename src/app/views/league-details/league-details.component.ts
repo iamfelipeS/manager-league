@@ -34,11 +34,9 @@ export class LeagueDetailsComponent implements OnInit {
   private leaguesService = inject(LeaguesService);
 
   imagemPadrao = '';
-  leagueName: string = '';
 
   isAdmin = true;
   isFollowing = false;
-  league: Leagues | null = null;
   allPlayersSelected: boolean = false;
 
   activeTab: string = 'info';
@@ -53,18 +51,18 @@ export class LeagueDetailsComponent implements OnInit {
   isLoading = signal(true);
   totalPlayers = signal(0);
   teamModalVisible = signal(false);
+  league = signal<Leagues | null>(null);
 
   generatedTeams: Team[] = [];
 
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.leagueName = params['name'];
-      this.loadLeagueDetails();
-    });
 
-    this.checkIfUserIsAdmin();
-    this.loadPlayers();
+  ngOnInit() {
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) this.loadLeagueDetails(id);
+    });
   }
+
 
   async loadPlayers() {
     this.isLoading.set(true);
@@ -89,14 +87,13 @@ export class LeagueDetailsComponent implements OnInit {
     this.isLoading.set(false);
   }
 
-  loadLeagueDetails() {
-    this.leaguesService.getLeagueByName(this.leagueName).subscribe({
-      next: (league) => {
-        console.log('[DEBUG] Liga carregada:', league);
-        this.league = league;
-      },
-      error: (err) => console.error('Erro ao carregar detalhes da liga', err)
-    });
+  async loadLeagueDetails(id: string) {
+    try {
+      const leagueData = await this.leaguesService.getLeagueById(id);
+      this.league.set(leagueData);
+    } catch (error) {
+      this.toaster.error('Erro ao carregar liga');
+    }
   }
 
   get sortedPlayers(): Player[] {

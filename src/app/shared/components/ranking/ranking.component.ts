@@ -1,27 +1,31 @@
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
+import { Component, Input, OnInit, TemplateRef, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { CriterioService, Criterio } from '../../../services/criterio.service';
 import { PlayerService } from '../../../services/player.service';
 import { Player } from '../../../models/player.model';
+import { ModalComponent } from '../modal/modal.component';
+import { CriterioConfigComponent } from '../criterio-config/criterio-config.component';
 
 @Component({
   selector: 'app-ranking',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CriterioConfigComponent, ModalComponent],
   templateUrl: './ranking.component.html',
   styleUrl: './ranking.component.scss'
 })
 export class RankingComponent implements OnInit {
   @Input({ required: true }) leagueId!: string;
+  @ViewChild('modal') modal!: ModalComponent;
+  @ViewChild('criteriosTemplate') criteriosTemplateRef!: TemplateRef<any>;
 
   private playerService = inject(PlayerService);
   private criterioService = inject(CriterioService);
 
   players = signal<Player[]>([]);
   criterios = signal<Criterio[]>([]);
-  isAdmin = signal<boolean>(false); // Pode vir do Auth futuramente
+  isAdmin = signal<boolean>(true);
 
   ngOnInit() {
     this.loadDados();
@@ -62,4 +66,12 @@ export class RankingComponent implements OnInit {
   getValor(player: Player, chave: string): any {
     return (player as Record<string, any>)[chave] ?? '-';
   }
+
+  abrirModalCriterios() {
+    this.modal.open({
+      title: 'Configurar Critérios de Desempate',
+      template: this.criteriosTemplateRef,
+    });
+  }
+
 }
