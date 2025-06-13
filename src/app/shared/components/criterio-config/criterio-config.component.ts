@@ -1,9 +1,10 @@
-import { Component, inject, Input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, Input, OnInit, signal } from '@angular/core';
 import { CriterioService } from '../../../services/criterio.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Criterio } from '../../../models/criterios.model';
 import { ToasterService } from '../../../services/toaster.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-criterio-config',
@@ -15,8 +16,13 @@ import { ToasterService } from '../../../services/toaster.service';
 
 
 export class CriterioConfigComponent implements OnInit {
-   @Input({ required: true }) leagueId!: string;
+  @Input({ required: true }) leagueId!: string;
+
+  private auth = inject(AuthService);
+  private toaster = inject(ToasterService);
   private criterioService = inject(CriterioService);
+
+  readonly canEdit = computed(() => this.auth.canEditLeague({ id: this.leagueId }));
 
   criterios = signal<Criterio[]>([]);
   criterioSelecionado = signal<Criterio | null>(null);
@@ -56,6 +62,10 @@ export class CriterioConfigComponent implements OnInit {
   }
 
   async criarCriterio() {
+    if (!this.canEdit()) {
+      this.toaster.warning('Apenas administradores podem criar critérios.');
+      return;
+    }
     const nome = prompt('Nome do novo critério:');
     if (!nome?.trim()) return;
 
