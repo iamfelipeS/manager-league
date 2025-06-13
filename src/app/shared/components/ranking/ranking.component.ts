@@ -11,6 +11,7 @@ import { Criterio } from '../../../models/criterios.model';
 import { ToasterService } from '../../../services/toaster.service';
 import { AuthService } from '../../../services/auth.service';
 import { LeaguesService } from '../../../services/leagues.service';
+import { Leagues } from '../../../models/leagues.model';
 
 @Component({
   selector: 'app-ranking',
@@ -34,7 +35,7 @@ export class RankingComponent implements OnInit {
   readonly canEdit = computed(() => this.auth.canEditLeague(this.league()));
   readonly isGuest = computed(() => this.auth.isGuest());
   
-  league = signal<any>(null);
+  league = signal<Leagues | null>(null);
   isAdmin = signal<boolean>(true);
   players = signal<Player[]>([]);
   criterios = signal<Criterio[]>([]);

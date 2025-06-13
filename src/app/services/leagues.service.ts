@@ -1,6 +1,4 @@
-// leagues.service.ts
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 import { Leagues } from '../models/leagues.model';
 import { supabase } from '../core/supabase/supabase.client';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -12,7 +10,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 export class LeaguesService {
   private supabase: SupabaseClient = supabase;
 
-  private leagues: Leagues[] = [];
+   private leagues = signal<Leagues[]>([]);
 
   constructor() { }
 
@@ -26,15 +24,17 @@ export class LeaguesService {
     return data ?? [];
   }
 
-async getLeagueById(id: string): Promise<Leagues | null> {
-  const { data, error } = await this.supabase
-    .from('leagues')
-    .select('*')
-    .eq('id', id)
-    .single();
+  async getLeagueById(id: string): Promise<Leagues> {
+    const { data, error } = await supabase
+      .from('leagues')
+      .select('*, organizer:organizer(id, name, email, phone, user_id)')
+      .eq('id', id)
+      .single();
 
-  if (error) throw error;
-  return data;
-}
+    if (error) {
+      throw new Error('Erro ao buscar liga por ID: ' + error.message);
+    }
 
+    return data as Leagues;
+  }
 }
