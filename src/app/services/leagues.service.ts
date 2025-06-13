@@ -10,7 +10,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 export class LeaguesService {
   private supabase: SupabaseClient = supabase;
 
-   private leagues = signal<Leagues[]>([]);
+  private leagues = signal<Leagues[]>([]);
 
   constructor() { }
 
@@ -27,9 +27,9 @@ export class LeaguesService {
   async getLeagueById(id: string): Promise<Leagues> {
     const { data, error } = await supabase
       .from('leagues')
-      .select('*, organizer:organizer(id, name, email, phone, user_id)')
+      .select('*, organizer:organizer(user_id)')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       throw new Error('Erro ao buscar liga por ID: ' + error.message);
