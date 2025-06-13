@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { LeagueDetailsComponent } from './views/league-details/league-details.component';
 import { HomeComponent } from './views/home/home.component';
-import { roleGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {

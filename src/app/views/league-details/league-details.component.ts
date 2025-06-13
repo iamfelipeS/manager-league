@@ -36,7 +36,10 @@ export class LeagueDetailsComponent implements OnInit {
   private leaguesService = inject(LeaguesService);
 
   readonly canEdit = computed(() => this.auth.canEditLeague(this.league()));
-  readonly isGuest = computed(() => this.auth.isGuest());
+  readonly canViewGenerateTab = computed(() =>
+    !this.auth.loading() && this.auth.userRole() !== 'guest'
+  );
+
 
   imagemPadrao = '';
 

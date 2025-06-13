@@ -52,15 +52,16 @@
                 class="py-2 cursor-pointer whitespace-nowrap">
                 Partidas
             </a>
-            @if (!isGuest()) {
-                @if (activeTab === 'generate' && !isGuest()) {
-                    <a (click)="activeTab = 'generate'" [class.text-blue-600]="activeTab === 'generate'"
-                        [class.border-b-2]="activeTab === 'generate'" [class.border-blue-600]="activeTab === 'generate'"
-                        class="py-2 cursor-pointer whitespace-nowrap">
-                        Criar times
-                    </a>
-                }
+            <!-- @if (!auth.loading()) { -->
+
+            @if (canViewGenerateTab()) {
+            <a (click)="activeTab = 'generate'" [class.text-blue-600]="activeTab === 'generate'"
+                [class.border-b-2]="activeTab === 'generate'" [class.border-blue-600]="activeTab === 'generate'"
+                class="py-2 cursor-pointer whitespace-nowrap">
+                Criar times
+            </a>
             }
+            <!-- } -->
             <a (click)="activeTab = 'ranking'" [class.text-blue-600]="activeTab === 'ranking'"
                 [class.border-b-2]="activeTab === 'ranking'" [class.border-blue-600]="activeTab === 'ranking'"
                 class="py-2 cursor-pointer whitespace-nowrap">
