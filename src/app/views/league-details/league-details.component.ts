@@ -18,6 +18,7 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
 import { TeamLineupModalComponent } from '../../shared/components/team-lineup-modal/team-lineup-modal.component';
 import { Team } from '../../models/team.model';
 import { RankingComponent } from '../../shared/components/ranking/ranking.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-league-details',
@@ -27,11 +28,15 @@ import { RankingComponent } from '../../shared/components/ranking/ranking.compon
   styleUrl: './league-details.component.scss'
 })
 export class LeagueDetailsComponent implements OnInit {
+  private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
   private toaster = inject(ToasterService);
   private playerService = inject(PlayerService);
   private ratingService = inject(RatingService);
   private leaguesService = inject(LeaguesService);
+
+  readonly canEdit = computed(() => this.auth.canEditLeague(this.league()));
+  readonly isGuest = computed(() => this.auth.isGuest());
 
   imagemPadrao = '';
 

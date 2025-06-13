@@ -15,14 +15,14 @@
             </div>
         </div>
 
-        @if (!isAdmin) {
+        @if (!canEdit()) {
         <button (click)="followLeague()"
             class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition flex-shrink-0">
             {{ isFollowing ? 'Seguindo' : 'Seguir' }}
         </button>
         }
 
-        @if (isAdmin) {
+        @if (canEdit()) {
         <div class="space-x-2 flex-shrink-0">
             <button class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
                 Editar Liga
@@ -52,11 +52,15 @@
                 class="py-2 cursor-pointer whitespace-nowrap">
                 Partidas
             </a>
-            <a (click)="activeTab = 'generate'" [class.text-blue-600]="activeTab === 'generate'"
-                [class.border-b-2]="activeTab === 'generate'" [class.border-blue-600]="activeTab === 'generate'"
-                class="py-2 cursor-pointer whitespace-nowrap">
-                Criar times
-            </a>
+            @if (!isGuest()) {
+                @if (activeTab === 'generate' && !isGuest()) {
+                    <a (click)="activeTab = 'generate'" [class.text-blue-600]="activeTab === 'generate'"
+                        [class.border-b-2]="activeTab === 'generate'" [class.border-blue-600]="activeTab === 'generate'"
+                        class="py-2 cursor-pointer whitespace-nowrap">
+                        Criar times
+                    </a>
+                }
+            }
             <a (click)="activeTab = 'ranking'" [class.text-blue-600]="activeTab === 'ranking'"
                 [class.border-b-2]="activeTab === 'ranking'" [class.border-blue-600]="activeTab === 'ranking'"
                 class="py-2 cursor-pointer whitespace-nowrap">
@@ -82,7 +86,7 @@
                     </ul>
                 </div>
 
-                @if (isAdmin) {
+                @if (canEdit()) {
                 <button class="mt-4 px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition text-sm">
                     Editar Informações
                 </button>
@@ -94,7 +98,7 @@
             <div>
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold">Times Participantes</h2>
-                    @if (isAdmin) {
+                    @if (canEdit()) {
                     <button class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition text-sm">
                         Adicionar Time
                     </button>
@@ -121,7 +125,7 @@
             <div>
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold">Partidas</h2>
-                    @if (isAdmin) {
+                    @if (canEdit()) {
                     <button class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition text-sm">
                         Agendar Partida
                     </button>
@@ -153,7 +157,7 @@
                             </div>
                         </div>
 
-                        @if (isAdmin) {
+                        @if (canEdit()) {
                         <div class="mt-3 flex justify-end space-x-2">
                             <button class="px-2 py-1 bg-blue-500 text-white rounded text-xs">Editar</button>
                             <button class="px-2 py-1 bg-gray-500 text-white rounded text-xs">Resultado</button>

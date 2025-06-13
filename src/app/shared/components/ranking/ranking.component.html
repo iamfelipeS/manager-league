@@ -2,75 +2,106 @@
   <h2 class="text-xl font-semibold mb-4 text-center">Classificação Atual</h2>
 
   <!-- Critérios Editáveis -->
-  @if (isAdmin()) {
-    <button
-      (click)="abrirModalCriterios()"
-      class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm"
-    >
+  @if (canEdit()) {
+  <div class="flex justify-between items-center mb-4">
+    <button (click)="abrirModalCriterios()"
+      class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm">
       ⚙️ Editar Critérios
     </button>
+    <button (click)="salvarAlteracoesJogadores()"
+      class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">
+      💾 Salvar Alterações
+    </button>
+  </div>
   }
 
   <!-- Tabela de Classificação -->
- <div class="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg">
-  <table class="min-w-full divide-y divide-gray-300 text-sm">
-    <thead class="bg-blue-50 sticky top-0 z-10">
-      <tr>
-        <th class="px-4 py-3 font-semibold text-gray-700">#</th>
-        <th class="px-4 py-3 font-semibold text-gray-700">Jogador</th>
-        @for (criterio of criterios(); track criterio.id) {
-        <th class="px-4 py-3 font-semibold text-gray-700 text-center capitalize">
-          {{ criterio.nome }}
-        </th>
-        }
-        <th class="px-4 py-3 font-semibold text-gray-700 text-center">Troféus</th>
-        @if (isAdmin()) {
-        <th class="px-4 py-3 font-semibold text-gray-700 text-center">Pontua?</th>
-        }
-      </tr>
-    </thead>
-    <tbody class="bg-white divide-y divide-gray-200">
-      @for (player of ordenarJogadores(); track player.id; let i = $index) {
-      <tr class="hover:bg-gray-50">
-        <td class="px-4 py-2 font-bold text-center">
-          @if (i === 0) { 🥇 } @else if (i === 1) { 🥈 } @else if (i === 2) { 🥉 } @else { {{ i + 1 }} }
-        </td>
-        <td class="px-4 py-2 flex items-center gap-3">
-          <img [src]="player.avatarUrl || 'icons/user.png'" class="w-8 h-8 rounded-full object-cover" />
-          <span class="truncate max-w-[140px] font-medium">{{ player.name }}</span>
-        </td>
-        @for (criterio of criterios(); track criterio.id) {
-        <td class="px-4 py-2 text-center">
-          {{ getValor(player, criterio.nome.toLowerCase()) }}
-        </td>
-        }
-        <td class="px-4 py-2 text-center">
-          @if (player.trofeus && player.trofeus > 0) {
-          <span class="inline-flex items-center gap-1 text-yellow-600 font-semibold">
-            <i class="fas fa-trophy"></i>
-            @if (player.trofeus > 1) {
-            <span class="text-xs">x{{ player.trofeus }}</span>
-            }
-          </span>
-          } @else {
-          <span>-</span>
+  <div class="overflow-x-auto shadow ring-1 ring-black/5 sm:rounded-lg">
+    <table class="min-w-full divide-y divide-gray-300 text-sm">
+      <thead class="bg-blue-50 sticky top-0 z-10">
+        <tr>
+          <th class="px-4 py-3 font-semibold text-gray-700">#</th>
+          <th class="px-4 py-3 font-semibold text-gray-700">Jogador</th>
+          <th class="px-4 py-3 font-semibold text-gray-700 text-center">Pontos</th>
+          @for (criterio of criterios(); track criterio.id) {
+          <th class="px-4 py-3 font-semibold text-gray-700 text-center capitalize">
+            {{ criterio.nome }}
+          </th>
           }
-        </td>
-        @if (isAdmin()) {
-        <td class="px-4 py-2 text-center">
-          <input type="checkbox" [(ngModel)]="player.pontua" (change)="togglePontua(player)" />
-        </td>
-        }
-      </tr>
-      }
-    </tbody>
-  </table>
-</div>
+          <th class="px-4 py-3 font-semibold text-gray-700 text-center">Títulos</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        @for (player of ordenarJogadores(); track player.id; let i = $index) {
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2 font-bold text-center">
+            @if (i === 0) { 🥇 } @else if (i === 1) { 🥈 } @else if (i === 2) { 🥉 } @else { {{ i + 1 }} }
+          </td>
+          <td class="px-4 py-2 flex items-center gap-3 w-52 md:w-60">
+            <img [src]="player.avatarUrl || 'icons/user.png'" class="w-8 h-8 rounded-full object-cover" />
+            <span class="truncate max-w-[110px] md:max-w-[140px] font-medium">{{ player.name }}</span>
+          </td>
 
+          <td class="px-4 py-2 text-center">
+            @if (canEdit()) {
+              @if (player.criterios) {
+                <input [(ngModel)]="player.criterios['Pontos']" type="number"
+                  class="w-16 border rounded text-center text-sm px-1 py-0.5" />
+
+              } @else {
+              {{ getValor(player, 'pontos') }}
+              }
+            }
+          </td>
+
+          @for (criterio of criterios(); track criterio.id) {
+          <td class="px-4 py-2 text-center">
+            {{ getValor(player, criterio.nome.toLowerCase()) }}
+          </td>
+          }
+
+          <td class="px-4 py-2 text-center">
+            <div class="inline-flex items-center justify-center gap-2 w-24 mx-auto text-yellow-600 font-semibold">
+              @if (canEdit()) {
+              <button (click)="decrementarTrofeu(player)" class="text-xs text-gray-500 hover:text-blue-600">
+                <i class="fas fa-minus-circle"></i>
+              </button>
+              }
+              <span>
+                @if (player.trofeus && player.trofeus > 0) {
+                <i class="fas fa-trophy"></i>
+                @if (player.trofeus > 1) {
+                <span class="text-xs">x{{ player.trofeus }}</span>
+                }
+                } @else {
+                <span>-</span>
+                }
+              </span>
+              @if (canEdit()) {
+              <button (click)="incrementarTrofeu(player)" class="text-xs text-gray-500 hover:text-blue-600">
+                <i class="fas fa-plus-circle"></i>
+              </button>
+              }
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <ng-template #criteriosTemplate>
-  <app-criterio-config />
+  <div class="p-4 space-y-4">
+    <app-criterio-config [leagueId]="leagueId" />
+
+    <div class="text-end">
+      <button (click)="salvarCriterios()"
+        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">
+        💾 Salvar Critérios
+      </button>
+    </div>
+  </div>
 </ng-template>
 
 <app-modal #modal></app-modal>
