@@ -65,16 +65,18 @@ export class LeagueDetailsComponent implements OnInit {
 
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe(async params => {
       const id = params.get('id');
-      if (id) this.loadLeagueDetails(id);
+      if (id) {
+        await this.loadLeagueDetails(id);
+        await this.loadPlayers(id); 
+      }
     });
   }
 
-
-  async loadPlayers() {
+  async loadPlayers(leagueId: string) {
     this.isLoading.set(true);
-    const result = await this.playerService.getPlayers();
+    const result = await this.playerService.getPlayersByLeague(leagueId);
 
     result.forEach(player => {
       if (player.posicao === 'D') {

@@ -12,11 +12,12 @@ import { ToasterService } from '../../../services/toaster.service';
 import { AuthService } from '../../../services/auth.service';
 import { LeaguesService } from '../../../services/leagues.service';
 import { Leagues } from '../../../models/leagues.model';
+import { LoaderComponent } from '../loader/loader.component';
 
 @Component({
   selector: 'app-ranking',
   standalone: true,
-  imports: [CommonModule, FormsModule, CriterioConfigComponent, ModalComponent],
+  imports: [CommonModule, FormsModule, CriterioConfigComponent, ModalComponent, LoaderComponent],
   templateUrl: './ranking.component.html',
   styleUrl: './ranking.component.scss'
 })
@@ -35,16 +36,19 @@ export class RankingComponent implements OnInit {
   readonly canEdit = computed(() => this.auth.canEditLeague(this.league()));
   readonly isGuest = computed(() => this.auth.isGuest());
   
-  league = signal<Leagues | null>(null);
+  isLoading = signal(true);
   isAdmin = signal<boolean>(true);
   players = signal<Player[]>([]);
   criterios = signal<Criterio[]>([]);
+  league = signal<Leagues | null>(null);
 
   ngOnInit() {
     this.loadDados();
   }
 
   async loadDados() {
+    this.isLoading.set(true);
+
     const [playersResp, criteriosResp] = await Promise.all([
       this.playerService.getPlayersPontuaveis(this.leagueId),
       this.criterioService.getCriteriosPorLiga(this.leagueId),
@@ -56,6 +60,7 @@ export class RankingComponent implements OnInit {
     })));
 
     this.criterios.set(criteriosResp);
+    this.isLoading.set(false);
   }
 
   ordenarJogadores(): Player[] {
