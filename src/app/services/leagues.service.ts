@@ -26,8 +26,15 @@ export class LeaguesService {
     return data ?? [];
   }
 
-  getLeagueByName(name: string): Observable<Leagues | null> {
-    const league = this.leagues.find(l => l.name === name);
-    return of(league || null);
-  }
+async getLeagueById(id: string): Promise<Leagues | null> {
+  const { data, error } = await this.supabase
+    .from('leagues')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 }

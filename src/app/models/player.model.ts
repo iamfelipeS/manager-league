@@ -16,6 +16,7 @@ export interface Player {
   league_id: string;
   trofeus?: number;
   flags: PlayerFlag[];
+  criterios?: { [nome: string]: number };
   movimentacao: 'Estático' | 'Normal' | 'Intenso';
   posicao: 'G' | 'D' | 'M' | 'A'; 
 }

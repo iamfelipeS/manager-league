@@ -15,18 +15,23 @@ export class AdminPanelComponent implements OnInit {
   private auth = inject(AuthService);
   private toaster = inject(ToasterService);
 
-  currentUser = this.auth.currentUser;
-  currentRole = this.auth.role;
+  currentUser = computed(() => this.auth.profile());
+  currentRole = computed(() => this.auth.userRole());
+
   isSuper = computed(() => this.currentRole() === 'super');
 
   users = signal<Profile[]>([]);
 
   async ngOnInit() {
-    if (this.isSuper()) {
-      const all = await this.auth.getAllUsers();
-      this.users.set(all);
+    if (!this.isSuper()) {
+      this.toaster.warning('Acesso restrito.');
+      return;
     }
+
+    const all = await this.auth.getAllUsers();
+    this.users.set(all);
   }
+
 
   async trocarRole(userId: string, novaRole: Role) {
     const error = await this.auth.updateRole(userId, novaRole);
