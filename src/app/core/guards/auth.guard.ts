@@ -6,10 +6,14 @@ export const roleGuard = (roles: Array<'super' | 'admin' | 'guest'>) => () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  const currentUser = auth.currentUser();
-  const currentRole = auth.role();
+  const role = auth.userRole();
 
-  if (!currentUser || currentRole === null || !roles.includes(currentRole)) {
+  if (!role && !roles.includes('guest')) {
+    router.navigateByUrl('/login');
+    return false;
+  }
+
+  if (role && !roles.includes(role as 'super' | 'admin')) {
     router.navigateByUrl('/login');
     return false;
   }

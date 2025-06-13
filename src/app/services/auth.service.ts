@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../enviroments/enviroment';
 import { Profile, Role } from '../models/profile.model';
+import { ToasterService } from './toaster.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -10,8 +11,88 @@ export class AuthService {
   currentUser = signal<Profile | null>(null);
   role = signal<'super' | 'admin' | 'guest' | null>(null);
 
-  constructor() {
-    this.refreshUserSession(); // Carrega sessão ao iniciar
+ readonly profile = signal<Profile | null>(null);
+  readonly loading = signal(false);
+
+  constructor(private toaster: ToasterService) {
+    this.loadSession();
+  }
+
+  // Retorna o papel atual
+  userRole(): string | null {
+    return this.profile()?.role ?? null;
+  }
+
+  // Retorna o ID do usuário atual
+  userId(): string | null {
+    return this.profile()?.id ?? null;
+  }
+
+  isSuper(): boolean {
+    return this.userRole() === 'super';
+  }
+
+  isAdmin(): boolean {
+    return this.userRole() === 'admin';
+  }
+
+  isGuest(): boolean {
+    return this.userRole() === null;
+  }
+
+  isPrivileged(): boolean {
+    return this.isSuper() || this.isAdmin();
+  }
+
+  // Verifica se o usuário pode editar uma liga específica
+  canEditLeague(league: any): boolean {
+    if (!league) return false;
+
+    if (this.isSuper()) return true;
+
+    if (this.isAdmin()) {
+      const userId = this.userId();
+      return league.organizer?.some((org: any) => org.user_id === userId);
+    }
+
+    return false;
+  }
+
+  // Carrega a sessão atual
+  async loadSession(): Promise<void> {
+    this.loading.set(true);
+
+    const {
+      data: { session },
+      error,
+    } = await this.supabase.auth.getSession();
+
+    if (error) {
+      this.toaster.error('Erro ao recuperar sessão');
+      this.loading.set(false);
+      return;
+    }
+
+    if (!session) {
+      this.profile.set(null);
+      this.loading.set(false);
+      return;
+    }
+
+    const { data: profile, error: profileError } = await this.supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profileError) {
+      this.toaster.error('Erro ao carregar perfil');
+      this.loading.set(false);
+      return;
+    }
+
+    this.profile.set(profile);
+    this.loading.set(false);
   }
 
   async refreshUserSession() {
