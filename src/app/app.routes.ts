@@ -23,12 +23,12 @@ export const routes: Routes = [
   {
     path: 'meu-perfil',
     loadComponent: () => import('./views/user/usern-panel/user-panel.component').then(m => m.UserPanelComponent),
-    canActivate: [roleGuard(['super', 'admin', 'guest'])], // qualquer usuário autenticado
+    // canActivate: [roleGuard(['super', 'admin', 'guest'])], // qualquer usuário autenticado
   },
   {
     path: 'jogadores',
     loadComponent: () => import('./views/player-list/player-list.component').then(m => m.PlayerListComponent),
-    canActivate: [roleGuard(['super', 'admin'])], // apenas super/admin podem ver a lista completa
+    // canActivate: [roleGuard(['super', 'admin'])], // apenas super/admin podem ver a lista completa
     data: {
       ssr: false
     }
@@ -40,11 +40,11 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadComponent: () => import('./views/admin/admin-panel/admin-panel.component').then(m => m.AdminPanelComponent),
-    canActivate: [roleGuard(['super', 'admin'])],
+    // canActivate: [roleGuard(['super', 'admin'])],
   },
   {
     path: 'admin/flags',
     loadComponent: () => import('./views/flag-admin/flag-admin.component').then(m => m.FlagAdminComponent),
-    canActivate: [roleGuard(['super'])], // apenas super pode administrar flags
+    // canActivate: [roleGuard(['super'])], // apenas super pode administrar flags
   },
 ];
