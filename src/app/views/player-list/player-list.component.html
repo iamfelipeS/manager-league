@@ -1,4 +1,4 @@
-<div class="p-4 max-w-6xl mx-auto flex flex-col h-screen">
+<div class="p-4 max-w-6xl mx-auto flex flex-col">
   <div class="mb-6 flex justify-between items-center flex-wrap gap-2">
     <h1 class="text-xl font-semibold">Jogadores</h1>
     <span class="text-sm text-gray-600">Total: <strong>{{ players().length }}</strong></span>
@@ -6,202 +6,172 @@
 
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-20">
     <div class="flex flex-wrap gap-3 items-center">
-      <select
-        class="p-2 rounded border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-        [(ngModel)]="ligaSelecionadaValue"
-        (change)="loadPlayersByLeague()"
-      >
+      <select class="p-2 rounded border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+        [(ngModel)]="ligaSelecionadaValue" (change)="loadPlayersByLeague()">
         <option disabled selected>Selecione a Liga</option>
         @for (liga of minhasLigas(); track liga.id) {
-          <option [value]="liga.id">{{ liga.name }}</option>
+        <option [value]="liga.id">{{ liga.name }}</option>
         }
       </select>
 
-      <select
-        class="p-2 rounded border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-        [ngModel]="orderBy()"
-        (ngModelChange)="orderBy.set($event)"
-      >
+      <select class="p-2 rounded border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+        [ngModel]="orderBy()" (ngModelChange)="orderBy.set($event)">
         <option value="rating">Classificar por Rating</option>
         <option value="name">Classificar por Nome</option>
         <option value="posicao">Classificar por Posição</option>
       </select>
 
       <div class="relative flex items-center">
-        <input
-          type="text"
-          placeholder="Buscar jogador"
-          class="p-2 border rounded w-full pr-10"
-          [(ngModel)]="searchTerm"
-          (input)="searchPlayer($event)"
-        />
-        <i
-          class="fas fa-times absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-primary"
-          (click)="clearSearch()"
-          *ngIf="searchTerm()"
-        ></i>
+        <input type="text" placeholder="Buscar jogador" class="p-2 border rounded w-full pr-10" [(ngModel)]="searchTerm"
+          (input)="searchPlayer($event)" />
+        <i class="fas fa-times absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-primary"
+          (click)="clearSearch()" *ngIf="searchTerm()"></i>
       </div>
     </div>
 
     <div class="flex gap-3">
-      <button
-        class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
-        (click)="addPlayer()"
-        title="Adicionar Jogador"
-      >
+      <button class="flex items-center justify-center bg-primary hover:bg-blue-700 text-white w-12 h-12 rounded-full"
+        (click)="addPlayer()" title="Adicionar Jogador">
         <i class="fas fa-user-plus text-white text-lg"></i>
       </button>
 
       <button
         class="flex items-center justify-center border border-primary hover:bg-grays7 text-white w-12 h-12 rounded-full"
-        (click)="redirectToFlagAdmin()"
-        title="Administrar Grupos"
-      >
+        (click)="redirectToFlagAdmin()" title="Administrar Grupos">
         <i class="fas fa-users text-primary text-lg"></i>
       </button>
     </div>
   </div>
 
-  @if (isLoading()) {
+    @if (isLoading()) {
     <app-loader></app-loader>
-  } @else {
+    } @else {
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-[3.5rem] flex-grow">
       @for (player of orderedAndFilteredPlayers(); track player.id) {
-        <div class="relative bg-white text-zinc-800 rounded-2xl p-6 border shadow-sm">
-          <div class="flex flex-row gap-2 items-center justify-center">
-            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2">
-              <div class="relative flex justify-center items-center">
-                <div class="w-[5.5rem] h-[5.5rem] rounded-full overflow-hidden">
-                  <img
-                    [src]="player.avatarUrl || 'icons/user.png'"
-                    alt="Avatar"
-                    class="w-full h-full object-cover"
-                  />
-                </div>
-
-                <label
-                  class="flex justify-center items-center absolute right-[2px] bottom-[0.2rem] bg-blue-800 hover:bg-blue-600 w-[1.7rem] h-[1.7rem] rounded-full cursor-pointer"
-                  title="Alterar avatar"
-                >
-                  <i class="fa-solid fa-plus mt-1 text-sm text-white"></i>
-                  <input type="file" hidden (change)="onAvatarChange($event, player)" />
-                </label>
+      <div class="relative bg-white text-zinc-800 rounded-2xl p-6 border shadow-sm">
+        <!-- AVATAR -->
+        <div class="flex flex-row gap-2 items-center justify-center">
+          <div class="absolute -top-10 left-1/2 transform -translate-x-1/2">
+            <div class="relative flex justify-center items-center">
+              <div class="w-[5.5rem] h-[5.5rem] rounded-full overflow-auto">
+                <img [src]="player.avatarUrl || 'icons/user.png'" alt="Avatar" class="w-full h-full object-cover" />
               </div>
-            </div>
 
+              <label
+                class="flex justify-center items-center absolute right-[2px] bottom-[0.2rem] bg-blue-800 hover:bg-blue-600 w-[1.7rem] h-[1.7rem] rounded-full cursor-pointer"
+                title="Alterar avatar">
+                <i class="fa-solid fa-plus mt-1 text-sm text-white"></i>
+                <input type="file" hidden (change)="onAvatarChange($event, player)" />
+              </label>
+            </div>
           </div>
 
-          <div class="flex flex-row items-center justify-center ml-4">
-            <div class="mt-8 text-center">
-              <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>
-              <div class="flex flex-col">
-                <span class="text-xs uppercase tracking-wide text-gray-500">
-                  {{ getPosicaoLabel(player.posicao) }}
-                </span>
+        </div>
 
-                @if (player.flags?.length) {
-                  <div class="mt-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 inline-block">
-                    {{ player.flags[0].name }}
-                  </div>
-                } @else {
-                  <div class="mt-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-gray-200 text-gray-500 inline-block">
-                    Sem grupo
-                  </div>
-                }
+        <!-- GRUPO -->
+        <div class="flex flex-row items-center justify-center ml-4">
+          <div class="mt-8 text-center">
+            <h2 class="text-lg font-bold uppercase">{{ player.name }}</h2>
+            <div class="flex flex-col">
+              <span class="text-xs uppercase tracking-wide text-gray-500">
+                {{ getPosicaoLabel(player.posicao) }}
+              </span>
 
+              @if (player.flags?.length) {
+              <div
+                class="mt-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 inline-block">
+                {{ player.flags[0].name }}
               </div>
-            </div>
+              } @else {
+              <div
+                class="mt-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-gray-200 text-gray-500 inline-block">
+                Sem grupo
+              </div>
+              }
 
-            <div class="mt-2">
-              <i class="fas"
-                [ngClass]="[
+            </div>
+          </div>
+
+          <div class="mt-2">
+            <i class="fas" [ngClass]="[
                   getFaseIcon(player).icon,
                   getFaseIcon(player).color,
                   getFaseIcon(player).animation,
                   'text-xl'
                 ]">
-              </i>
-            </div>
-          </div>
-
-          <div class="mt-4 space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span>Qualidade</span>
-              <span>{{ player.qualidade }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Velocidade</span>
-              <span>{{ player.velocidade }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Fase</span>
-              <span>{{ player.fase }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Movimentação</span>
-              <span>{{ player.movimentacao }}</span>
-            </div>
-          </div>
-
-          <div class="mt-6 flex justify-center">
-            <div
-              class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold"
-              [ngClass]="getRatingColor(getRating(player))"
-            >
-              {{ getRating(player) }}
-            </div>
-          </div>
-
-          @if (player.pontua) {
-            <span class="text-green-600 text-xs mr-auto flex items-center gap-1">
-              <i class="fas fa-check-circle text-green-600 text-sm" title="Pontua na classificação"></i>
-            </span>
-          }
-          <div class="absolute bottom-3 right-3 flex gap-2">
-            <button (click)="editPlayer(player)"
-              class="bg-white text-blue-600 hover:bg-blue-50 p-2 rounded-full shadow-md hover:scale-105 transition"
-              title="Editar jogador">
-              <i class="fas fa-pen text-sm"></i>
-            </button>
-
-            <button (click)="deletePlayer(player.id)"
-              class="bg-white text-red-600 hover:bg-red-50 p-2 rounded-full shadow-md hover:scale-105 transition"
-              title="Remover jogador">
-              <i class="fas fa-trash text-sm"></i>
-            </button>
+            </i>
           </div>
         </div>
+
+        <!-- INFOS GERAIS -->
+        <div class="mt-4 space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>Qualidade</span>
+            <span>{{ player.qualidade }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Velocidade</span>
+            <span>{{ player.velocidade }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Fase</span>
+            <span>{{ player.fase }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Movimentação</span>
+            <span>{{ player.movimentacao }}</span>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-center">
+          <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold"
+            [ngClass]="getRatingColor(getRating(player))">
+            {{ getRating(player) }}
+          </div>
+        </div>
+
+        @if (player.pontua) {
+        <span class="text-green-600 text-xs mr-auto flex items-center gap-1">
+          <i class="fas fa-check-circle text-green-600 text-sm" title="Pontua na classificação"></i>
+        </span>
+        }
+        <div class="absolute bottom-3 right-3 flex gap-2">
+          <button (click)="editPlayer(player)"
+            class="bg-white text-blue-600 hover:bg-blue-50 p-2 rounded-full shadow-md hover:scale-105 transition"
+            title="Editar jogador">
+            <i class="fas fa-pen text-sm"></i>
+          </button>
+
+          <button (click)="deletePlayer(player.id)"
+            class="bg-white text-red-600 hover:bg-red-50 p-2 rounded-full shadow-md hover:scale-105 transition"
+            title="Remover jogador">
+            <i class="fas fa-trash text-sm"></i>
+          </button>
+        </div>
+      </div>
       } @empty {
-        <div class="col-span-full text-center text-gray-500">
-          Nenhum jogador encontrado com o termo de busca.
-        </div>
+      <div class="col-span-full text-center text-gray-500">
+        Nenhum jogador encontrado com o termo de busca.
+      </div>
       }
     </div>
-  }
+    }
 
+  <!-- MODAL -->
   <ng-template #playerFormTemplate>
     <form class="space-y-4 text-sm text-zinc-900">
       <!-- Nome -->
       <div>
         <label class="text-sm font-medium">Nome</label>
-        <input
-          [(ngModel)]="selectedPlayer!.name"
-          name="name"
-          required
-          class="w-full p-3 border rounded-xl bg-white"
-          placeholder="Nome do jogador"
-        />
+        <input [(ngModel)]="selectedPlayer!.name" name="name" required class="w-full p-3 border rounded-xl bg-white"
+          placeholder="Nome do jogador" />
       </div>
-      
+
       <!-- Posição -->
       <div class="flex flex-col">
         <label class="text-sm font-medium">Posição</label>
-        <select
-          [(ngModel)]="selectedPlayer!.posicao"
-          name="posicao"
-          required
-          class="w-full p-3 border rounded-xl bg-white"
-        >
+        <select [(ngModel)]="selectedPlayer!.posicao" name="posicao" required
+          class="w-full p-3 border rounded-xl bg-white">
           <option disabled value="">Selecione a posição</option>
           <option value="G">Goleiro</option>
           <option value="D">Defensor</option>
@@ -213,70 +183,55 @@
       <!-- Seletor de Liga + Toggle de Pontuação -->
       <div class="flex items-end gap-3 w-full mt-4">
         @if(selectedPlayer) {
-          <!-- Select de Liga -->
-          <div class="flex flex-col w-full">
-            <label class="text-sm font-medium mb-1">Liga</label>
-            <select
-              [(ngModel)]="selectedPlayer.league_id"
-              name="liga"
-              class="w-full p-3 border rounded-xl bg-white text-sm"
-            >
-              <option disabled value="">Selecione uma liga</option>
-              @for (liga of minhasLigas(); track liga.id) {
-                <option [value]="liga.id">{{ liga.name }}</option>
-              }
-            </select>
-          </div>
+        <!-- Select de Liga -->
+        <div class="flex flex-col w-full">
+          <label class="text-sm font-medium mb-1">Liga</label>
+          <select [(ngModel)]="selectedPlayer.league_id" name="liga"
+            class="w-full p-3 border rounded-xl bg-white text-sm">
+            <option disabled value="">Selecione uma liga</option>
+            @for (liga of minhasLigas(); track liga.id) {
+            <option [value]="liga.id">{{ liga.name }}</option>
+            }
+          </select>
+        </div>
 
-          <!-- Toggle de Pontuação -->
-          <div class="flex flex-col justify-end items-start mt-[30px]">
-            <label class="text-sm font-medium mb-1">Pontua</label>
-            <label class="inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                [(ngModel)]="selectedPlayer!.pontua"
-                [ngModelOptions]="{ standalone: true }"
-                class="sr-only peer"
-              />
-              <div
-                class="w-11 h-6 bg-gray-200 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"
-              ></div>
-            </label>
-          </div>
+        <!-- Toggle de Pontuação -->
+        <div class="flex flex-col justify-end items-start mt-[30px]">
+          <label class="text-sm font-medium mb-1">Pontua</label>
+          <label class="inline-flex items-center cursor-pointer">
+            <input type="checkbox" [(ngModel)]="selectedPlayer!.pontua" [ngModelOptions]="{ standalone: true }"
+              class="sr-only peer" />
+            <div
+              class="w-11 h-6 bg-gray-200 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full">
+            </div>
+          </label>
+        </div>
         }
       </div>
 
-      
+
       <!-- Flags  -->
       <div class="flex items-end gap-3 w-full">
         <div class="flex flex-col w-full">
           <label class="text-sm font-medium">Grupo (Flag)</label>
-          <select
-            [(ngModel)]="selectedFlagId"
-            name="flag"
-            class="p-3 border rounded-xl bg-white text-sm w-full"
-          >
+          <select [(ngModel)]="selectedFlagId" name="flag" class="p-3 border rounded-xl bg-white text-sm w-full">
             <option [ngValue]="null">Sem grupo</option>
             @for (flag of availableFlags(); track flag.id) {
-              <option [ngValue]="flag.id">{{ flag.name }}</option>
+            <option [ngValue]="flag.id">{{ flag.name }}</option>
             }
           </select>
         </div>
 
         <!-- Botão criar nova flag -->
         <div class="flex justify-end">
-          <button
-            type="button"
-            (click)="createAndSelectFlag()"
-            class="p-2 bg-green-600 text-white rounded-xl h-11 text-xs hover:bg-green-700"
-            title="Criar novo grupo"
-          >
+          <button type="button" (click)="createAndSelectFlag()"
+            class="p-2 bg-green-600 text-white rounded-xl h-11 text-xs hover:bg-green-700" title="Criar novo grupo">
             +
           </button>
         </div>
       </div>
 
-  
+
       <!-- Qualidade -->
       <div>
         <div class="flex justify-between items-center mb-1">
@@ -287,124 +242,80 @@
         </div>
         <div class="flex justify-between gap-2">
           @for (i of [1, 2, 3, 4, 5]; track i) {
-            <button
-              type="button"
-              class="w-full p-4 rounded-xl"
-              [class.bg-primary]="selectedPlayer?.qualidade === i"
-              [class.bg-gray-300]="selectedPlayer?.qualidade !== i"
-              [class.text-white]="selectedPlayer?.qualidade === i"
-              (click)="selectedPlayer!.qualidade = i"
-            ></button>
+          <button type="button" class="w-full p-4 rounded-xl" [class.bg-primary]="selectedPlayer?.qualidade === i"
+            [class.bg-gray-300]="selectedPlayer?.qualidade !== i" [class.text-white]="selectedPlayer?.qualidade === i"
+            (click)="selectedPlayer!.qualidade = i"></button>
           }
         </div>
       </div>
-  
+
       <!-- Velocidade -->
       <div>
         <label class="text-sm font-medium">Velocidade</label>
         <div class="flex justify-between gap-2 mt-1">
-          <button
-            type="button"
-            class="w-full py-2 rounded-xl"
-            [class.bg-primary]="selectedPlayer?.velocidade === 3"
-            [class.bg-gray-300]="selectedPlayer?.velocidade !== 3"
-            [class.text-white]="selectedPlayer?.velocidade === 3"
-            (click)="selectedPlayer!.velocidade = 3"
-          >
+          <button type="button" class="w-full py-2 rounded-xl" [class.bg-primary]="selectedPlayer?.velocidade === 3"
+            [class.bg-gray-300]="selectedPlayer?.velocidade !== 3" [class.text-white]="selectedPlayer?.velocidade === 3"
+            (click)="selectedPlayer!.velocidade = 3">
             Lento
           </button>
-          <button
-            type="button"
-            class="w-full py-2 rounded-xl"
-            [class.bg-primary]="selectedPlayer?.velocidade === 6"
-            [class.bg-gray-300]="selectedPlayer?.velocidade !== 6"
-            [class.text-white]="selectedPlayer?.velocidade === 6"
-            (click)="selectedPlayer!.velocidade = 6"
-          >
+          <button type="button" class="w-full py-2 rounded-xl" [class.bg-primary]="selectedPlayer?.velocidade === 6"
+            [class.bg-gray-300]="selectedPlayer?.velocidade !== 6" [class.text-white]="selectedPlayer?.velocidade === 6"
+            (click)="selectedPlayer!.velocidade = 6">
             Normal
           </button>
-          <button
-            type="button"
-            class="w-full py-2 rounded-xl"
-            [class.bg-primary]="selectedPlayer?.velocidade === 9"
-            [class.bg-gray-300]="selectedPlayer?.velocidade !== 9"
-            [class.text-white]="selectedPlayer?.velocidade === 9"
-            (click)="selectedPlayer!.velocidade = 9"
-          >
+          <button type="button" class="w-full py-2 rounded-xl" [class.bg-primary]="selectedPlayer?.velocidade === 9"
+            [class.bg-gray-300]="selectedPlayer?.velocidade !== 9" [class.text-white]="selectedPlayer?.velocidade === 9"
+            (click)="selectedPlayer!.velocidade = 9">
             Rápido
           </button>
         </div>
       </div>
-  
+
       <!-- Movimentação -->
       <div>
         <label class="text-sm font-medium">Movimentação</label>
         <div class="flex justify-between gap-2 mt-1">
-          <button
-            type="button"
-            class="w-full py-2 rounded-xl"
+          <button type="button" class="w-full py-2 rounded-xl"
             [class.bg-primary]="selectedPlayer?.movimentacao === 'Estático'"
             [class.bg-gray-300]="selectedPlayer?.movimentacao !== 'Estático'"
             [class.text-white]="selectedPlayer?.movimentacao === 'Estático'"
-            (click)="selectedPlayer!.movimentacao = 'Estático'"
-          >
+            (click)="selectedPlayer!.movimentacao = 'Estático'">
             Estático
           </button>
-          <button
-            type="button"
-            class="w-full py-2 rounded-xl"
+          <button type="button" class="w-full py-2 rounded-xl"
             [class.bg-primary]="selectedPlayer?.movimentacao === 'Normal'"
             [class.bg-gray-300]="selectedPlayer?.movimentacao !== 'Normal'"
             [class.text-white]="selectedPlayer?.movimentacao === 'Normal'"
-            (click)="selectedPlayer!.movimentacao = 'Normal'"
-          >
+            (click)="selectedPlayer!.movimentacao = 'Normal'">
             Normal
           </button>
-          <button
-            type="button"
-            class="w-full py-2 rounded-xl"
+          <button type="button" class="w-full py-2 rounded-xl"
             [class.bg-primary]="selectedPlayer?.movimentacao === 'Intenso'"
             [class.bg-gray-300]="selectedPlayer?.movimentacao !== 'Intenso'"
             [class.text-white]="selectedPlayer?.movimentacao === 'Intenso'"
-            (click)="selectedPlayer!.movimentacao = 'Intenso'"
-          >
+            (click)="selectedPlayer!.movimentacao = 'Intenso'">
             Intenso
           </button>
         </div>
       </div>
-  
+
       <!-- Fase -->
       <div>
         <label class="text-sm font-medium">Fase</label>
         <div class="flex justify-between gap-2 mt-1">
-          <button
-            type="button"
-            class="w-full py-2 rounded-xl"
-            [class.bg-primary]="selectedPlayer?.fase === 3"
-            [class.bg-gray-300]="selectedPlayer?.fase !== 3"
-            [class.text-white]="selectedPlayer?.fase === 3"
-            (click)="selectedPlayer!.fase = 3"
-          >
+          <button type="button" class="w-full py-2 rounded-xl" [class.bg-primary]="selectedPlayer?.fase === 3"
+            [class.bg-gray-300]="selectedPlayer?.fase !== 3" [class.text-white]="selectedPlayer?.fase === 3"
+            (click)="selectedPlayer!.fase = 3">
             Ruim
           </button>
-          <button
-            type="button"
-            class="w-full py-2 rounded-xl"
-            [class.bg-primary]="selectedPlayer?.fase === 6"
-            [class.bg-gray-300]="selectedPlayer?.fase !== 6"
-            [class.text-white]="selectedPlayer?.fase === 6"
-            (click)="selectedPlayer!.fase = 6"
-          >
+          <button type="button" class="w-full py-2 rounded-xl" [class.bg-primary]="selectedPlayer?.fase === 6"
+            [class.bg-gray-300]="selectedPlayer?.fase !== 6" [class.text-white]="selectedPlayer?.fase === 6"
+            (click)="selectedPlayer!.fase = 6">
             Normal
           </button>
-          <button
-            type="button"
-            class="w-full py-2 rounded-xl"
-            [class.bg-primary]="selectedPlayer?.fase === 9"
-            [class.bg-gray-300]="selectedPlayer?.fase !== 9"
-            [class.text-white]="selectedPlayer?.fase === 9"
-            (click)="selectedPlayer!.fase = 9"
-          >
+          <button type="button" class="w-full py-2 rounded-xl" [class.bg-primary]="selectedPlayer?.fase === 9"
+            [class.bg-gray-300]="selectedPlayer?.fase !== 9" [class.text-white]="selectedPlayer?.fase === 9"
+            (click)="selectedPlayer!.fase = 9">
             Boa
           </button>
         </div>
