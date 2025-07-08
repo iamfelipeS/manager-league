@@ -85,11 +85,14 @@ export class AuthService {
       .eq('id', session.user.id)
       .single();
 
-    if (profileError) {
-      this.toaster.error('Erro ao carregar perfil');
-      this.loading.set(false);
-      return;
-    }
+console.log('[Auth] Recuperando perfil para usuário:', session.user.id);
+
+if (profileError) {
+  console.error('[Auth] Erro ao carregar perfil:', profileError.message);
+} else {
+  console.log('[Auth] Perfil carregado:', profile);
+}
+
 
     this.profile.set(profile);
     this.loading.set(false);

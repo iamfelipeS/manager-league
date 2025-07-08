@@ -2,7 +2,6 @@ import { Injectable, signal } from '@angular/core';
 import { Player, PlayerFlag } from '../models/player.model';
 import { supabase } from '../core/supabase/supabase.client';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { v4 as uuidv4 } from 'uuid';
 
 type PlayerWithJoin = Player & {
   pontua: boolean;

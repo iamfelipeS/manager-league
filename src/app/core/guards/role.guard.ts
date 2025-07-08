@@ -6,7 +6,7 @@ export const roleGuard = (roles: Array<'super' | 'admin' | 'guest'>) => async ()
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  // aguarda sessão
+  // aguarda até que auth.loading seja false
   if (auth.loading()) {
     await new Promise(resolve => {
       const interval = setInterval(() => {
@@ -25,11 +25,10 @@ export const roleGuard = (roles: Array<'super' | 'admin' | 'guest'>) => async ()
     return false;
   }
 
-  if (role && !roles.includes(role as 'super' | 'admin')) {
+  if (role && !roles.includes(role as 'super' | 'admin' | 'guest')) {
     router.navigateByUrl('/login');
     return false;
   }
 
   return true;
 };
-

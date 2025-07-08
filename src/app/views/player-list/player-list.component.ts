@@ -329,7 +329,6 @@ export class PlayerListComponent implements OnInit {
   searchPlayer(event: Event) {
     const target = event.target as HTMLInputElement;
     this.searchTerm.set(target.value);
-    console.log(target.value)
   }
 
   clearSearch(): void {
