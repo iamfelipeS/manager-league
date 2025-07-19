@@ -69,7 +69,7 @@ export class LeagueDetailsComponent implements OnInit {
       const id = params.get('id');
       if (id) {
         await this.loadLeagueDetails(id);
-        await this.loadPlayers(id); 
+        await this.loadPlayers(id);
       }
     });
   }
@@ -260,6 +260,7 @@ export class LeagueDetailsComponent implements OnInit {
 
 
   //METODO MAIS ALEATORIEDADE
+  
   shuffleArray(array: Player[]): Player[] {
     const result = [...array];
     for (let i = result.length - 1; i > 0; i--) {
@@ -418,31 +419,6 @@ export class LeagueDetailsComponent implements OnInit {
       );
     }
   }
-
-
-  //METODO MAIS ALEATORIEDADE
-  recalculateTeamAverages() {
-    for (const team of this.generatedTeams) {
-      team.overall = Math.round(
-        team.players.reduce((sum, p) => sum + this.getRating(p), 0) /
-        (team.players.length || 1)
-      );
-    }
-  }
-
-  private calculateTeamDistribution(totalPlayers: number, teamCount: number): number[] {
-    const baseSize = Math.floor(totalPlayers / teamCount);
-    const extras = totalPlayers % teamCount;
-
-    const distribution = Array(teamCount).fill(baseSize);
-
-    for (let i = 0; i < extras; i++) {
-      distribution[i]++;
-    }
-
-    return distribution.sort((a, b) => b - a); // opcional: organiza para começar pelos maiores
-  }
-
 
   get availablePlayers(): Player[] {
     return this.sortedPlayers.filter(player => !this.isLesionado(player));
