@@ -7,11 +7,19 @@ import { ToasterService } from './toaster.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
+  private supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: localStorage,
+    },
+  });
+
   currentUser = signal<Profile | null>(null);
   role = signal<'super' | 'admin' | 'guest' | null>(null);
 
- readonly profile = signal<Profile | null>(null);
+  readonly profile = signal<Profile | null>(null);
   readonly loading = signal(false);
 
   constructor(private toaster: ToasterService) {
@@ -85,13 +93,13 @@ export class AuthService {
       .eq('id', session.user.id)
       .single();
 
-console.log('[Auth] Recuperando perfil para usuário:', session.user.id);
+    console.log('[Auth] Recuperando perfil para usuário:', session.user.id);
 
-if (profileError) {
-  console.error('[Auth] Erro ao carregar perfil:', profileError.message);
-} else {
-  console.log('[Auth] Perfil carregado:', profile);
-}
+    if (profileError) {
+      console.error('[Auth] Erro ao carregar perfil:', profileError.message);
+    } else {
+      console.log('[Auth] Perfil carregado:', profile);
+    }
 
 
     this.profile.set(profile);

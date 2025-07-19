@@ -277,8 +277,12 @@
             <app-loader />
             }
             }
-            @if (activeTab === 'ranking' && league() !== null) {
-            <app-ranking [leagueId]="league()!.id" />
+            @if (activeTab === 'ranking') {
+                @if (league()) {
+                <app-ranking [league]="league()!" />
+                } @else {
+                <app-loader />
+                }
             }
         </div>
     </div>

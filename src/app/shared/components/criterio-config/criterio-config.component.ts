@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Criterio } from '../../../models/criterios.model';
 import { ToasterService } from '../../../services/toaster.service';
 import { AuthService } from '../../../services/auth.service';
+import { Leagues } from '../../../models/leagues.model';
 
 @Component({
   selector: 'app-criterio-config',
@@ -16,13 +17,14 @@ import { AuthService } from '../../../services/auth.service';
 
 
 export class CriterioConfigComponent implements OnInit {
-  @Input({ required: true }) leagueId!: string;
+  @Input({ required: true }) league!: Leagues;
+
 
   private auth = inject(AuthService);
   private toaster = inject(ToasterService);
   private criterioService = inject(CriterioService);
 
-  readonly canEdit = computed(() => this.auth.canEditLeague({ id: this.leagueId }));
+  readonly canEdit = computed(() => this.auth.canEditLeague({ id: this.league.id }));
 
   criterios = signal<Criterio[]>([]);
   criterioSelecionado = signal<Criterio | null>(null);
@@ -31,7 +33,7 @@ export class CriterioConfigComponent implements OnInit {
   criteriosSelecionados = signal<Criterio[]>([]);
 
   async ngOnInit() {
-    const lista = await this.criterioService.getCriteriosPorLiga(this.leagueId);
+    const lista = await this.criterioService.getCriteriosPorLiga(this.league.id);
     this.criterios.set(lista);
     this.separarCriterios(lista);
   }
@@ -91,7 +93,7 @@ export class CriterioConfigComponent implements OnInit {
     await this.criterioService.updateCriteriosPorLiga(
       this.criterios().map(c => ({
         ...c,
-        league_id: this.leagueId
+        league_id: this.league.id
       }))
     );
   }
