@@ -15,7 +15,7 @@ export class UserPanelComponent implements OnInit {
   private auth = inject(AuthService);
   private toaster = inject(ToasterService);
 
-  profile = this.auth.currentUser;
+  profile = this.auth.profile;
   role = this.auth.role;
 
   nomeEditado = signal('');

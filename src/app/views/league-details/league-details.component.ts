@@ -36,10 +36,7 @@ export class LeagueDetailsComponent implements OnInit {
   private leaguesService = inject(LeaguesService);
 
   readonly canEdit = computed(() => this.auth.canEditLeague(this.league()));
-  readonly canViewGenerateTab = computed(() =>
-    !this.auth.loading() && this.auth.userRole() !== 'guest'
-  );
-
+  readonly canViewGenerateTab = this.auth.canViewGenerateTab;
 
   imagemPadrao = '';
 
@@ -51,18 +48,18 @@ export class LeagueDetailsComponent implements OnInit {
   selectedTeamCount = 2;
   sortBy: 'name' | 'rating' | 'qualidade' | 'velocidade' | 'posicao' | 'fase' = 'name';
 
-  isLesionado(player: Player): boolean {
-    return player.flags?.some(f => f.name.toLowerCase() === 'lesionado') ?? false;
-  }
-
+  
   players = signal<Player[]>([]);
   isLoading = signal(true);
   totalPlayers = signal(0);
   teamModalVisible = signal(false);
   league = signal<Leagues | null>(null);
-
+  
   generatedTeams: Team[] = [];
-
+  
+  isLesionado(player: Player): boolean {
+    return player.flags?.some(f => f.name.toLowerCase() === 'lesionado') ?? false;
+  }
 
   ngOnInit() {
     this.route.paramMap.subscribe(async params => {
@@ -260,7 +257,7 @@ export class LeagueDetailsComponent implements OnInit {
 
 
   //METODO MAIS ALEATORIEDADE
-  
+
   shuffleArray(array: Player[]): Player[] {
     const result = [...array];
     for (let i = result.length - 1; i > 0; i--) {

@@ -66,16 +66,21 @@ export class CriterioService {
     return data ?? [];
   }
 
-  async salvarValores(valores: {
+  async salvarValores(dados: {
     player_id: string;
     league_id: string;
     criterio: string;
     valor: number;
-  }[]): Promise<void> {
+  }[]) {
     const { error } = await supabase
-      .from('player_criterios')
-      .upsert(valores, { onConflict: 'player_id,criterio,league_id' });
+      .from('criterios')
+      .upsert(dados, {
+        onConflict: 'player_id,league_id,criterio',
+      });
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
   }
+
 }

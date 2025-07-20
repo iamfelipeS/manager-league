@@ -90,6 +90,7 @@ export class RankingComponent implements OnInit {
   }
 
   async salvarCriterios() {
+    this.isLoading.set(true);
     const criteriosAtualizados = this.criterios().map(c => ({
       ...c,
       league_id: this.league.id,
@@ -105,10 +106,13 @@ export class RankingComponent implements OnInit {
     } catch (error) {
       console.error(error);
       this.toaster.error('Erro ao salvar os critérios.');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
   async salvarAlteracoesJogadores() {
+    this.isLoading.set(true);
     try {
       const updates = this.players().flatMap(player => {
         return Object.entries(player.criterios || {}).map(([criterio, valor]) => ({
@@ -122,8 +126,9 @@ export class RankingComponent implements OnInit {
       await this.criterioService.salvarValores(updates);
       this.toaster.success('Pontuações e troféus salvos com sucesso!');
     } catch (error) {
-      console.error(error);
       this.toaster.error('Erro ao salvar pontuações.');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 

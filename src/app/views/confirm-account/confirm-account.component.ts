@@ -30,7 +30,7 @@ export class ConfirmAccountComponent implements OnInit {
       const { error } = await this.auth.setSessionWithHashToken(access_token, refresh_token);
 
       if (!error) {
-        await this.auth.refreshUserSession();
+        await this.auth.loadUserSession();
         this.toaster.success('Conta ativada com sucesso!');
 
         const role = this.auth.role();
