@@ -19,7 +19,7 @@ export class PlayerService {
   private players = signal<Player[]>([]);
   private supabase: SupabaseClient = supabase;
 
-    async getPlayers(): Promise<Player[]> {
+  async getPlayers(): Promise<Player[]> {
     const { data, error } = await this.supabase
       .from('players')
       .select('*, player_flags:player_flags(flag_id, flags(id, name, affectsTeamGeneration))')
@@ -139,8 +139,25 @@ export class PlayerService {
         movimentacao: player.movimentacao,
         avatar_url: player.avatarUrl,
         pontua: player.pontua,
+        trofeus: player.trofeus
       })
       .eq('id', player.id);
+
+    if (error) throw error;
+  }
+
+  async updateTrofeusBulk(players: Player[]): Promise<void> {
+    const updates = players.map(p => ({
+      id: p.id,
+      name: p.name, 
+      trofeus: p.trofeus ?? 0,
+      league_id: p.league_id, 
+      pontua: p.pontua ?? false, 
+    }));
+
+    const { error } = await supabase
+      .from('players')
+      .upsert(updates, { onConflict: 'id' });
 
     if (error) throw error;
   }

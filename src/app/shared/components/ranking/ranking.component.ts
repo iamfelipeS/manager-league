@@ -50,16 +50,27 @@ export class RankingComponent implements OnInit {
   async loadDados() {
     this.isLoading.set(true);
 
-    const [playersResp, criteriosResp] = await Promise.all([
+    const [playersResp, criteriosResp, valoresResp] = await Promise.all([
       this.playerService.getPlayersPontuaveis(this.league.id),
       this.criterioService.getCriteriosPorLiga(this.league.id),
+      this.criterioService.getValoresPorLiga(this.league.id),
     ]);
 
-    this.players.set(playersResp.map(p => ({
-      ...p,
-      criterios: p.criterios ?? {}
-    })));
+    const criteriosMap = new Map<string, Record<string, number>>();
 
+    for (const val of valoresResp) {
+      if (!criteriosMap.has(val.player_id)) {
+        criteriosMap.set(val.player_id, {});
+      }
+      criteriosMap.get(val.player_id)![val.criterio] = val.valor;
+    }
+
+    const jogadoresComValores = playersResp.map(player => ({
+      ...player,
+      criterios: criteriosMap.get(player.id) ?? {},
+    }));
+
+    this.players.set(jogadoresComValores);
     this.criterios.set(criteriosResp);
     this.isLoading.set(false);
   }
@@ -119,18 +130,29 @@ export class RankingComponent implements OnInit {
           player_id: player.id,
           league_id: this.league.id,
           criterio,
-          valor,
+          valor: typeof valor === 'number' ? valor : Number(valor),
         }));
       });
 
+      if (!updates.length) {
+        this.toaster.warning('Nenhum dado para salvar.');
+        return;
+      }
+
+      // Salva os critérios
       await this.criterioService.salvarValores(updates);
+
+      // Salva os troféus dos jogadores
+      await this.playerService.updateTrofeusBulk(this.players());
+
       this.toaster.success('Pontuações e troféus salvos com sucesso!');
     } catch (error) {
-      this.toaster.error('Erro ao salvar pontuações.');
+      this.toaster.error('Erro ao salvar pontuações e troféus.');
     } finally {
       this.isLoading.set(false);
     }
   }
+
 
   abrirModalCriterios() {
     this.modal.open({

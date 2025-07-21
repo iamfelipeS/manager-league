@@ -26,6 +26,28 @@
     />
   </div>
 
+    <div class="flex justify-center p-1">
+    @if (authService.profile(); as profile) {
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-gray-600">
+          Olá, {{ profile.username }}
+        </span>
+        <button 
+          type="button"
+          (click)="logout()"
+          class="text-sm text-red-600 hover:text-red-800 underline transition-colors">
+          Sair
+        </button>
+      </div>
+    } @else {
+      <a 
+        [routerLink]="'/login'"
+        class="text-blue-600 hover:text-blue-800 underline font-medium transition-colors">
+        Entrar
+      </a>
+    }
+  </div>
+
   <!-- Grid de ligas -->
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
     @for (league of ligasFiltradas(); track league.id) {

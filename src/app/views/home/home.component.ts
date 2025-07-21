@@ -1,15 +1,16 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Leagues } from '../../models/leagues.model';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { ToasterService } from '../../services/toaster.service';
 import { LeaguesService } from '../../services/leagues.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
@@ -18,6 +19,7 @@ export class HomeComponent implements OnInit {
   private router = inject(Router);
   private toaster = inject(ToasterService);
   private leaguesService = inject(LeaguesService);
+  readonly authService = inject(AuthService);
 
   filtro = signal('');
   leagues = signal<Leagues[]>([]);
@@ -53,5 +55,16 @@ export class HomeComponent implements OnInit {
 
   navigateToDetails(id: string) {
     this.router.navigate(['/league-details', id]);
+  }
+
+  async logout() {
+    try {
+      await this.authService.logout();
+      this.toaster.success('Logout realizado com sucesso!');
+      this.router.navigate(['/']); 
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      this.toaster.error('Erro ao fazer logout');
+    }
   }
 }

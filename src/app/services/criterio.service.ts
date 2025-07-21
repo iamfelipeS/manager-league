@@ -36,6 +36,16 @@ export class CriterioService {
     return mapped;
   }
 
+  async getValoresPorLiga(leagueId: string) {
+    const { data, error } = await supabase
+      .from('player_criterios_por_liga')
+      .select('*')
+      .eq('league_id', leagueId);
+
+    if (error) throw error;
+    return data ?? [];
+  }
+
   async updateCriteriosPorLiga(criterios: Criterio[]): Promise<void> {
     const upserts = criterios.map(c => ({
       criterio_id: c.id,
@@ -52,35 +62,24 @@ export class CriterioService {
     if (error) throw error;
   }
 
-  async getValoresByLeague(leagueId: string): Promise<{
-    player_id: string;
-    criterio: string;
-    valor: number;
-  }[]> {
-    const { data, error } = await supabase
-      .from('player_criterios')
-      .select('player_id, criterio, valor')
-      .eq('league_id', leagueId);
-
-    if (error) throw error;
-    return data ?? [];
-  }
-
   async salvarValores(dados: {
     player_id: string;
     league_id: string;
     criterio: string;
     valor: number;
   }[]) {
-    const { error } = await supabase
-      .from('criterios')
+    const { data, error } = await supabase
+      .from('player_criterios_por_liga')
+
       .upsert(dados, {
         onConflict: 'player_id,league_id,criterio',
-      });
+      })
+      .select(); // <- ESSENCIAL para retorno dos dados salvos
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
+    return data;
   }
+
+
 
 }
