@@ -45,6 +45,6 @@ export const routes: Routes = [
   {
     path: 'admin/flags',
     loadComponent: () => import('./views/flag-admin/flag-admin.component').then(m => m.FlagAdminComponent),
-    canActivate: [roleGuard(['super'])], 
+    canActivate: [roleGuard(['super', 'admin'])],
   },
 ];
