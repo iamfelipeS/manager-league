@@ -25,11 +25,12 @@
           <tr>
             <th class="px-4 py-3 font-semibold text-gray-700">#</th>
             <th class="px-4 py-3 font-semibold text-gray-700">Jogador</th>
-            <th class="px-4 py-3 font-semibold text-gray-700 text-center">Pontos</th>
             @for (criterio of criterios(); track criterio.id) {
-            <th class="px-4 py-3 font-semibold text-gray-700 text-center capitalize">
-              {{ criterio.nome }}
-            </th>
+              @if (criterio.nome !== 'Pontos') {
+                <th class="px-4 py-3 font-semibold text-gray-700 text-center capitalize">
+                  {{ criterio.nome }}
+                </th>
+              }
             }
             <th class="px-4 py-3 font-semibold text-gray-700 text-center">Títulos</th>
           </tr>
@@ -45,23 +46,58 @@
               <span class="truncate max-w-[110px] md:max-w-[140px] font-medium">{{ player.name }}</span>
             </td>
 
-            <td class="px-4 py-2 text-center">
-              @if (canEdit()) {
-                @if (player.criterios) {
-                  <input [(ngModel)]="player.criterios['Pontos']" type="number"
-                    class="w-16 border rounded text-center text-sm px-1 py-0.5" />
+              <!-- Coluna de Pontos (fixa e sempre exibida) -->
+              <td class="px-4 py-2 text-center cursor-pointer">
+                @if (canEdit()) {
+                  @if (estaEditando(player.id, 'Pontos')) {
+                    <input
+                      [ngModel]="player.criterios?.['Pontos']"
+                      (ngModelChange)="updateCriterio(player, 'Pontos', $event)"
+                      (blur)="desativarEdicao(player.id, 'Pontos')"
+                      type="number"
+                      class="w-16 border rounded text-center text-sm px-1 py-0.5"
+                      autofocus
+                    />
+                  } @else {
+                    <span
+                      (click)="ativarEdicao(player.id, 'Pontos')"
+                      class="underline text-blue-600 hover:text-blue-800"
+                    >
+                      {{ getValor(player, 'Pontos') }}
+                    </span>
+                  }
                 } @else {
-                  {{ getValor(player, 'pontos') }}
+                  {{ getValor(player, 'Pontos') }}
+                }
+              </td>
+
+              <!-- Demais critérios dinâmicos -->
+              @for (criterio of getCriteriosDinamicos(); track criterio.id) {
+                @if (criterio.nome !== 'Pontos') {
+                  <td class="px-4 py-2 text-center cursor-pointer">
+                    @if (canEdit()) {
+                      @if (estaEditando(player.id, criterio.nome)) {
+                        <input
+                          type="number"
+                          class="w-16 border rounded text-center text-sm px-1 py-0.5"
+                          [ngModel]="getCriterioValor(player, criterio.nome)"
+                          (ngModelChange)="setCriterioValor(player, criterio.nome, $event)"
+                          (blur)="desativarEdicao(player.id, criterio.nome)"
+                        />
+                      } @else {
+                        <span (click)="ativarEdicao(player.id, criterio.nome)" class="underline text-blue-600 hover:text-blue-800">
+                          {{ getValor(player, criterio.nome) }}
+                        </span>
+                      }
+                    } @else {
+                      {{ getValor(player, criterio.nome) }}
+                    }
+                  </td>
                 }
               }
-            </td>
 
-            @for (criterio of criterios(); track criterio.id) {
-            <td class="px-4 py-2 text-center">
-              {{ getValor(player, criterio.nome.toLowerCase()) }}
-            </td>
-            }
 
+            <!-- Troféus -->
             <td class="px-4 py-2 text-center">
               <div class="inline-flex items-center justify-center gap-2 w-24 mx-auto text-yellow-600 font-semibold">
                 @if (canEdit()) {
@@ -91,20 +127,13 @@
         </tbody>
       </table>
     </div>
-  }
-</div>
+      }
+    </div>
 
 
 <ng-template #criteriosTemplate>
   <div class="p-4 space-y-4">
     <app-criterio-config [league]="league" />
-
-    <div class="text-end">
-      <button (click)="salvarCriterios()" [disabled]="isLoading()"
-        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">
-        💾 Salvar Critérios
-      </button>
-    </div>
   </div>
 </ng-template>
 

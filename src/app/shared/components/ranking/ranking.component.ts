@@ -7,11 +7,12 @@ import { PlayerService } from '../../../services/player.service';
 import { Player } from '../../../models/player.model';
 import { ModalComponent } from '../modal/modal.component';
 import { CriterioConfigComponent } from '../criterio-config/criterio-config.component';
-import { Criterio } from '../../../models/criterios.model';
+import { PlayerCriterioService } from '../../../services/player-criterio.service';
 import { ToasterService } from '../../../services/toaster.service';
 import { AuthService } from '../../../services/auth.service';
 import { Leagues } from '../../../models/leagues.model';
 import { LoaderComponent } from '../loader/loader.component';
+import { CriterioDaLiga } from '../../../models/criterios.model';
 
 @Component({
   selector: 'app-ranking',
@@ -30,6 +31,7 @@ export class RankingComponent implements OnInit {
   private toaster = inject(ToasterService);
   private playerService = inject(PlayerService);
   private criterioService = inject(CriterioService);
+  private playerCriterioService = inject(PlayerCriterioService);
 
   readonly canEdit = computed(() => {
     const profile = this.auth.profile();
@@ -38,10 +40,12 @@ export class RankingComponent implements OnInit {
   });
 
   readonly isGuest = computed(() => this.auth.isGuest());
+  editingCriterios = signal<{ [playerId: string]: { [criterio: string]: boolean } }>({});
+
 
   isLoading = signal(true);
   players = signal<Player[]>([]);
-  criterios = signal<Criterio[]>([]);
+  criterios = signal<CriterioDaLiga[]>([]);
 
   ngOnInit() {
     this.loadDados();
@@ -52,9 +56,10 @@ export class RankingComponent implements OnInit {
 
     const [playersResp, criteriosResp, valoresResp] = await Promise.all([
       this.playerService.getPlayersPontuaveis(this.league.id),
-      this.criterioService.getCriteriosPorLiga(this.league.id),
-      this.criterioService.getValoresPorLiga(this.league.id),
+      this.criterioService.getCriteriosDaLiga(this.league.id),
+      this.playerCriterioService.getValoresPorLiga(this.league.id), // ✅
     ]);
+
 
     const criteriosMap = new Map<string, Record<string, number>>();
 
@@ -81,7 +86,7 @@ export class RankingComponent implements OnInit {
 
     return jogadores.sort((a, b) => {
       for (const crit of criterios) {
-        const campo = crit.nome.toLowerCase();
+        const campo = crit.nome;
         const valorA = this.getValor(a, campo);
         const valorB = this.getValor(b, campo);
         if (valorA !== valorB) return valorB - valorA;
@@ -98,28 +103,6 @@ export class RankingComponent implements OnInit {
   decrementarTrofeu(player: Player) {
     player.trofeus = Math.max((player.trofeus ?? 0) - 1, 0);
     this.playerService.update(player);
-  }
-
-  async salvarCriterios() {
-    this.isLoading.set(true);
-    const criteriosAtualizados = this.criterios().map(c => ({
-      ...c,
-      league_id: this.league.id,
-    }));
-
-    try {
-      await this.criterioService.updateCriteriosPorLiga(criteriosAtualizados);
-      this.toaster.success('Critérios atualizados com sucesso!');
-      this.modal.close();
-
-      const criteriosAtualizadosResp = await this.criterioService.getCriteriosPorLiga(this.league.id);
-      this.criterios.set(criteriosAtualizadosResp);
-    } catch (error) {
-      console.error(error);
-      this.toaster.error('Erro ao salvar os critérios.');
-    } finally {
-      this.isLoading.set(false);
-    }
   }
 
   async salvarAlteracoesJogadores() {
@@ -140,7 +123,7 @@ export class RankingComponent implements OnInit {
       }
 
       // Salva os critérios
-      await this.criterioService.salvarValores(updates);
+      await this.playerCriterioService.salvarValores(updates);
 
       // Salva os troféus dos jogadores
       await this.playerService.updateTrofeusBulk(this.players());
@@ -153,6 +136,12 @@ export class RankingComponent implements OnInit {
     }
   }
 
+  updateCriterio(player: Player, nome: string, valor: number) {
+    if (!player.criterios) {
+      player.criterios = {};
+    }
+    player.criterios[nome] = valor;
+  }
 
   abrirModalCriterios() {
     this.modal.open({
@@ -163,6 +152,43 @@ export class RankingComponent implements OnInit {
   }
 
   getValor(player: Player, chave: string): any {
-    return (player as Record<string, any>)[chave] ?? '-';
+    const isRestricted = this.league.private && this.auth.isGuest();
+    if (isRestricted) return '-';
+
+    return player.criterios?.[chave] ?? (player as Record<string, any>)[chave] ?? '-';
   }
+
+  //EDIÇÃO
+  getCriterioValor(player: Player, nome: string): number | null {
+    return player.criterios?.[nome] ?? null;
+  }
+  getCriteriosDinamicos(): CriterioDaLiga[] {
+    return this.criterios().filter(c => c.nome.toLowerCase() !== 'pontos');
+  }
+
+  setCriterioValor(player: Player, nome: string, valor: number): void {
+    if (!player.criterios) {
+      player.criterios = {};
+    }
+    player.criterios[nome] = valor;
+  }
+
+
+  estaEditando(playerId: string, criterio: string): boolean {
+    return this.editingCriterios()[playerId]?.[criterio] ?? false;
+  }
+
+  ativarEdicao(playerId: string, criterio: string) {
+    const editMap = { ...this.editingCriterios() };
+    if (!editMap[playerId]) editMap[playerId] = {};
+    editMap[playerId][criterio] = true;
+    this.editingCriterios.set(editMap);
+  }
+
+  desativarEdicao(playerId: string, criterio: string) {
+    const editMap = { ...this.editingCriterios() };
+    if (editMap[playerId]) editMap[playerId][criterio] = false;
+    this.editingCriterios.set(editMap);
+  }
+
 }

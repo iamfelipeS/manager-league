@@ -60,7 +60,6 @@ export class HomeComponent implements OnInit {
   async logout() {
     try {
       await this.authService.logout();
-      this.toaster.success('Logout realizado com sucesso!');
       this.router.navigate(['/']); 
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
