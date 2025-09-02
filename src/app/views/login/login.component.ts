@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,10 +13,9 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   isLoginView = true;
   isRecoverView = false;
-  isLoading = false;
 
   nome = signal('');
   email = signal('');
@@ -30,10 +29,12 @@ export class LoginComponent {
   private router = inject(Router);
   private toaster = inject(ToasterService);
 
+  ngOnInit(){
+  }
+
   async onLogin() {
     this.loading.set(true);
     const error = await this.auth.login(this.email(), this.password());
-    this.loading.set(false);
   
     if (error) {
       const mensagemTraduzida = this.getMensagemErroTraduzida(error.code as string);
@@ -41,8 +42,8 @@ export class LoginComponent {
       return;
     }
   
-    this.toaster.success('Login realizado com sucesso!');
     const role = this.auth.role();
+    this.loading.set(false);
   
     this.router.navigateByUrl('/');
    
